@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 import javax.websocket.ContainerProvider;
 import javax.websocket.DeploymentException;
-import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 public class Pathfinder {
