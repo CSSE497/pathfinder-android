@@ -5,6 +5,8 @@
 bin/
 gen/
 .gradle/
+.idea
+*.iml
 build/
 local.properties
 proguard/
