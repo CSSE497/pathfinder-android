@@ -17,7 +17,7 @@ public class Cluster {
         if(this.path.equals(this.DEFAULT_PATH)) {
             subClusterPath = this.path + path;
         } else {
-            subClusterPath = this.path + "/" + path);
+            subClusterPath = this.path + "/" + path;
         }
         return new Cluster(subClusterPath, this.connection);
     }
