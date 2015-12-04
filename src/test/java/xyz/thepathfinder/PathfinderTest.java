@@ -1,7 +1,7 @@
-package xyz.pathfinder.android.test;
+package xyz.thepathfinder;
 
 import org.junit.Test;
-import xyz.pathfinder.android.Pathfinder;
+import xyz.thepathfinder.android.Pathfinder;
 
 import javax.websocket.DeploymentException;
 import java.io.IOException;
@@ -15,7 +15,7 @@ public class PathfinderTest {
     @Test
     public void testConnection() throws URISyntaxException, IOException, DeploymentException, InterruptedException {
         URI url = new URI("ws://api.thepathfinder.xyz:9000/socket");
-        Pathfinder pathfinder = new Pathfinder("", "", url);
+        Pathfinder pathfinder = new Pathfinder("9c4166bb-9535-49e1-8844-1904a0b1f45b", "", url);
         Thread.sleep(1000);
         assertTrue(pathfinder.isConnected());
     }
