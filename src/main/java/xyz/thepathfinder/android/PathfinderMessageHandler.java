@@ -1,6 +1,9 @@
 package xyz.thepathfinder.android;
 
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import javax.websocket.MessageHandler;
 
 public class PathfinderMessageHandler implements MessageHandler.Whole<String> {
@@ -15,7 +18,8 @@ public class PathfinderMessageHandler implements MessageHandler.Whole<String> {
     public void onMessage(String message) {
         this.receivedMessageCount++;
         System.out.println(message);
-        //JSONObject json = new JSONObject(message);
+        JsonObject json = new JsonParser().parse(message).getAsJsonObject();
+        //TODO find the things that need to be notified
     }
 
     public int getReceivedMessageCount() {

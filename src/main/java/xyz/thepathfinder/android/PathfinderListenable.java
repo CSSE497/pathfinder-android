@@ -1,10 +1,13 @@
 package xyz.thepathfinder.android;
 
+import com.google.gson.JsonObject;
+
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public class PathfinderListenable<E extends PathfinderListener> {
+
+public abstract class PathfinderListenable<E extends PathfinderListener> {
 
     private List<E> listeners;
 
@@ -23,4 +26,6 @@ public class PathfinderListenable<E extends PathfinderListener> {
     public List<E> getListeners() {
         return Collections.unmodifiableList(this.listeners);
     }
+
+    protected abstract void notifyUpdate(JsonObject json);
 }

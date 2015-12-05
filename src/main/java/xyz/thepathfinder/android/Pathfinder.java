@@ -37,4 +37,12 @@ public class Pathfinder {
         return this.connection.isConnected();
     }
 
+    public long getSentMessageCount() {
+        return this.connection.getSentMessageCount();
+    }
+
+    public long getReceivedMessageCount() {
+        return this.getReceivedMessageCount();
+    }
+
 }

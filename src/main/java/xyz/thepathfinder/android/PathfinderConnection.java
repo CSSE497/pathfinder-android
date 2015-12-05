@@ -10,13 +10,13 @@ public class PathfinderConnection extends Endpoint {
     private String applictionIdentifier;
     private String userCredentials;
     private Session session;
-    private int sentMessageCount;
+    private long sentMessageCount;
     private PathfinderMessageHandler messageHandler;
 
     protected PathfinderConnection(String applicationIdentifier, String userCredentials) {
         this.applictionIdentifier = applicationIdentifier;
         this.userCredentials = userCredentials;
-        this.sentMessageCount = 0;
+        this.sentMessageCount = 0L;
     }
 
     public void sendMessage(String message) {
@@ -43,5 +43,13 @@ public class PathfinderConnection extends Endpoint {
 
     public boolean isConnected() {
         return this.session.isOpen();
+    }
+
+    public long getSentMessageCount() {
+        return this.getSentMessageCount();
+    }
+
+    public long getReceivedMessageCount() {
+        return this.messageHandler.getReceivedMessageCount();
     }
 }
