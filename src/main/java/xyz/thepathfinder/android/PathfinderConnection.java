@@ -4,29 +4,26 @@ import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.Session;
-import java.util.LinkedList;
-import java.util.Queue;
 
 public class PathfinderConnection extends Endpoint {
 
     private String applictionIdentifier;
     private String userCredentials;
     private Session session;
-    private EndpointConfig endpointConfig;
-    private Queue<String> outgoingMessageQueue;
+    private int sentMessageCount;
+    private PathfinderMessageHandler messageHandler;
 
-    public PathfinderConnection(String applicationIdentifier, String userCredentials) {
+    protected PathfinderConnection(String applicationIdentifier, String userCredentials) {
         this.applictionIdentifier = applicationIdentifier;
         this.userCredentials = userCredentials;
-        outgoingMessageQueue = new LinkedList<String>();
+        this.sentMessageCount = 0;
     }
 
     public void sendMessage(String message) {
         System.out.println("Sending json: " + message);
         if(this.isConnected()) {
             this.session.getAsyncRemote().sendText(message);
-        } else if(outgoingMessageQueue != null) {
-            this.outgoingMessageQueue.add(message);
+            this.sentMessageCount++;
         } else {
             throw new IllegalStateException("The connection to Pathfinder was closed or opened twice.");
         }
@@ -35,13 +32,8 @@ public class PathfinderConnection extends Endpoint {
     @Override
     public void onOpen(Session session, EndpointConfig config) {
         this.session = session;
-        this.session.addMessageHandler(new PathfinderMessageHandler());
-        this.endpointConfig = config;
-
-        for(String message: this.outgoingMessageQueue) {
-            this.sendMessage(message);
-        }
-        this.outgoingMessageQueue = null;
+        this.messageHandler = new PathfinderMessageHandler();
+        this.session.addMessageHandler(this.messageHandler);
     }
 
     @Override

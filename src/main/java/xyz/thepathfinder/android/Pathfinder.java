@@ -15,7 +15,7 @@ public class Pathfinder {
     public Pathfinder(String applicationIdentifier, String userCredentials, URI websocketUrl) throws IOException, DeploymentException {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         this.connection = new PathfinderConnection(applicationIdentifier, userCredentials);
-        container.connectToServer(this.connection, websocketUrl);
+        container.connectToServer(this.connection, websocketUrl); // blocks until connection is established, JSR 356
 
         JsonObject jsonId = new JsonObject();
         jsonId.addProperty("id", applicationIdentifier);
@@ -26,7 +26,7 @@ public class Pathfinder {
     }
 
     public Cluster cluster() {
-        return this.cluster(Cluster.DEFAULT_PATH);
+        return new Cluster(this.connection);
     }
 
     public Cluster cluster(String path) {
