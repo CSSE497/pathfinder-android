@@ -21,7 +21,7 @@ public class Cluster extends PathfinderListenable<ClusterListener> {
     private List<Route> routes;
 
     protected Cluster(PathfinderConnection connection) {
-        this(null, this.DEFAULT_PATH, connection);
+        this(null, DEFAULT_PATH, connection);
     }
 
     protected Cluster(Long parentId, PathfinderConnection connection) {
