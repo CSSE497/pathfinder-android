@@ -45,8 +45,12 @@ public class PathfinderConnection extends Endpoint {
         return this.session.isOpen();
     }
 
+    protected String getApplictionIdentifier() {
+        return this.applictionIdentifier;
+    }
+
     public long getSentMessageCount() {
-        return this.getSentMessageCount();
+        return this.sentMessageCount;
     }
 
     public long getReceivedMessageCount() {

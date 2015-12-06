@@ -1,12 +1,10 @@
 package xyz.thepathfinder.android;
 
-import com.google.gson.JsonObject;
-
-import java.io.IOException;
-import java.net.URI;
 import javax.websocket.ContainerProvider;
 import javax.websocket.DeploymentException;
 import javax.websocket.WebSocketContainer;
+import java.io.IOException;
+import java.net.URI;
 
 public class Pathfinder {
 
@@ -16,13 +14,6 @@ public class Pathfinder {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         this.connection = new PathfinderConnection(applicationIdentifier, userCredentials);
         container.connectToServer(this.connection, websocketUrl); // blocks until connection is established, JSR 356
-
-        JsonObject jsonId = new JsonObject();
-        jsonId.addProperty("id", applicationIdentifier);
-
-        JsonObject json = new JsonObject();
-        json.add("getApplicationCluster", jsonId);
-        this.connection.sendMessage(json.toString());
     }
 
     public Cluster cluster() {
@@ -44,5 +35,4 @@ public class Pathfinder {
     public long getReceivedMessageCount() {
         return this.getReceivedMessageCount();
     }
-
 }

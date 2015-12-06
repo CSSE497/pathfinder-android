@@ -2,9 +2,9 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
-public class Commodity extends PathfinderListenable<CommodityListener> {
+public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
-    private PathfinderConnection connection;
+    protected static final String MODEL = "Commodity";
 
     private Long id;
     private Long clusterId;
@@ -16,39 +16,27 @@ public class Commodity extends PathfinderListenable<CommodityListener> {
     private JsonObject metadata;
 
     protected Commodity(long clusterId, PathfinderConnection connection) {
+        super(connection);
         this.clusterId = clusterId;
-        this.connection = connection;
     }
 
-    public void connect() {
-        //TODO implement
+    protected Commodity(JsonObject json, PathfinderConnection connection) {
+        super(connection);
+        //TODO check json
+        //TODO initialize object
     }
 
-    public void create() {
-        //TODO implement
+    @Override
+    public boolean isConnected() {
+        return this.id != null;
     }
 
-    public void delete() {
-        //TODO implement
-    }
-
-    public void update() {
-        //TODO implement
-    }
-
-    public void subscribe() {
-        //TODO implement
-    }
-
-    public void unsubscribe() {
-        //TODO implement
-    }
-
+    @Override
     public Long getId() {
         return this.id;
     }
 
-    protected void setId(long id) {
+    private void setId(long id) {
         this.id = id;
     }
 
@@ -56,58 +44,141 @@ public class Commodity extends PathfinderListenable<CommodityListener> {
         return this.clusterId;
     }
 
-    protected void setClusterId(long id) {
+    private void setClusterId(long id) {
         this.clusterId = id;
+    }
+
+    public void updateStartLocation(double startLatitude, double startLongitude) {
+        this.update(startLatitude, startLongitude, null, null, null, null);
     }
 
     public Double getStartLongitude() {
         return this.startLongitude;
     }
 
-    public void setStartLongitude(double longitude) {
+    private void setStartLongitude(double longitude) {
         this.startLongitude = longitude;
+    }
+
+    public void updateStartLongitude(double startLongitude) {
+        this.update(null, startLongitude, null, null, null, null);
     }
 
     public Double getStartLatitude() {
         return this.startLatitude;
     }
 
-    public void setStartLatitude(double latitude) {
+    private void setStartLatitude(double latitude) {
         this.startLatitude = latitude;
+    }
+
+    public void updateStartLatitude(double startLatitude) {
+        this.update(startLatitude, null, null, null, null, null);
+    }
+
+    public void updateEndLocation(double endLatitude, double endLongitude) {
+        this.update(null, null, endLatitude, endLongitude, null, null);
     }
 
     public Double getEndLongitude() {
         return this.endLongitude;
     }
 
-    public void setEndLongitude(double longitude) {
+    private void setEndLongitude(double longitude) {
         this.endLongitude = longitude;
+    }
+
+    public void updateEndLongitude(double endLongitude) {
+        this.update(null, null, null, endLongitude, null, null);
     }
 
     public Double getEndLatitude() {
         return this.endLatitude;
     }
 
-    public void setEndLatitude(double latitude) {
+    private void setEndLatitude(double latitude) {
         this.endLatitude = latitude;
+    }
+
+    public void updateEndLatitude(double endLatitude) {
+        this.update(null, null, endLatitude, null, null, null);
     }
 
     public CommodityStatus getStatus() {
         return this.status;
     }
 
-    public void setStatus(CommodityStatus status) {
+    private void setStatus(CommodityStatus status) {
         this.status = status;
+    }
+
+    public void updateStatus(CommodityStatus status) {
+        this.update(null, null, null, null, status, null);
     }
 
     public JsonObject getMetadata() {
         return this.metadata;
     }
 
-    public void setMetadata(JsonObject metadata) {
+    private void setMetadata(JsonObject metadata) {
         this.metadata = metadata;
     }
 
+    public void updateMetadata(JsonObject metadata) {
+        this.update(null, null, null, null, null, metadata);
+    }
+
+    @Override
+    protected String getModel() {
+        return Transport.MODEL;
+    }
+
+    public void update(Double startLatitude, Double startLongitude, Double endLatitude, Double endLongitude, CommodityStatus status, JsonObject metadata) {
+        JsonObject value = new JsonObject();
+
+        if(startLatitude != null) {
+            value.addProperty("startLatitude", startLatitude);
+        }
+
+        if(startLongitude != null) {
+            value.addProperty("startLongitude", startLongitude);
+        }
+
+        if(endLatitude != null) {
+            value.addProperty("endLatitude", endLatitude);
+        }
+
+        if(endLongitude != null) {
+            value.addProperty("endLongitude", endLongitude);
+        }
+
+        if(status != null) {
+            value.addProperty("status", status.toString());
+        }
+
+        if(metadata != null) {
+            value.add("metadata", metadata);
+        }
+
+        super.update(value);
+    }
+
+    @Override
+    protected JsonObject toJson() {
+        JsonObject json = new JsonObject();
+
+        json.addProperty("startLatitude", this.getStartLatitude());
+        json.addProperty("startLongitude", this.getStartLongitude());
+        json.addProperty("endLatitude", this.getEndLatitude());
+        json.addProperty("endLongitude", this.getEndLongitude());
+        json.addProperty("status", this.getStatus().toString());
+        json.addProperty("clusterId", this.getClusterId());
+        json.add("metadata", this.getMetadata());
+
+        return json;
+    }
+
+    @Override
     protected void notifyUpdate(JsonObject json) {
         //TODO implement
     }
