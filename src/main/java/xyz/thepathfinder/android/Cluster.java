@@ -169,8 +169,20 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     @Override
     protected JsonObject toJson() {
         JsonObject json = new JsonObject();
-
         return json;
+    }
+
+    public void subscribe() {
+        this.subscribe(SubscribableClusterModel.COMMODITY);
+        this.subscribe(SubscribableClusterModel.TRANSPORT);
+    }
+
+    public void subscribe(SubscribableClusterModel model) {
+        JsonObject modelJson = new JsonObject();
+        modelJson.addProperty("model", model.toString());
+        modelJson.addProperty("clusterId", this.getId());
+
+        super.subscribe(modelJson);
     }
 
     @Override

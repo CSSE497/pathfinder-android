@@ -134,6 +134,14 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         super.update(value);
     }
 
+    public void subscribe() {
+        JsonObject model = new JsonObject();
+        model.addProperty("model", this.getModel());
+        model.addProperty("id", this.getId());
+
+        super.subscribe(model);
+    }
+
     @Override
     protected JsonObject toJson() {
         JsonObject json = new JsonObject();
