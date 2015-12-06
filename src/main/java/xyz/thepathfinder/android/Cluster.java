@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Cluster extends SubscribableCrudModel<ClusterListener> {
@@ -49,10 +50,66 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         this.routes = null;
     }
 
-    protected Cluster(JsonObject json, PathfinderConnection connection) {
+    protected Cluster(JsonObject clusterJson, PathfinderConnection connection) {
         super(connection);
-        //TODO check json
-        //TODO initialize object
+
+        if(!clusterJson.has("id")) {
+            throw new ClassCastException("No cluster ID was found in the JSON");
+        }
+
+        if(!clusterJson.has("parent")) {
+            throw new ClassCastException("No parent cluster ID was found in the JSON");
+        }
+
+        if(!clusterJson.has("transports")) {
+            throw new ClassCastException("No list of transports was found in the JSON");
+        }
+
+        if(!clusterJson.get("transports").isJsonArray()) {
+            throw new ClassCastException("Transports were not a list in the JSON");
+        }
+
+        if(!clusterJson.has("commodities")) {
+            throw new ClassCastException("No list of commodities was found in the JSON");
+        }
+
+        if(!clusterJson.get("commodities").isJsonArray()) {
+            throw new ClassCastException("Commodities were not a list in the JSON");
+        }
+
+        if(!clusterJson.has("subClusters")) {
+            throw new ClassCastException("No list of subclusters was found in the JSON");
+        }
+
+        if(!clusterJson.get("subClusters").isJsonArray()) {
+            throw new ClassCastException("Subclusters were not a list in the JSON");
+        }
+
+        this.setId(clusterJson.get("id").getAsLong());
+
+        if(clusterJson.get("parent").isJsonNull()) {
+            this.setParentId(null);
+        } else {
+            this.setParentId(clusterJson.get("parent").getAsLong());
+        }
+
+        LinkedList<Commodity> commodities = new LinkedList<Commodity>();
+        for(JsonElement commodity: clusterJson.getAsJsonArray("commodities")) {
+            commodities.add(new Commodity(commodity.getAsJsonObject(), this.getConnection()));
+        }
+        this.setCommodities(commodities);
+
+        LinkedList<Transport> transports = new LinkedList<Transport>();
+        for(JsonElement transport: clusterJson.getAsJsonArray("transports")) {
+            transports.add(new Transport(transport.getAsJsonObject(), this.getConnection()));
+        }
+        this.setTransports(transports);
+
+        LinkedList<Cluster> subclusters = new LinkedList<Cluster>();
+        for(JsonElement subcluster: clusterJson.getAsJsonArray("subClusters")) {
+            subclusters.add(new Cluster(subcluster.getAsJsonObject(), this.getConnection()));
+        }
+        this.setSubclusters(subclusters);
     }
 
     @Override
