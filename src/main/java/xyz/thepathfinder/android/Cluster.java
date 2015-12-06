@@ -53,6 +53,11 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     protected Cluster(JsonObject clusterJson, PathfinderConnection connection) {
         super(connection);
 
+        this.checkClusterFields(clusterJson);
+        this.setClusterFields(clusterJson);
+    }
+
+    private void checkClusterFields(JsonObject clusterJson) {
         if(!clusterJson.has("id")) {
             throw new ClassCastException("No cluster ID was found in the JSON");
         }
@@ -84,7 +89,9 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         if(!clusterJson.get("subClusters").isJsonArray()) {
             throw new ClassCastException("Subclusters were not a list in the JSON");
         }
+    }
 
+    private void setClusterFields(JsonObject clusterJson) {
         this.setId(clusterJson.get("id").getAsLong());
 
         if(clusterJson.get("parent").isJsonNull()) {

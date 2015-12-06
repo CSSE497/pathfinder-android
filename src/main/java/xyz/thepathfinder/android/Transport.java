@@ -19,10 +19,43 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         this.clusterId = clusterId;
     }
 
-    protected Transport(JsonObject json, PathfinderConnection connection) {
+    protected Transport(JsonObject transportJson, PathfinderConnection connection) {
         super(connection);
+
+        this.checkTransportFields(transportJson);
+        this.setTransportFields(transportJson);
+
         //TODO check json
         //TODO initialize object
+    }
+
+    private void checkTransportFields(JsonObject transportJson) {
+        if(!transportJson.has("id")) {
+            throw new ClassCastException("No ID was found in the JSON");
+        }
+
+        if(!transportJson.has("latitude")) {
+            throw new ClassCastException("No latitude was found in the JSON");
+        }
+
+        if(!transportJson.has("longitude")) {
+            throw new ClassCastException("No longitude was found in the JSON");
+        }
+
+        if(!transportJson.has("status")) {
+            throw new ClassCastException("No status was found in the JSON");
+        }
+
+        if(!transportJson.has("metadata")) {
+            throw new ClassCastException("No metadata was found in the JSON");
+        }
+    }
+
+    private void setTransportFields(JsonObject transportJson) {
+        this.setId(transportJson.get("id").getAsLong());
+        this.setLatitude(transportJson.get("latitude").getAsDouble());
+        this.setLongitude(transportJson.get("longitude").getAsDouble());
+        this.setMetadata(transportJson.get("metadata").getAsJsonObject());
     }
 
     @Override
@@ -142,10 +175,19 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         super.subscribe(model);
     }
 
+    protected void create() {
+        if(this.getClusterId() == null) {
+            throw new IllegalStateException("Cluster Id not set");
+        }
+
+        super.create();
+    }
+
     @Override
     protected JsonObject toJson() {
         JsonObject json = new JsonObject();
 
+        json.addProperty("clusterId", this.getClusterId());
         json.addProperty("latitude", this.getLatitude());
         json.addProperty("longitude", this.getLongitude());
         json.addProperty("status", this.getStatus().toString());
