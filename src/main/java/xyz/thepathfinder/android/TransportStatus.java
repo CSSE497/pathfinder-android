@@ -10,6 +10,10 @@ public enum TransportStatus {
         this.status = status;
     }
 
+    public boolean equals(String status) {
+        return this.status.equals(status);
+    }
+
     @Override
     public String toString() {
         return this.status;

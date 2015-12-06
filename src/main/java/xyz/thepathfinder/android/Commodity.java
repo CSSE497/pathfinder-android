@@ -20,10 +20,41 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.clusterId = clusterId;
     }
 
-    protected Commodity(JsonObject json, PathfinderConnection connection) {
+    protected Commodity(JsonObject commodityJson, PathfinderConnection connection) {
         super(connection);
-        //TODO check json
-        //TODO initialize object
+
+        this.checkCommodityFields(commodityJson);
+        this.setCommodityFields(commodityJson);
+    }
+
+    private void checkCommodityField(JsonObject commodityJson, String field) {
+        if(!commodityJson.has(field)) {
+            throw new ClassCastException("No " + field + " was found in the JSON");
+        }
+    }
+
+    private void checkCommodityFields(JsonObject commodityJson) {
+        this.checkCommodityField(commodityJson, "id");
+        this.checkCommodityField(commodityJson, "startLatitude");
+        this.checkCommodityField(commodityJson, "startLongitude");
+        this.checkCommodityField(commodityJson, "endLatitude");
+        this.checkCommodityField(commodityJson, "endLongitude");
+        this.checkCommodityField(commodityJson, "status");
+        this.checkCommodityField(commodityJson, "metadata");
+
+        if(!commodityJson.get("metadata").isJsonObject()) {
+            throw new ClassCastException("Metadata was not a JSON object");
+        }
+    }
+
+    private void setCommodityFields(JsonObject commodityJson) {
+        this.setId(commodityJson.get("id").getAsLong());
+        this.setStartLatitude(commodityJson.get("startLatitude").getAsDouble());
+        this.setStartLongitude(commodityJson.get("startLongitude").getAsDouble());
+        this.setEndLatitude(commodityJson.get("endLatitude").getAsDouble());
+        this.setEndLongitude(commodityJson.get("startLongitude").getAsDouble());
+        this.setStatus(commodityJson.get("status").getAsString());
+        this.setMetadata(commodityJson.get("metadata").getAsJsonObject());
     }
 
     @Override
@@ -108,8 +139,14 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return this.status;
     }
 
-    private void setStatus(CommodityStatus status) {
-        this.status = status;
+    private void setStatus(String status) {
+        CommodityStatus[] values = CommodityStatus.values();
+        for(int k = 0; k < values.length; k++) {
+            if(values[k].equals(status)) {
+                this.status = values[k];
+                break;
+            }
+        }
     }
 
     public void updateStatus(CommodityStatus status) {
@@ -131,6 +168,15 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     @Override
     protected String getModel() {
         return Transport.MODEL;
+    }
+
+    @Override
+    protected void create() {
+        if(this.getClusterId() == null) {
+            throw new IllegalStateException("Cluster Id not set");
+        }
+
+        super.create();
     }
 
     public void update(Double startLatitude, Double startLongitude, Double endLatitude, Double endLongitude, CommodityStatus status, JsonObject metadata) {

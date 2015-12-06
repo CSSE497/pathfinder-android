@@ -13,6 +13,10 @@ public enum CommodityStatus {
         this.status = status;
     }
 
+    public boolean equals(String status) {
+        return this.status.equals(status);
+    }
+
     public String toString() {
         return this.status;
     }

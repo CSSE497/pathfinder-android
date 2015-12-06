@@ -24,30 +24,23 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
         this.checkTransportFields(transportJson);
         this.setTransportFields(transportJson);
+    }
 
-        //TODO check json
-        //TODO initialize object
+    private void checkTransportField(JsonObject transportJson, String field) {
+        if(!transportJson.has(field)) {
+            throw new ClassCastException("No " + field + " was found in the JSON");
+        }
     }
 
     private void checkTransportFields(JsonObject transportJson) {
-        if(!transportJson.has("id")) {
-            throw new ClassCastException("No ID was found in the JSON");
-        }
+        this.checkTransportField(transportJson, "id");
+        this.checkTransportField(transportJson, "latitude");
+        this.checkTransportField(transportJson, "longitude");
+        this.checkTransportField(transportJson, "status");
+        this.checkTransportField(transportJson, "metadata");
 
-        if(!transportJson.has("latitude")) {
-            throw new ClassCastException("No latitude was found in the JSON");
-        }
-
-        if(!transportJson.has("longitude")) {
-            throw new ClassCastException("No longitude was found in the JSON");
-        }
-
-        if(!transportJson.has("status")) {
-            throw new ClassCastException("No status was found in the JSON");
-        }
-
-        if(!transportJson.has("metadata")) {
-            throw new ClassCastException("No metadata was found in the JSON");
+        if(!transportJson.get("metadata").isJsonObject()) {
+            throw new ClassCastException("Metadata was not a JSON object");
         }
     }
 
@@ -55,6 +48,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         this.setId(transportJson.get("id").getAsLong());
         this.setLatitude(transportJson.get("latitude").getAsDouble());
         this.setLongitude(transportJson.get("longitude").getAsDouble());
+        this.setStatus(transportJson.get("status").getAsString());
         this.setMetadata(transportJson.get("metadata").getAsJsonObject());
     }
 
@@ -112,8 +106,14 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         return this.status;
     }
 
-    private void setStatus(TransportStatus status) {
-        this.status = status;
+    private void setStatus(String status) {
+        TransportStatus[] values = TransportStatus.values();
+        for(int k = 0; k < values.length; k++) {
+            if(values[k].equals(status)) {
+                this.status = values[k];
+                break;
+            }
+        }
     }
 
     public void updateStatus(TransportStatus status) {
@@ -175,6 +175,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         super.subscribe(model);
     }
 
+    @Override
     protected void create() {
         if(this.getClusterId() == null) {
             throw new IllegalStateException("Cluster Id not set");
