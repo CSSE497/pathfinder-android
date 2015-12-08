@@ -26,7 +26,23 @@ public abstract class SubscribableModel<E extends PathfinderListener> extends Pa
         return this.isSubscribed;
     }
 
+    public void addMessageReceiver() {
+        if(!this.isSubscribed()) {
+            this.getConnection().addMessageReceiver(this);
+        }
+    }
+
+    public void removeMessageReceiver() {
+        if(this.isSubscribed()) {
+            this.getConnection().removeMessageReceiver(this);
+        }
+    }
+
     public void subscribe(JsonObject value) {
+        if (!this.isConnected()) {
+            throw new IllegalStateException("Not connected to object on Pathfinder server");
+        }
+
         JsonObject subscribeRequest = new JsonObject();
         subscribeRequest.add("subscribe", value);
 
@@ -39,6 +55,10 @@ public abstract class SubscribableModel<E extends PathfinderListener> extends Pa
     }
 
     public void routeSubscribe() {
+        if (!this.isConnected()) {
+            throw new IllegalStateException("Not connected to object on Pathfinder server");
+        }
+
         JsonObject model = new JsonObject();
         model.addProperty("model", this.getModel());
         model.addProperty("id", this.getId());

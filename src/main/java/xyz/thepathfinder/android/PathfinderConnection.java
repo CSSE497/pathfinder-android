@@ -19,6 +19,18 @@ public class PathfinderConnection extends Endpoint {
         this.sentMessageCount = 0L;
     }
 
+    private PathfinderMessageHandler getMessageHandler() {
+        return this.messageHandler;
+    }
+
+    public void addMessageReceiver(SubscribableModel subscribableModel) {
+        this.getMessageHandler().addMessageReceiver(subscribableModel);
+    }
+
+    public SubscribableModel removeMessageReceiver(SubscribableModel subscribableModel) {
+        return this.getMessageHandler().removeMessageReceiver(subscribableModel);
+    }
+
     public void sendMessage(String message) {
         System.out.println("Sending json: " + message);
         if(this.isConnected()) {

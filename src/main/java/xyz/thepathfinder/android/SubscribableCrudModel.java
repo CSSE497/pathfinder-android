@@ -46,6 +46,8 @@ public abstract class SubscribableCrudModel<E extends PathfinderListener> extend
         JsonObject requestJson = new JsonObject();
         requestJson.add("delete", model);
 
+
+
         this.getConnection().sendMessage(requestJson.toString());
     }
 
