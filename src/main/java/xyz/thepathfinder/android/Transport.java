@@ -9,8 +9,6 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
     protected static final String MODEL = Pathfinder.TRANSPORT;
 
-    private static final Map<String, Transport> transports = new HashMap<String, Transport>();
-
     private double longitude;
     private double latitude;
     private TransportStatus status;
@@ -37,11 +35,11 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
             this.metadata = metadata;
         }
 
-        Transport transport = Transport.getInstance(path);
-        if (transport != null) {
+        boolean isRegistered = PathfinderModelRegistry.isModelRegistered(path);
+        if (isRegistered) {
             throw new IllegalArgumentException("Transport path already exists: " + path);
         } else {
-            Transport.transports.put(path, this);
+            PathfinderModelRegistry.registerModel(this);
         }
 
         this.isConnected = false;
@@ -57,7 +55,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         String path = Transport.getPath(transportJson);
         Transport transport = Transport.getInstance(path);
 
-        if (transport != null) {
+        if (transport == null) {
             double latitude = Transport.getLatitude(transportJson);
             double longitude = Transport.getLongitude(transportJson);
             TransportStatus status = Transport.getStatus(transportJson);
