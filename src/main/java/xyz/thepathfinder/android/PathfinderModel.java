@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 public abstract class PathfinderModel {
 
     private Path path;
+    protected static final String model = null;
 
     public PathfinderModel(String path) {
         this.path = new Path(path);
@@ -22,7 +23,10 @@ public abstract class PathfinderModel {
         return this.path.getParentPath();
     }
 
+    protected String getModel() {
+        return this.model;
+    }
+
     protected abstract JsonObject toJson();
-    protected abstract String getModel();
     public abstract boolean isConnected();
 }

@@ -4,20 +4,13 @@ import com.google.gson.JsonObject;
 
 public abstract class SubscribableModel<E extends PathfinderListener> extends PathfinderListenable<E> {
 
-    private PathfinderConnection connection;
-
-    public SubscribableModel(String path, PathfinderConnection connection) {
+    public SubscribableModel(String path) {
         super(path);
-        this.connection = connection;
     }
 
     public Cluster getParent() {
         String parentPath = this.getParentPath();
-        return Cluster.getInstance(parentPath, this.getConnection());
-    }
-
-    protected PathfinderConnection getConnection() {
-        return this.connection;
+        return Cluster.getInstance(parentPath);
     }
 
     public void addMessageReceiver() {
@@ -34,7 +27,7 @@ public abstract class SubscribableModel<E extends PathfinderListener> extends Pa
         JsonObject subscribeRequest = new JsonObject();
         subscribeRequest.add("subscribe", value);
 
-        this.getConnection().sendMessage(subscribeRequest.toString());
+        PathfinderConnection.getConnection().sendMessage(subscribeRequest.toString());
     }
 
     public void unsubscribe() {
@@ -50,7 +43,7 @@ public abstract class SubscribableModel<E extends PathfinderListener> extends Pa
         JsonObject requestJson = new JsonObject();
         requestJson.add("routeSubscribe", model);
 
-        this.getConnection().sendMessage(requestJson.toString());
+        PathfinderConnection.getConnection().sendMessage(requestJson.toString());
     }
 
     public void routeUnsubscribe() {

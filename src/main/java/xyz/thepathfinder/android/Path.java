@@ -1,8 +1,5 @@
 package xyz.thepathfinder.android;
 
-import java.util.HashSet;
-import java.util.Set;
-
 public class Path {
 
     public static String DEFAULT_PATH = "/default";

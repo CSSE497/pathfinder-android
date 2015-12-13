@@ -19,8 +19,8 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
     private boolean isConnected;
 
-    protected Transport(String path, double latitude, double longitude, TransportStatus status, JsonObject metadata, PathfinderConnection connection) {
-        super(path, connection);
+    protected Transport(String path, double latitude, double longitude, TransportStatus status, JsonObject metadata) {
+        super(path);
 
         this.latitude = latitude;
         this.longitude = longitude;
@@ -48,10 +48,10 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     }
 
     public static Transport getInstance(String path) {
-        return Transport.transports.get(path);
+        return (Transport) PathfinderModelRegistry.getModel(path, Transport.MODEL);
     }
 
-    protected static Transport getInstance(JsonObject transportJson, PathfinderConnection connection) {
+    protected static Transport getInstance(JsonObject transportJson) {
         Transport.checkTransportFields(transportJson);
 
         String path = Transport.getPath(transportJson);
@@ -66,8 +66,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
                     latitude,
                     longitude,
                     status,
-                    metadata,
-                    connection);
+                    metadata);
         } else {
             transport.setTransportFields(transportJson);
         }
@@ -196,11 +195,6 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         this.route = route;
     }
 
-    @Override
-    protected String getModel() {
-        return Transport.MODEL;
-    }
-
     public void update(Double latitude, Double longitude, TransportStatus status, JsonObject metadata) {
         JsonObject value = new JsonObject();
 
@@ -235,7 +229,6 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     protected JsonObject toJson() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("path", this.getPath());
         json.addProperty("latitude", this.getLatitude());
         json.addProperty("longitude", this.getLongitude());
         json.addProperty("status", this.getStatus().toString());

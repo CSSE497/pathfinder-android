@@ -8,8 +8,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     protected static final String MODEL = Pathfinder.COMMODITY;
 
-    private static Map<String, Commodity> commodities;
-
     private double startLongitude;
     private double startLatitude;
     private double endLongitude;
@@ -19,8 +17,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     private boolean isConnected;
 
-    protected Commodity(String path, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata, PathfinderConnection connection) {
-        super(path, connection);
+    protected Commodity(String path, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata) {
+        super(path);
 
         this.startLatitude = startLatitude;
         this.startLongitude = startLongitude;
@@ -41,19 +39,19 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
         this.isConnected = false;
 
-        Commodity commodity = Commodity.getInstance(path);
-        if(commodity != null) {
+        boolean isRegistered = PathfinderModelRegistry.isModelRegistered(path);
+        if(isRegistered) {
             throw new IllegalArgumentException("Commodity path already exists: " + path);
         } else {
-            Commodity.commodities.put(path, this);
+            PathfinderModelRegistry.registerModel(this);
         }
     }
 
     protected static Commodity getInstance(String path) {
-        return Commodity.commodities.get(path);
+        return (Commodity) PathfinderModelRegistry.getModel(path, Commodity.MODEL);
     }
 
-    protected static Commodity getInstance(JsonObject commodityJson, PathfinderConnection connection) {
+    protected static Commodity getInstance(JsonObject commodityJson) {
         Commodity.checkCommodityFields(commodityJson);
 
         String path = Commodity.getPath(commodityJson);
@@ -72,8 +70,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
                     endLatitude,
                     endLongitude,
                     status,
-                    metadata,
-                    connection);
+                    metadata);
         } else {
             commodity.setCommodityFields(commodityJson);
         }
@@ -104,10 +101,10 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     private void setCommodityFields(JsonObject commodityJson) {
         this.setStartLatitude(Commodity.getStartLatitude(commodityJson));
         this.setStartLongitude(Commodity.getStartLongitude(commodityJson));
-        this.setEndLatitude(commodityJson.get("endLatitude").getAsDouble());
-        this.setEndLongitude(commodityJson.get("startLongitude").getAsDouble());
-        this.setStatus(commodityJson.get("status").getAsString());
-        this.setMetadata(commodityJson.get("metadata").getAsJsonObject());
+        this.setEndLatitude(Commodity.getEndLatitude(commodityJson));
+        this.setEndLongitude(Commodity.getEndLongitude(commodityJson));
+        this.setStatus(Commodity.getStatus(commodityJson));
+        this.setMetadata(Commodity.getMetadata(commodityJson));
     }
 
     private static String getPath(JsonObject commodityJson) {
@@ -209,8 +206,12 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return null;
     }
 
+    private void setStatus(CommodityStatus status) {
+        this.status = status;
+    }
+
     private void setStatus(String status) {
-        this.status = Commodity.getStatus(status);
+        this.setStatus(Commodity.getStatus(status));
     }
 
     public void updateStatus(CommodityStatus status) {
@@ -227,11 +228,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     public void updateMetadata(JsonObject metadata) {
         this.update(null, null, null, null, null, metadata);
-    }
-
-    @Override
-    protected String getModel() {
-        return Commodity.MODEL;
     }
 
     public void update(Double startLatitude, Double startLongitude, Double endLatitude, Double endLongitude, CommodityStatus status, JsonObject metadata) {

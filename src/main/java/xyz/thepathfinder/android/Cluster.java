@@ -14,8 +14,6 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
     protected static final String MODEL = Pathfinder.CLUSTER;
 
-    private static final Map<String, Cluster> clusters = new HashMap<String, Cluster>();
-
     private Map<String, Transport> transports;
     private Map<String, Commodity> commodities;
     private Map<String, Cluster> subclusters;
@@ -24,8 +22,8 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
     private boolean isConnected;
 
-    private Cluster(String path, PathfinderConnection connection) {
-        super(path, connection);
+    private Cluster(String path) {
+        super(path);
 
         this.transports = new HashMap<String, Transport>();
         this.commodities = new HashMap<String, Commodity>();
@@ -34,38 +32,28 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
         this.isConnected = false;
 
-        Cluster cluster = Cluster.getInstance(path);
-        if(cluster != null) {
+        boolean isRegistered = PathfinderModelRegistry.isModelRegistered(path);
+        if(isRegistered) {
             throw new IllegalArgumentException("Cluster path already exists: " + path);
         } else {
-            Cluster.clusters.put(path, this);
+            PathfinderModelRegistry.registerModel(this);
         }
     }
 
-    private static Cluster getInstance(String path) {
-        return Cluster.clusters.get(path);
+    protected static Cluster getInstance(String path) {
+        return (Cluster) PathfinderModelRegistry.getModel(path, Cluster.MODEL);
     }
 
-    protected static Cluster getInstance(String path, PathfinderConnection connection) {
-        if(connection == null) {
-            throw new NullPointerException("Connection may not be null");
-        }
-
-        if(path == "") {
-            return null;
-        }
-
-        if(Cluster.clusters.containsKey(path)) {
-            return Cluster.clusters.get(path);
-        } else {
-            return new Cluster(path, connection);
-        }
-    }
-
-    protected static Cluster getInstance(JsonObject clusterJson, PathfinderConnection connection) {
+    protected static Cluster getInstance(JsonObject clusterJson) {
         Cluster.checkClusterFields(clusterJson);
 
-        Cluster cluster = Cluster.getInstance(clusterJson.get("path").getAsString(), connection);
+        String path = Cluster.getPath(clusterJson);
+        Cluster cluster = Cluster.getInstance(path);
+
+        if(cluster == null) {
+            cluster = new Cluster(path);
+        }
+
         cluster.setClusterFields(clusterJson);
         return cluster;
     }
@@ -100,23 +88,42 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
     }
 
-    private void setClusterFields(JsonObject clusterJson) {
-        LinkedList<Commodity> commodities = new LinkedList<Commodity>();
+    private static String getPath(JsonObject clusterJson) {
+        return clusterJson.get("path").getAsString();
+    }
+
+    private static List<Commodity> getCommodities(JsonObject clusterJson) {
+        List<Commodity> commodities = new LinkedList<Commodity>();
         for(JsonElement commodity: clusterJson.getAsJsonArray("commodities")) {
-            commodities.add(Commodity.getInstance(commodity.getAsJsonObject(), this.getConnection()));
+            commodities.add(Commodity.getInstance(commodity.getAsJsonObject()));
         }
+        return commodities;
+    }
+
+    private static List<Cluster> getSubclusters(JsonObject clusterJson) {
+        List<Cluster> clusters = new LinkedList<Cluster>();
+        for(JsonElement cluster: clusterJson.getAsJsonArray("subClusters")) {
+            clusters.add(Cluster.getInstance(cluster.getAsJsonObject()));
+        }
+        return clusters;
+    }
+
+    private static List<Transport> getTransports(JsonObject clusterJson) {
+        List<Transport> transports = new LinkedList<Transport>();
+        for(JsonElement transport: clusterJson.getAsJsonArray("transports")) {
+            transports.add(Transport.getInstance(transport.getAsJsonObject()));
+        }
+        return transports;
+    }
+
+    private void setClusterFields(JsonObject clusterJson) {
+        List<Commodity> commodities = Cluster.getCommodities(clusterJson);
         this.setCommodities(commodities);
 
-        LinkedList<Transport> transports = new LinkedList<Transport>();
-        for(JsonElement transport: clusterJson.getAsJsonArray("transports")) {
-            transports.add(Transport.getInstance(transport.getAsJsonObject(), this.getConnection()));
-        }
+        List<Transport> transports = Cluster.getTransports(clusterJson);
         this.setTransports(transports);
 
-        LinkedList<Cluster> subclusters = new LinkedList<Cluster>();
-        for(JsonElement subcluster: clusterJson.getAsJsonArray("subClusters")) {
-            subclusters.add(Cluster.getInstance(subcluster.getAsJsonObject(), this.getConnection()));
-        }
+        List<Cluster> subclusters = Cluster.getSubclusters(clusterJson);
         this.setSubclusters(subclusters);
     }
 
@@ -126,11 +133,11 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
 
         String path = this.getChildPath(name);
-        return new Commodity(path, startLatitude, startLongitude, endLatitude, endLongitude, status, metadata, this.getConnection());
+        return new Commodity(path, startLatitude, startLongitude, endLatitude, endLongitude, status, metadata);
     }
 
     private Commodity createCommodity(JsonObject json) {
-        return Commodity.getInstance(json, this.getConnection());
+        return Commodity.getInstance(json);
     }
 
     public Collection<Commodity> getCommodities() {
@@ -148,7 +155,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     public Cluster createSubcluster(String name) {
-        return Cluster.getInstance(this.getChildPath(name), this.getConnection());
+        return Cluster.getInstance(this.getChildPath(name));
     }
 
     public Cluster getSubcluster(String name) {
@@ -176,11 +183,11 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
 
         String path = this.getChildPath(name);
-        return new Transport(path, latitude, longitude, status, metadata, this.getConnection());
+        return new Transport(path, latitude, longitude, status, metadata);
     }
 
     private Transport createTransport(JsonObject json) {
-        return Transport.getInstance(json, this.getConnection());
+        return Transport.getInstance(json);
     }
 
     public Transport getTransport(String name) {
@@ -225,11 +232,6 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     @Override
     public boolean isConnected() {
         return this.isConnected;
-    }
-
-    @Override
-    protected String getModel() {
-        return Cluster.MODEL;
     }
 
     @Override

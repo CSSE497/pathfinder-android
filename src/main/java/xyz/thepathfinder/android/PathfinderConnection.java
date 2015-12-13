@@ -8,34 +8,34 @@ import java.io.IOException;
 
 public class PathfinderConnection extends Endpoint {
 
+    private static final PathfinderConnection connection = new PathfinderConnection();
+
     private String applictionIdentifier;
     private String userCredentials;
     private Session session;
     private long sentMessageCount;
     private PathfinderMessageHandler messageHandler;
 
-    protected PathfinderConnection(String applicationIdentifier, String userCredentials) {
-        this.applictionIdentifier = applicationIdentifier;
-        this.userCredentials = userCredentials;
+    protected PathfinderConnection() {
         this.sentMessageCount = 0L;
     }
 
-    private PathfinderMessageHandler getMessageHandler() {
-        return this.messageHandler;
+    protected static PathfinderConnection getConnection() {
+        return PathfinderConnection.connection;
     }
 
-    public void addMessageReceiver(SubscribableModel subscribableModel) {
-        this.getMessageHandler().addMessageReceiver(subscribableModel);
+    protected void setApplicationIdentifier(String applicationIdentifier) {
+        this.applictionIdentifier = applicationIdentifier;
     }
 
-    public SubscribableModel removeMessageReceiver(SubscribableModel subscribableModel) {
-        return this.getMessageHandler().removeMessageReceiver(subscribableModel);
+    protected void setUserCredentials(String userCredentials) {
+        this.userCredentials = userCredentials;
     }
 
     public void sendMessage(String message) {
         System.out.println("Sending json: " + message);
         if(this.isConnected()) {
-            this.session.getAsyncRemote().sendText(message);
+            PathfinderConnection.getConnection().session.getAsyncRemote().sendText(message);
             this.sentMessageCount++;
         } else {
             throw new IllegalStateException("The connection to Pathfinder was closed or opened twice.");

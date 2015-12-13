@@ -4,8 +4,8 @@ import com.google.gson.JsonObject;
 
 public abstract class SubscribableCrudModel<E extends PathfinderListener> extends SubscribableModel<E> {
 
-    public SubscribableCrudModel(String path, PathfinderConnection connection) {
-        super(path, connection);
+    public SubscribableCrudModel(String path) {
+        super(path);
     }
 
     public void connect() {
@@ -16,7 +16,7 @@ public abstract class SubscribableCrudModel<E extends PathfinderListener> extend
         JsonObject requestJson = new JsonObject();
         requestJson.add("read", model);
 
-        this.getConnection().sendMessage(requestJson.toString());
+        PathfinderConnection.getConnection().sendMessage(requestJson.toString());
     }
 
     protected void create() {
@@ -31,7 +31,7 @@ public abstract class SubscribableCrudModel<E extends PathfinderListener> extend
         JsonObject requestJson = new JsonObject();
         requestJson.add("create", model);
 
-        this.getConnection().sendMessage(requestJson.toString());
+        PathfinderConnection.getConnection().sendMessage(requestJson.toString());
     }
 
     public void delete() {
@@ -48,7 +48,7 @@ public abstract class SubscribableCrudModel<E extends PathfinderListener> extend
 
 
 
-        this.getConnection().sendMessage(requestJson.toString());
+        PathfinderConnection.getConnection().sendMessage(requestJson.toString());
     }
 
     public void update(JsonObject value) {
@@ -64,6 +64,6 @@ public abstract class SubscribableCrudModel<E extends PathfinderListener> extend
         JsonObject requestJson = new JsonObject();
         requestJson.add("update", model);
 
-        this.getConnection().sendMessage(requestJson.toString());
+        PathfinderConnection.getConnection().sendMessage(requestJson.toString());
     }
 }

@@ -16,16 +16,18 @@ public class Pathfinder {
 
     public Pathfinder(String applicationIdentifier, String userCredentials, URI websocketUrl) throws IOException, DeploymentException {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-        this.connection = new PathfinderConnection(applicationIdentifier, userCredentials);
+        this.connection = new PathfinderConnection();
+        this.connection.setApplicationIdentifier(applicationIdentifier);
+        this.connection.setUserCredentials(userCredentials);
         container.connectToServer(this.connection, websocketUrl); // blocks until connection is established, JSR 356
     }
 
     public Cluster getCluster() {
-        return Cluster.getInstance(Path.DEFAULT_PATH, this.connection);
+        return Cluster.getInstance(Path.DEFAULT_PATH);
     }
 
     public Cluster getCluster(String path) {
-        return Cluster.getInstance(path, this.connection);
+        return Cluster.getInstance(path);
     }
 
     public boolean isConnected() {
