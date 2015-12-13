@@ -4,14 +4,14 @@ import com.google.gson.JsonObject;
 
 public abstract class SubscribableCrudModel<E extends PathfinderListener> extends SubscribableModel<E> {
 
-    public SubscribableCrudModel(PathfinderConnection connection) {
-        super(connection);
+    public SubscribableCrudModel(String path, PathfinderConnection connection) {
+        super(path, connection);
     }
 
     public void connect() {
         JsonObject model = new JsonObject();
         model.addProperty("model", this.getModel());
-        model.addProperty("id", this.getId());
+        model.addProperty("path", this.getPath());
 
         JsonObject requestJson = new JsonObject();
         requestJson.add("read", model);
@@ -20,9 +20,9 @@ public abstract class SubscribableCrudModel<E extends PathfinderListener> extend
     }
 
     protected void create() {
-        if (this.isConnected()) {
-            throw new IllegalStateException("Already created");
-        }
+        //if (this.isConnected()) {
+        //    throw new IllegalStateException("Already created");
+        //}
 
         JsonObject model = new JsonObject();
         model.addProperty("model", this.getModel());
@@ -41,7 +41,7 @@ public abstract class SubscribableCrudModel<E extends PathfinderListener> extend
 
         JsonObject model = new JsonObject();
         model.addProperty("model", this.getModel());
-        model.addProperty("id", this.getId());
+        model.addProperty("path", this.getPath());
 
         JsonObject requestJson = new JsonObject();
         requestJson.add("delete", model);
@@ -58,7 +58,7 @@ public abstract class SubscribableCrudModel<E extends PathfinderListener> extend
 
         JsonObject model = new JsonObject();
         model.addProperty("model", this.getModel());
-        model.addProperty("id", this.getId());
+        model.addProperty("path", this.getPath());
         model.add("value", value);
 
         JsonObject requestJson = new JsonObject();

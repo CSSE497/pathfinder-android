@@ -8,6 +8,10 @@ import java.net.URI;
 
 public class Pathfinder {
 
+    protected static String CLUSTER = "Cluster";
+    protected static String COMMODITY = "Commodity";
+    protected static String TRANSPORT = "Vehicle";
+
     private PathfinderConnection connection;
 
     public Pathfinder(String applicationIdentifier, String userCredentials, URI websocketUrl) throws IOException, DeploymentException {
@@ -16,12 +20,12 @@ public class Pathfinder {
         container.connectToServer(this.connection, websocketUrl); // blocks until connection is established, JSR 356
     }
 
-    public Cluster cluster() {
-        return new Cluster(this.connection);
+    public Cluster getCluster() {
+        return Cluster.getInstance(Path.DEFAULT_PATH, this.connection);
     }
 
-    public Cluster cluster(String path) {
-        return new Cluster(path, this.connection);
+    public Cluster getCluster(String path) {
+        return Cluster.getInstance(path, this.connection);
     }
 
     public boolean isConnected() {
@@ -33,6 +37,10 @@ public class Pathfinder {
     }
 
     public long getReceivedMessageCount() {
-        return this.getReceivedMessageCount();
+        return this.connection.getReceivedMessageCount();
+    }
+
+    public void close() throws IOException {
+        this.connection.close();
     }
 }

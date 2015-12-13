@@ -3,65 +3,76 @@ package xyz.thepathfinder.android;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
-    public static final String DEFAULT_PATH = "/";
+    protected static final String MODEL = Pathfinder.CLUSTER;
 
-    protected static final String MODEL = "Cluster";
+    private static final Map<String, Cluster> clusters = new HashMap<String, Cluster>();
 
-    private String path;
+    private Map<String, Transport> transports;
+    private Map<String, Commodity> commodities;
+    private Map<String, Cluster> subclusters;
 
-    private Long id;
-    private Long parentId;
-
-    private List<Transport> transports;
-    private List<Commodity> commodities;
-    private List<Cluster> subclusters;
     private List<Route> routes;
 
-    protected Cluster(PathfinderConnection connection) {
-        this(null, Cluster.DEFAULT_PATH, connection);
+    private boolean isConnected;
+
+    private Cluster(String path, PathfinderConnection connection) {
+        super(path, connection);
+
+        this.transports = new HashMap<String, Transport>();
+        this.commodities = new HashMap<String, Commodity>();
+        this.subclusters = new HashMap<String, Cluster>();
+        this.routes = new LinkedList<Route>();
+
+        this.isConnected = false;
+
+        Cluster cluster = Cluster.getInstance(path);
+        if(cluster != null) {
+            throw new IllegalArgumentException("Cluster path already exists: " + path);
+        } else {
+            Cluster.clusters.put(path, this);
+        }
     }
 
-    protected Cluster(Long parentId, PathfinderConnection connection) {
-        this(parentId, null, connection);
+    private static Cluster getInstance(String path) {
+        return Cluster.clusters.get(path);
     }
 
-    protected Cluster(String path, PathfinderConnection connection) {
-        this(null, path, connection);
-    }
-
-    protected Cluster(Long parentId, String path, PathfinderConnection connection) {
-        super(connection);
-        this.path = path;
-
-        this.id = null;
-        this.parentId = parentId;
-
-        this.transports = null;
-        this.commodities = null;
-        this.subclusters = null;
-        this.routes = null;
-    }
-
-    protected Cluster(JsonObject clusterJson, PathfinderConnection connection) {
-        super(connection);
-
-        this.checkClusterFields(clusterJson);
-        this.setClusterFields(clusterJson);
-    }
-
-    private void checkClusterFields(JsonObject clusterJson) {
-        if(!clusterJson.has("id")) {
-            throw new ClassCastException("No cluster ID was found in the JSON");
+    protected static Cluster getInstance(String path, PathfinderConnection connection) {
+        if(connection == null) {
+            throw new NullPointerException("Connection may not be null");
         }
 
-        if(!clusterJson.has("parent")) {
-            throw new ClassCastException("No parent cluster ID was found in the JSON");
+        if(path == "") {
+            return null;
+        }
+
+        if(Cluster.clusters.containsKey(path)) {
+            return Cluster.clusters.get(path);
+        } else {
+            return new Cluster(path, connection);
+        }
+    }
+
+    protected static Cluster getInstance(JsonObject clusterJson, PathfinderConnection connection) {
+        Cluster.checkClusterFields(clusterJson);
+
+        Cluster cluster = Cluster.getInstance(clusterJson.get("path").getAsString(), connection);
+        cluster.setClusterFields(clusterJson);
+        return cluster;
+    }
+
+    private static void checkClusterFields(JsonObject clusterJson) {
+        if(!clusterJson.has("path")) {
+            throw new ClassCastException("No cluster path was found in the JSON");
         }
 
         if(!clusterJson.has("transports")) {
@@ -90,129 +101,104 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     private void setClusterFields(JsonObject clusterJson) {
-        this.setId(clusterJson.get("id").getAsLong());
-
-        if(clusterJson.get("parent").isJsonNull()) {
-            this.setParentId(null);
-        } else {
-            this.setParentId(clusterJson.get("parent").getAsLong());
-        }
-
         LinkedList<Commodity> commodities = new LinkedList<Commodity>();
         for(JsonElement commodity: clusterJson.getAsJsonArray("commodities")) {
-            commodities.add(new Commodity(commodity.getAsJsonObject(), this.getConnection()));
+            commodities.add(Commodity.getInstance(commodity.getAsJsonObject(), this.getConnection()));
         }
         this.setCommodities(commodities);
 
         LinkedList<Transport> transports = new LinkedList<Transport>();
         for(JsonElement transport: clusterJson.getAsJsonArray("transports")) {
-            transports.add(new Transport(transport.getAsJsonObject(), this.getConnection()));
+            transports.add(Transport.getInstance(transport.getAsJsonObject(), this.getConnection()));
         }
         this.setTransports(transports);
 
         LinkedList<Cluster> subclusters = new LinkedList<Cluster>();
         for(JsonElement subcluster: clusterJson.getAsJsonArray("subClusters")) {
-            subclusters.add(new Cluster(subcluster.getAsJsonObject(), this.getConnection()));
+            subclusters.add(Cluster.getInstance(subcluster.getAsJsonObject(), this.getConnection()));
         }
         this.setSubclusters(subclusters);
     }
 
-    @Override
-    public boolean isConnected() {
-        return this.getId() != null;
-    }
-
-    public Cluster createSubcluster() {
-        if (this.isConnected()) {
-            return new Cluster(this.getId(), this.getConnection());
-        } else {
-            return null;
+    public Commodity createCommodity(String name, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata) {
+        if (!this.isConnected()) {
+            throw new IllegalStateException("Not connected to cluster, cannot create commodity");
         }
-    }
 
-    public List<Cluster> getSubclusters() {
-        return Collections.unmodifiableList(this.subclusters);
-    }
-
-    public boolean removeSubcluster(Cluster cluster) {
-        return this.subclusters.remove(cluster);
-    }
-
-    private void setSubclusters(List<Cluster> subclusters) {
-        this.subclusters = subclusters;
-    }
-
-    public Cluster parentCluster() {
-        if (this.path.equals(Cluster.DEFAULT_PATH)) {
-            return null;
-        } else {
-            return new Cluster(this.parentId, this.getConnection());
-        }
-    }
-
-    private void setId(long id) {
-        this.id = id;
-    }
-
-    @Override
-    public Long getId() {
-        return this.id;
-    }
-
-    private void setParentId(Long id) {
-        this.parentId = id;
-    }
-
-    public Long getParentId() {
-        return this.parentId;
-    }
-
-    public Transport createTransport() {
-        if (this.isConnected()) {
-            return new Transport(this.getId(), this.getConnection());
-        } else {
-            return null;
-        }
-    }
-
-    private Transport createTransport(JsonObject json) {
-        return new Transport(json, this.getConnection());
-    }
-
-    public List<Transport> getTransports() {
-        return Collections.unmodifiableList(this.transports);
-    }
-
-    public boolean removeTransport(Transport transport) {
-        return this.transports.remove(transport);
-    }
-
-    private void setTransports(List<Transport> transports) {
-        this.transports = transports;
-    }
-
-    public Commodity createCommodity() {
-        if (this.isConnected()) {
-            return new Commodity(this.getId(), this.getConnection());
-        } else {
-            return null;
-        }
+        String path = this.getChildPath(name);
+        return new Commodity(path, startLatitude, startLongitude, endLatitude, endLongitude, status, metadata, this.getConnection());
     }
 
     private Commodity createCommodity(JsonObject json) {
-        return new Commodity(json, this.getConnection());
+        return Commodity.getInstance(json, this.getConnection());
     }
 
-    public List<Commodity> getCommodities() {
-        return Collections.unmodifiableList(this.commodities);
+    public Collection<Commodity> getCommodities() {
+        return Collections.unmodifiableCollection(this.commodities.values());
     }
 
-    public boolean removeCommodity(Commodity commodity) {
-        return this.commodities.remove(commodity);
+    public Commodity removeCommodity(Commodity commodity) {
+        return this.commodities.remove(commodity.getPath());
     }
 
-    private void setCommodities(List<Commodity> commodities) {
-        this.commodities = commodities;
+    private void setCommodities(Iterable<Commodity> commodities) {
+        for(Commodity commodity: commodities) {
+            this.commodities.put(commodity.getPath(), commodity);
+        }
+    }
+
+    public Cluster createSubcluster(String name) {
+        return Cluster.getInstance(this.getChildPath(name), this.getConnection());
+    }
+
+    public Cluster getSubcluster(String name) {
+        return this.subclusters.get(this.getChildPath(name));
+    }
+
+    public Collection<Cluster> getSubclusters() {
+        return Collections.unmodifiableCollection(this.subclusters.values());
+    }
+
+    //TODO think about how to deal with the remove methods
+    public Cluster removeSubcluster(Cluster cluster) {
+        return this.subclusters.remove(cluster.getPath());
+    }
+
+    private void setSubclusters(Iterable<Cluster> subclusters) {
+        for(Cluster cluster: subclusters) {
+            this.subclusters.put(cluster.getPath(), cluster);
+        }
+    }
+
+    public Transport createTransport(String name, double latitude, double longitude, TransportStatus status, JsonObject metadata) {
+        if (!this.isConnected()) {
+            throw new IllegalStateException("Not connected to cluster, cannot create transport");
+        }
+
+        String path = this.getChildPath(name);
+        return new Transport(path, latitude, longitude, status, metadata, this.getConnection());
+    }
+
+    private Transport createTransport(JsonObject json) {
+        return Transport.getInstance(json, this.getConnection());
+    }
+
+    public Transport getTransport(String name) {
+        return this.transports.get(this.getChildPath(name));
+    }
+
+    public Collection<Transport> getTransports() {
+        return Collections.unmodifiableCollection(this.transports.values());
+    }
+
+    public Transport removeTransport(Transport transport) {
+        return this.transports.remove(transport.getPath());
+    }
+
+    private void setTransports(Iterable<Transport> transports) {
+        for(Transport transport: transports) {
+            this.transports.put(transport.getPath(), transport);
+        }
     }
 
     private void setRoutes(List<Route> routes) {
@@ -223,17 +209,6 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return Collections.unmodifiableList(this.routes);
     }
 
-    @Override
-    protected String getModel() {
-        return Cluster.MODEL;
-    }
-
-    @Override
-    protected JsonObject toJson() {
-        JsonObject json = new JsonObject();
-        return json;
-    }
-
     public void subscribe() {
         this.subscribe(SubscribableClusterModel.COMMODITY);
         this.subscribe(SubscribableClusterModel.TRANSPORT);
@@ -242,31 +217,30 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     public void subscribe(SubscribableClusterModel model) {
         JsonObject modelJson = new JsonObject();
         modelJson.addProperty("model", model.toString());
-        modelJson.addProperty("clusterId", this.getId());
+        modelJson.addProperty("path", this.getPath());
 
         super.subscribe(modelJson);
     }
 
     @Override
-    protected void notifyUpdate(JsonObject json) {
-        //TODO implement
+    public boolean isConnected() {
+        return this.isConnected;
     }
 
     @Override
-    public void connect() {
-        if(this.path != null && this.path.equals(Cluster.DEFAULT_PATH)) {
-            connectDefaultCluster();
-        } else {
-            super.connect();
-        }
+    protected String getModel() {
+        return Cluster.MODEL;
     }
 
-    private void connectDefaultCluster() {
-        JsonObject jsonId = new JsonObject();
-        jsonId.addProperty("id", this.getConnection().getApplictionIdentifier());
-
+    @Override
+    protected JsonObject toJson() {
         JsonObject json = new JsonObject();
-        json.add("getApplicationCluster", jsonId);
-        this.getConnection().sendMessage(json.toString());
+        json.addProperty("parentPath", this.getParentPath());
+        return json;
+    }
+
+    @Override
+    protected void notifyUpdate(JsonObject json) {
+        // IMPLEMENTME: 12/12/15
     }
 }

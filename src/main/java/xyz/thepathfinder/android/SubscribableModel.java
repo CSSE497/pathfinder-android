@@ -4,44 +4,32 @@ import com.google.gson.JsonObject;
 
 public abstract class SubscribableModel<E extends PathfinderListener> extends PathfinderListenable<E> {
 
-    private boolean isSubscribed;
     private PathfinderConnection connection;
 
-    public SubscribableModel(PathfinderConnection connection) {
-        this.isSubscribed = false;
+    public SubscribableModel(String path, PathfinderConnection connection) {
+        super(path);
         this.connection = connection;
     }
 
-    public abstract boolean isConnected();
-    public abstract Long getId();
-
-    protected abstract JsonObject toJson();
-    protected abstract String getModel();
+    public Cluster getParent() {
+        String parentPath = this.getParentPath();
+        return Cluster.getInstance(parentPath, this.getConnection());
+    }
 
     protected PathfinderConnection getConnection() {
         return this.connection;
     }
 
-    public boolean isSubscribed() {
-        return this.isSubscribed;
-    }
-
     public void addMessageReceiver() {
-        if(!this.isSubscribed()) {
-            this.getConnection().addMessageReceiver(this);
-        }
+        // FIXME: 12/12/15
     }
 
     public void removeMessageReceiver() {
-        if(this.isSubscribed()) {
-            this.getConnection().removeMessageReceiver(this);
-        }
+        // FIXME: 12/12/15
     }
 
     public void subscribe(JsonObject value) {
-        if (!this.isConnected()) {
-            throw new IllegalStateException("Not connected to object on Pathfinder server");
-        }
+        //TODO uncomment this
 
         JsonObject subscribeRequest = new JsonObject();
         subscribeRequest.add("subscribe", value);
@@ -55,13 +43,9 @@ public abstract class SubscribableModel<E extends PathfinderListener> extends Pa
     }
 
     public void routeSubscribe() {
-        if (!this.isConnected()) {
-            throw new IllegalStateException("Not connected to object on Pathfinder server");
-        }
-
         JsonObject model = new JsonObject();
         model.addProperty("model", this.getModel());
-        model.addProperty("id", this.getId());
+        model.addProperty("path", this.getPath());
 
         JsonObject requestJson = new JsonObject();
         requestJson.add("routeSubscribe", model);

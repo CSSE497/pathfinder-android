@@ -15,7 +15,7 @@ public class PathfinderMessageHandler implements MessageHandler.Whole<String> {
     }
 
     private String makeKey(SubscribableModel subscribableModel) {
-        return subscribableModel.getModel() + subscribableModel.getId();
+        return subscribableModel.getModel() + subscribableModel.getPath();
     }
 
     public void addMessageReceiver(SubscribableModel subscribableModel) {
@@ -37,6 +37,7 @@ public class PathfinderMessageHandler implements MessageHandler.Whole<String> {
 
 
         //TODO find the things that need to be notified
+        System.out.println("Received json: " + message);
     }
 
     public int getReceivedMessageCount() {

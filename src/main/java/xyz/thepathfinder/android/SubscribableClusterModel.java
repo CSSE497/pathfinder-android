@@ -1,8 +1,8 @@
 package xyz.thepathfinder.android;
 
 public enum SubscribableClusterModel {
-    COMMODITY("Commodity"),
-    TRANSPORT("Transport");
+    COMMODITY(Pathfinder.COMMODITY),
+    TRANSPORT(Pathfinder.TRANSPORT);
 
     private final String model;
 

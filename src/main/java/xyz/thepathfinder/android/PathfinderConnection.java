@@ -4,6 +4,7 @@ import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.Session;
+import java.io.IOException;
 
 public class PathfinderConnection extends Endpoint {
 
@@ -67,5 +68,9 @@ public class PathfinderConnection extends Endpoint {
 
     public long getReceivedMessageCount() {
         return this.messageHandler.getReceivedMessageCount();
+    }
+
+    public void close() throws IOException {
+        this.session.close();
     }
 }
