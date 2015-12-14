@@ -4,26 +4,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PathfinderModelRegistry {
-    private static final Map<String, PathfinderModel> models = new HashMap<String, PathfinderModel>();
+    private final Map<String, PathfinderModel> models;
 
-    protected static void registerModel(PathfinderModel model) {
-        if(models.containsKey(model.getPath())) {
+    protected PathfinderModelRegistry() {
+        this.models = new HashMap<String, PathfinderModel>();
+    }
+
+    protected void registerModel(PathfinderModel model) {
+        if(this.models.containsKey(model.getPath())) {
             throw new IllegalArgumentException("Path already exists: " + model.getPath());
         }
 
-        models.put(model.getPath(), model);
+        this.models.put(model.getPath(), model);
     }
 
-    protected static PathfinderModel unregisterModel(String path) {
-        return models.remove(path);
+    protected PathfinderModel unregisterModel(String path) {
+        return this.models.remove(path);
     }
 
-    protected static boolean isModelRegistered(String path) {
-        return models.containsKey(path);
+    protected boolean isModelRegistered(String path) {
+        return this.models.containsKey(path);
     }
 
-    protected static PathfinderModel getModel(String path, String modelType) {
-        PathfinderModel model = models.get(path);
+    protected PathfinderModel getModel(String path, String modelType) {
+        PathfinderModel model = this.models.get(path);
         if(model == null) {
             return model;
         }

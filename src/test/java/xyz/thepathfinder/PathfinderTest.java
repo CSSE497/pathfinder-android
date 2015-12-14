@@ -13,6 +13,7 @@ import javax.websocket.DeploymentException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.logging.LogManager;
 
 import static org.junit.Assert.assertTrue;
 
@@ -23,6 +24,8 @@ public class PathfinderTest {
 
     @Before
     public void setupSever() {
+        LogManager.getLogManager().reset();
+
         this.server = new TestServer();
         this.messager = TestEndpoint.getMessager();
     }
@@ -40,6 +43,14 @@ public class PathfinderTest {
 
     @Test(timeout = 10000)
     public void testConnection() throws URISyntaxException, IOException, DeploymentException, InterruptedException {
+        URI url = new URI("ws://localhost:8025/socket");
+        Pathfinder pathfinder = new Pathfinder("9c4166bb-9535-49e1-8844-1904a0b1f45b", "", url);
+        assertTrue(pathfinder.isConnected());
+        pathfinder.close();
+    }
+
+    @Test(timeout = 10000)
+    public void testGetDefaultCluster() throws URISyntaxException, IOException, DeploymentException, InterruptedException {
         URI url = new URI("ws://localhost:8025/socket");
         Pathfinder pathfinder = new Pathfinder("9c4166bb-9535-49e1-8844-1904a0b1f45b", "", url);
         assertTrue(pathfinder.isConnected());

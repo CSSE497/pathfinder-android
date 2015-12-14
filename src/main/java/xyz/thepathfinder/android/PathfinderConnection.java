@@ -8,38 +8,22 @@ import java.io.IOException;
 
 public class PathfinderConnection extends Endpoint {
 
-    private static PathfinderConnection connection = new PathfinderConnection();
-
     private String applictionIdentifier;
     private String userCredentials;
     private Session session;
     private long sentMessageCount;
     private PathfinderMessageHandler messageHandler;
 
-    private PathfinderConnection() {
-        this.sentMessageCount = 0L;
-    }
-
-    protected static PathfinderConnection getConnection() {
-        if(PathfinderConnection.connection == null) {
-            PathfinderConnection.connection = new PathfinderConnection();
-        }
-
-        return PathfinderConnection.connection;
-    }
-
-    protected void setApplicationIdentifier(String applicationIdentifier) {
-        this.applictionIdentifier = applicationIdentifier;
-    }
-
-    protected void setUserCredentials(String userCredentials) {
+    protected PathfinderConnection(String applictionIdentifier, String userCredentials) {
+        this.applictionIdentifier = applictionIdentifier;
         this.userCredentials = userCredentials;
+        this.sentMessageCount = 0L;
     }
 
     public void sendMessage(String message) {
         System.out.println("Sending json: " + message);
         if(this.isConnected()) {
-            PathfinderConnection.getConnection().session.getAsyncRemote().sendText(message);
+            this.session.getAsyncRemote().sendText(message);
             this.sentMessageCount++;
         } else {
             throw new IllegalStateException("The connection to Pathfinder was closed or opened twice.");
@@ -61,10 +45,6 @@ public class PathfinderConnection extends Endpoint {
 
     public boolean isConnected() {
         return this.session.isOpen();
-    }
-
-    protected String getApplictionIdentifier() {
-        return this.applictionIdentifier;
     }
 
     public long getSentMessageCount() {

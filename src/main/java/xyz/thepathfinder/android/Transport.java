@@ -12,8 +12,8 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     private JsonObject metadata;
     private Route route;
 
-    protected Transport(String path, double latitude, double longitude, TransportStatus status, JsonObject metadata) {
-        super(path);
+    protected Transport(String path, double latitude, double longitude, TransportStatus status, JsonObject metadata, PathfinderServices services) {
+        super(path, services);
 
         this.latitude = latitude;
         this.longitude = longitude;
@@ -30,23 +30,23 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
             this.metadata = metadata;
         }
 
-        boolean isRegistered = PathfinderModelRegistry.isModelRegistered(path);
+        boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
         if (isRegistered) {
             throw new IllegalArgumentException("Transport path already exists: " + path);
         } else {
-            PathfinderModelRegistry.registerModel(this);
+            this.getServices().getRegistry().registerModel(this);
         }
     }
 
-    public static Transport getInstance(String path) {
-        return (Transport) PathfinderModelRegistry.getModel(path, Transport.MODEL);
+    public static Transport getInstance(String path, PathfinderServices services) {
+        return (Transport) services.getRegistry().getModel(path, Transport.MODEL);
     }
 
-    protected static Transport getInstance(JsonObject transportJson) {
+    protected static Transport getInstance(JsonObject transportJson, PathfinderServices services) {
         Transport.checkTransportFields(transportJson);
 
         String path = Transport.getPath(transportJson);
-        Transport transport = Transport.getInstance(path);
+        Transport transport = Transport.getInstance(path, services);
 
         if (transport == null) {
             double latitude = Transport.getLatitude(transportJson);
@@ -57,7 +57,8 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
                     latitude,
                     longitude,
                     status,
-                    metadata);
+                    metadata,
+                    services);
         } else {
             transport.setTransportFields(transportJson);
         }

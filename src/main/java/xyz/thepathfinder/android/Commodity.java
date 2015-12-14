@@ -13,8 +13,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     private CommodityStatus status;
     private JsonObject metadata;
 
-    protected Commodity(String path, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata) {
-        super(path);
+    protected Commodity(String path, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata, PathfinderServices services) {
+        super(path, services);
 
         this.startLatitude = startLatitude;
         this.startLongitude = startLongitude;
@@ -33,23 +33,23 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
             this.metadata = new JsonObject();
         }
 
-        boolean isRegistered = PathfinderModelRegistry.isModelRegistered(path);
+        boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
         if(isRegistered) {
             throw new IllegalArgumentException("Commodity path already exists: " + path);
         } else {
-            PathfinderModelRegistry.registerModel(this);
+            this.getServices().getRegistry().registerModel(this);
         }
     }
 
-    protected static Commodity getInstance(String path) {
-        return (Commodity) PathfinderModelRegistry.getModel(path, Commodity.MODEL);
+    protected static Commodity getInstance(String path, PathfinderServices services) {
+        return (Commodity) services.getRegistry().getModel(path, Commodity.MODEL);
     }
 
-    protected static Commodity getInstance(JsonObject commodityJson) {
+    protected static Commodity getInstance(JsonObject commodityJson, PathfinderServices services) {
         Commodity.checkCommodityFields(commodityJson);
 
         String path = Commodity.getPath(commodityJson);
-        Commodity commodity = Commodity.getInstance(path);
+        Commodity commodity = Commodity.getInstance(path, services);
 
         if(commodity == null) {
             double startLatitude = Commodity.getStartLatitude(commodityJson);
@@ -64,7 +64,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
                     endLatitude,
                     endLongitude,
                     status,
-                    metadata);
+                    metadata,
+                    services);
         } else {
             commodity.setCommodityFields(commodityJson);
         }

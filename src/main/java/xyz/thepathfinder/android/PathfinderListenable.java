@@ -11,8 +11,8 @@ public abstract class PathfinderListenable<E extends PathfinderListener> extends
 
     private List<E> listeners;
 
-    public PathfinderListenable(String path) {
-        super(path);
+    public PathfinderListenable(String path, PathfinderServices services) {
+        super(path, services);
         this.listeners = new LinkedList<E>();
     }
 

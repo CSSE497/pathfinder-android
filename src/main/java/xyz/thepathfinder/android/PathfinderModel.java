@@ -4,11 +4,13 @@ import com.google.gson.JsonObject;
 
 public abstract class PathfinderModel {
 
-    private Path path;
+    private final Path path;
+    private final PathfinderServices services;
     private boolean isConnected;
 
-    public PathfinderModel(String path) {
+    public PathfinderModel(String path, PathfinderServices services) {
         this.path = new Path(path);
+        this.services = services;
         this.isConnected = false;
     }
 
@@ -26,7 +28,11 @@ public abstract class PathfinderModel {
 
     public Cluster getParent() {
         String parentPath = this.getParentPath();
-        return Cluster.getInstance(parentPath);
+        return Cluster.getInstance(parentPath, services);
+    }
+
+    protected PathfinderServices getServices() {
+        return this.services;
     }
 
     public boolean isConnected() {

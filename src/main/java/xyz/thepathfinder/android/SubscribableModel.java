@@ -4,8 +4,8 @@ import com.google.gson.JsonObject;
 
 public abstract class SubscribableModel<E extends PathfinderListener> extends PathfinderListenable<E> {
 
-    public SubscribableModel(String path) {
-        super(path);
+    public SubscribableModel(String path, PathfinderServices services) {
+        super(path, services);
     }
 
     public JsonObject getMessageHeader(String type) {
@@ -20,7 +20,7 @@ public abstract class SubscribableModel<E extends PathfinderListener> extends Pa
 
     public void subscribe(JsonObject value) {
         JsonObject json = this.getMessageHeader("subscribe");
-        PathfinderConnection.getConnection().sendMessage(json.toString());
+        this.getServices().getConnection().sendMessage(json.toString());
     }
 
     public void unsubscribe() {
@@ -30,7 +30,7 @@ public abstract class SubscribableModel<E extends PathfinderListener> extends Pa
 
     public void routeSubscribe() {
         JsonObject json = this.getMessageHeader("routeSubscribe");
-        PathfinderConnection.getConnection().sendMessage(json.toString());
+        this.getServices().getConnection().sendMessage(json.toString());
     }
 
     public void routeUnsubscribe() {

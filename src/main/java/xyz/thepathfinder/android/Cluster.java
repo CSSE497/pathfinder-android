@@ -20,37 +20,37 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
     private List<Route> routes;
 
-    private Cluster(String path) {
-        super(path);
+    private Cluster(String path, PathfinderServices services) {
+        super(path, services);
 
         this.transports = new HashMap<String, Transport>();
         this.commodities = new HashMap<String, Commodity>();
         this.subclusters = new HashMap<String, Cluster>();
         this.routes = new LinkedList<Route>();
 
-        boolean isRegistered = PathfinderModelRegistry.isModelRegistered(path);
+        boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
         if(isRegistered) {
             throw new IllegalArgumentException("Cluster path already exists: " + path);
         } else {
-            PathfinderModelRegistry.registerModel(this);
+            this.getServices().getRegistry().registerModel(this);
         }
     }
 
-    protected static Cluster getInstance(String path) {
-        Cluster cluster = (Cluster) PathfinderModelRegistry.getModel(path, Cluster.MODEL);
+    protected static Cluster getInstance(String path, PathfinderServices services) {
+        Cluster cluster = (Cluster) services.getRegistry().getModel(path, Cluster.MODEL);
 
         if(cluster == null) {
-            cluster = new Cluster(path);
+            cluster = new Cluster(path, services);
         }
 
         return cluster;
     }
 
-    protected static Cluster getInstance(JsonObject clusterJson) {
+    protected static Cluster getInstance(JsonObject clusterJson, PathfinderServices services) {
         Cluster.checkClusterFields(clusterJson);
 
         String path = Cluster.getPath(clusterJson);
-        Cluster cluster = Cluster.getInstance(path);
+        Cluster cluster = Cluster.getInstance(path, services);
 
         cluster.setClusterFields(clusterJson);
         return cluster;
@@ -90,38 +90,38 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return clusterJson.get("path").getAsString();
     }
 
-    private static List<Commodity> getCommodities(JsonObject clusterJson) {
+    private static List<Commodity> getCommodities(JsonObject clusterJson, PathfinderServices services) {
         List<Commodity> commodities = new LinkedList<Commodity>();
         for(JsonElement commodity: clusterJson.getAsJsonArray("commodities")) {
-            commodities.add(Commodity.getInstance(commodity.getAsJsonObject()));
+            commodities.add(Commodity.getInstance(commodity.getAsJsonObject(), services));
         }
         return commodities;
     }
 
-    private static List<Cluster> getSubclusters(JsonObject clusterJson) {
+    private static List<Cluster> getSubclusters(JsonObject clusterJson, PathfinderServices services) {
         List<Cluster> clusters = new LinkedList<Cluster>();
         for(JsonElement cluster: clusterJson.getAsJsonArray("subClusters")) {
-            clusters.add(Cluster.getInstance(cluster.getAsJsonObject()));
+            clusters.add(Cluster.getInstance(cluster.getAsJsonObject(), services));
         }
         return clusters;
     }
 
-    private static List<Transport> getTransports(JsonObject clusterJson) {
+    private static List<Transport> getTransports(JsonObject clusterJson, PathfinderServices services) {
         List<Transport> transports = new LinkedList<Transport>();
         for(JsonElement transport: clusterJson.getAsJsonArray("transports")) {
-            transports.add(Transport.getInstance(transport.getAsJsonObject()));
+            transports.add(Transport.getInstance(transport.getAsJsonObject(), services));
         }
         return transports;
     }
 
     private void setClusterFields(JsonObject clusterJson) {
-        List<Commodity> commodities = Cluster.getCommodities(clusterJson);
+        List<Commodity> commodities = Cluster.getCommodities(clusterJson, this.getServices());
         this.setCommodities(commodities);
 
-        List<Transport> transports = Cluster.getTransports(clusterJson);
+        List<Transport> transports = Cluster.getTransports(clusterJson, this.getServices());
         this.setTransports(transports);
 
-        List<Cluster> subclusters = Cluster.getSubclusters(clusterJson);
+        List<Cluster> subclusters = Cluster.getSubclusters(clusterJson, this.getServices());
         this.setSubclusters(subclusters);
     }
 
@@ -131,11 +131,11 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
 
         String path = this.getChildPath(name);
-        return new Commodity(path, startLatitude, startLongitude, endLatitude, endLongitude, status, metadata);
+        return new Commodity(path, startLatitude, startLongitude, endLatitude, endLongitude, status, metadata, this.getServices());
     }
 
-    private Commodity createCommodity(JsonObject json) {
-        return Commodity.getInstance(json);
+    private Commodity createCommodity(JsonObject json, PathfinderServices services) {
+        return Commodity.getInstance(json, services);
     }
 
     public Collection<Commodity> getCommodities() {
@@ -153,7 +153,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     public Cluster createSubcluster(String name) {
-        return Cluster.getInstance(this.getChildPath(name));
+        return Cluster.getInstance(this.getChildPath(name), this.getServices());
     }
 
     public Cluster getSubcluster(String name) {
@@ -181,11 +181,11 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
 
         String path = this.getChildPath(name);
-        return new Transport(path, latitude, longitude, status, metadata);
+        return new Transport(path, latitude, longitude, status, metadata, this.getServices());
     }
 
     private Transport createTransport(JsonObject json) {
-        return Transport.getInstance(json);
+        return Transport.getInstance(json, this.getServices());
     }
 
     public Transport getTransport(String name) {
