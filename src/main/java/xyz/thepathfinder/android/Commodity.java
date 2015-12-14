@@ -2,11 +2,9 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
-import java.util.Map;
-
 public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
-    protected static final String MODEL = Pathfinder.COMMODITY;
+    private static final String MODEL = Pathfinder.COMMODITY;
 
     private double startLongitude;
     private double startLatitude;
@@ -14,8 +12,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     private double endLatitude;
     private CommodityStatus status;
     private JsonObject metadata;
-
-    private boolean isConnected;
 
     protected Commodity(String path, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata) {
         super(path);
@@ -36,8 +32,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         } else {
             this.metadata = new JsonObject();
         }
-
-        this.isConnected = false;
 
         boolean isRegistered = PathfinderModelRegistry.isModelRegistered(path);
         if(isRegistered) {
@@ -269,8 +263,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     }
 
     @Override
-    public boolean isConnected() {
-        return isConnected;
+    protected String getModel() {
+        return Commodity.MODEL;
     }
 
     @Override

@@ -5,10 +5,11 @@ import com.google.gson.JsonObject;
 public abstract class PathfinderModel {
 
     private Path path;
-    protected static final String model = null;
+    private boolean isConnected;
 
     public PathfinderModel(String path) {
         this.path = new Path(path);
+        this.isConnected = false;
     }
 
     public String getPath() {
@@ -23,10 +24,16 @@ public abstract class PathfinderModel {
         return this.path.getParentPath();
     }
 
-    protected String getModel() {
-        return this.model;
+    public Cluster getParent() {
+        String parentPath = this.getParentPath();
+        return Cluster.getInstance(parentPath);
     }
 
+    public boolean isConnected() {
+        return this.isConnected;
+    }
+
+    protected abstract String getModel();
     protected abstract JsonObject toJson();
-    public abstract boolean isConnected();
+
 }

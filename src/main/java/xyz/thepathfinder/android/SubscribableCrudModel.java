@@ -9,29 +9,19 @@ public abstract class SubscribableCrudModel<E extends PathfinderListener> extend
     }
 
     public void connect() {
-        JsonObject model = new JsonObject();
-        model.addProperty("model", this.getModel());
-        model.addProperty("path", this.getPath());
-
-        JsonObject requestJson = new JsonObject();
-        requestJson.add("read", model);
-
-        PathfinderConnection.getConnection().sendMessage(requestJson.toString());
+        JsonObject json = this.getMessageHeader("read");
+        PathfinderConnection.getConnection().sendMessage(json.toString());
     }
 
     protected void create() {
-        //if (this.isConnected()) {
-        //    throw new IllegalStateException("Already created");
-        //}
+        if (this.isConnected()) {
+            throw new IllegalStateException("Already created");
+        }
 
-        JsonObject model = new JsonObject();
-        model.addProperty("model", this.getModel());
-        model.add("value", this.toJson());
+        JsonObject json = this.getMessageHeader("create");
+        json.add("value", this.toJson());
 
-        JsonObject requestJson = new JsonObject();
-        requestJson.add("create", model);
-
-        PathfinderConnection.getConnection().sendMessage(requestJson.toString());
+        PathfinderConnection.getConnection().sendMessage(json.toString());
     }
 
     public void delete() {
@@ -39,16 +29,8 @@ public abstract class SubscribableCrudModel<E extends PathfinderListener> extend
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 
-        JsonObject model = new JsonObject();
-        model.addProperty("model", this.getModel());
-        model.addProperty("path", this.getPath());
-
-        JsonObject requestJson = new JsonObject();
-        requestJson.add("delete", model);
-
-
-
-        PathfinderConnection.getConnection().sendMessage(requestJson.toString());
+        JsonObject json = this.getMessageHeader("delete");
+        PathfinderConnection.getConnection().sendMessage(json.toString());
     }
 
     public void update(JsonObject value) {
@@ -56,14 +38,9 @@ public abstract class SubscribableCrudModel<E extends PathfinderListener> extend
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 
-        JsonObject model = new JsonObject();
-        model.addProperty("model", this.getModel());
-        model.addProperty("path", this.getPath());
-        model.add("value", value);
+        JsonObject json = this.getMessageHeader("update");
+        json.add("value", value);
 
-        JsonObject requestJson = new JsonObject();
-        requestJson.add("update", model);
-
-        PathfinderConnection.getConnection().sendMessage(requestJson.toString());
+        PathfinderConnection.getConnection().sendMessage(json.toString());
     }
 }

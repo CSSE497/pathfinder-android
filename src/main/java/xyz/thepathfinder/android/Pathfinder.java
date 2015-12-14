@@ -10,19 +10,17 @@ public class Pathfinder {
 
     protected static String CLUSTER = "Cluster";
     protected static String COMMODITY = "Commodity";
-    protected static String TRANSPORT = "Vehicle";
-
-    private PathfinderConnection connection;
+    protected static String TRANSPORT = "Transport";
 
     public Pathfinder(String applicationIdentifier, String userCredentials, URI websocketUrl) throws IOException, DeploymentException {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-        this.connection = new PathfinderConnection();
-        this.connection.setApplicationIdentifier(applicationIdentifier);
-        this.connection.setUserCredentials(userCredentials);
-        container.connectToServer(this.connection, websocketUrl); // blocks until connection is established, JSR 356
+        PathfinderConnection connection = PathfinderConnection.getConnection();
+        connection.setApplicationIdentifier(applicationIdentifier);
+        connection.setUserCredentials(userCredentials);
+        container.connectToServer(connection, websocketUrl); // blocks until connection is established, JSR 356
     }
 
-    public Cluster getCluster() {
+    public Cluster getDefaultCluster() {
         return Cluster.getInstance(Path.DEFAULT_PATH);
     }
 
@@ -31,18 +29,18 @@ public class Pathfinder {
     }
 
     public boolean isConnected() {
-        return this.connection.isConnected();
+        return PathfinderConnection.getConnection().isConnected();
     }
 
     public long getSentMessageCount() {
-        return this.connection.getSentMessageCount();
+        return PathfinderConnection.getConnection().getSentMessageCount();
     }
 
     public long getReceivedMessageCount() {
-        return this.connection.getReceivedMessageCount();
+        return PathfinderConnection.getConnection().getReceivedMessageCount();
     }
 
     public void close() throws IOException {
-        this.connection.close();
+        PathfinderConnection.getConnection().close();
     }
 }

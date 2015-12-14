@@ -12,15 +12,13 @@ import java.util.Map;
 
 public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
-    protected static final String MODEL = Pathfinder.CLUSTER;
+    private static final String MODEL = Pathfinder.CLUSTER;
 
     private Map<String, Transport> transports;
     private Map<String, Commodity> commodities;
     private Map<String, Cluster> subclusters;
 
     private List<Route> routes;
-
-    private boolean isConnected;
 
     private Cluster(String path) {
         super(path);
@@ -29,8 +27,6 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         this.commodities = new HashMap<String, Commodity>();
         this.subclusters = new HashMap<String, Cluster>();
         this.routes = new LinkedList<Route>();
-
-        this.isConnected = false;
 
         boolean isRegistered = PathfinderModelRegistry.isModelRegistered(path);
         if(isRegistered) {
@@ -41,7 +37,13 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     protected static Cluster getInstance(String path) {
-        return (Cluster) PathfinderModelRegistry.getModel(path, Cluster.MODEL);
+        Cluster cluster = (Cluster) PathfinderModelRegistry.getModel(path, Cluster.MODEL);
+
+        if(cluster == null) {
+            cluster = new Cluster(path);
+        }
+
+        return cluster;
     }
 
     protected static Cluster getInstance(JsonObject clusterJson) {
@@ -49,10 +51,6 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
         String path = Cluster.getPath(clusterJson);
         Cluster cluster = Cluster.getInstance(path);
-
-        if(cluster == null) {
-            cluster = new Cluster(path);
-        }
 
         cluster.setClusterFields(clusterJson);
         return cluster;
@@ -217,21 +215,15 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     public void subscribe() {
-        this.subscribe(SubscribableClusterModel.COMMODITY);
-        this.subscribe(SubscribableClusterModel.TRANSPORT);
-    }
-
-    public void subscribe(SubscribableClusterModel model) {
         JsonObject modelJson = new JsonObject();
-        modelJson.addProperty("model", model.toString());
         modelJson.addProperty("path", this.getPath());
 
         super.subscribe(modelJson);
     }
 
     @Override
-    public boolean isConnected() {
-        return this.isConnected;
+    protected String getModel() {
+        return Cluster.MODEL;
     }
 
     @Override

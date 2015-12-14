@@ -8,26 +8,19 @@ public abstract class SubscribableModel<E extends PathfinderListener> extends Pa
         super(path);
     }
 
-    public Cluster getParent() {
-        String parentPath = this.getParentPath();
-        return Cluster.getInstance(parentPath);
-    }
+    public JsonObject getMessageHeader(String type) {
+        JsonObject json = new JsonObject();
 
-    public void addMessageReceiver() {
-        // FIXME: 12/12/15
-    }
+        json.addProperty("type", type);
+        json.addProperty("path", this.getPath());
+        json.addProperty("model", this.getModel());
 
-    public void removeMessageReceiver() {
-        // FIXME: 12/12/15
+        return json;
     }
 
     public void subscribe(JsonObject value) {
-        //TODO uncomment this
-
-        JsonObject subscribeRequest = new JsonObject();
-        subscribeRequest.add("subscribe", value);
-
-        PathfinderConnection.getConnection().sendMessage(subscribeRequest.toString());
+        JsonObject json = this.getMessageHeader("subscribe");
+        PathfinderConnection.getConnection().sendMessage(json.toString());
     }
 
     public void unsubscribe() {
@@ -36,14 +29,8 @@ public abstract class SubscribableModel<E extends PathfinderListener> extends Pa
     }
 
     public void routeSubscribe() {
-        JsonObject model = new JsonObject();
-        model.addProperty("model", this.getModel());
-        model.addProperty("path", this.getPath());
-
-        JsonObject requestJson = new JsonObject();
-        requestJson.add("routeSubscribe", model);
-
-        PathfinderConnection.getConnection().sendMessage(requestJson.toString());
+        JsonObject json = this.getMessageHeader("routeSubscribe");
+        PathfinderConnection.getConnection().sendMessage(json.toString());
     }
 
     public void routeUnsubscribe() {

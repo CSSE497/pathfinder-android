@@ -8,7 +8,7 @@ import java.io.IOException;
 
 public class PathfinderConnection extends Endpoint {
 
-    private static final PathfinderConnection connection = new PathfinderConnection();
+    private static PathfinderConnection connection = new PathfinderConnection();
 
     private String applictionIdentifier;
     private String userCredentials;
@@ -16,11 +16,15 @@ public class PathfinderConnection extends Endpoint {
     private long sentMessageCount;
     private PathfinderMessageHandler messageHandler;
 
-    protected PathfinderConnection() {
+    private PathfinderConnection() {
         this.sentMessageCount = 0L;
     }
 
     protected static PathfinderConnection getConnection() {
+        if(PathfinderConnection.connection == null) {
+            PathfinderConnection.connection = new PathfinderConnection();
+        }
+
         return PathfinderConnection.connection;
     }
 
@@ -44,6 +48,7 @@ public class PathfinderConnection extends Endpoint {
 
     @Override
     public void onOpen(Session session, EndpointConfig config) {
+        System.out.print("Connected");
         this.session = session;
         this.messageHandler = new PathfinderMessageHandler();
         this.session.addMessageHandler(this.messageHandler);

@@ -2,20 +2,15 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class Transport extends SubscribableCrudModel<TransportListener> {
 
-    protected static final String MODEL = Pathfinder.TRANSPORT;
+    private static final String MODEL = Pathfinder.TRANSPORT;
 
     private double longitude;
     private double latitude;
     private TransportStatus status;
     private JsonObject metadata;
     private Route route;
-
-    private boolean isConnected;
 
     protected Transport(String path, double latitude, double longitude, TransportStatus status, JsonObject metadata) {
         super(path);
@@ -41,8 +36,6 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         } else {
             PathfinderModelRegistry.registerModel(this);
         }
-
-        this.isConnected = false;
     }
 
     public static Transport getInstance(String path) {
@@ -115,11 +108,6 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
     private static JsonObject getMetadata(JsonObject transportJson) {
         return transportJson.get("metadata").getAsJsonObject();
-    }
-
-    @Override
-    public boolean isConnected() {
-        return this.isConnected;
     }
 
     public void updateLocation(double latitude, double longitude) {
@@ -221,6 +209,11 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         model.addProperty("path", this.getPath());
 
         super.subscribe(model);
+    }
+
+    @Override
+    protected String getModel() {
+        return Transport.MODEL;
     }
 
     @Override
