@@ -7,11 +7,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-public abstract class PathfinderListenable<E extends PathfinderListener> extends PathfinderModel {
+public abstract class Listenable<E extends PathfinderListener> extends Model {
 
     private List<E> listeners;
 
-    public PathfinderListenable(String path, PathfinderServices services) {
+    public Listenable(String path, PathfinderServices services) {
         super(path, services);
         this.listeners = new LinkedList<E>();
     }

@@ -1,4 +1,4 @@
-package xyz.thepathfinder;
+package xyz.thepathfinder.android.test;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -6,6 +6,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import xyz.thepathfinder.TestMessager;
+import xyz.thepathfinder.TestServer;
 import xyz.thepathfinder.android.Cluster;
 import xyz.thepathfinder.android.Pathfinder;
 

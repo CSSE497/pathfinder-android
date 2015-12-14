@@ -6,15 +6,15 @@ import javax.websocket.EndpointConfig;
 import javax.websocket.Session;
 import java.io.IOException;
 
-public class PathfinderConnection extends Endpoint {
+public class Connection extends Endpoint {
 
     private String applictionIdentifier;
     private String userCredentials;
     private Session session;
     private long sentMessageCount;
-    private PathfinderMessageHandler messageHandler;
+    private MessageHandler messageHandler;
 
-    protected PathfinderConnection(String applictionIdentifier, String userCredentials) {
+    protected Connection(String applictionIdentifier, String userCredentials) {
         this.applictionIdentifier = applictionIdentifier;
         this.userCredentials = userCredentials;
         this.sentMessageCount = 0L;
@@ -34,7 +34,7 @@ public class PathfinderConnection extends Endpoint {
     public void onOpen(Session session, EndpointConfig config) {
         System.out.print("Connected");
         this.session = session;
-        this.messageHandler = new PathfinderMessageHandler();
+        this.messageHandler = new MessageHandler();
         this.session.addMessageHandler(this.messageHandler);
     }
 

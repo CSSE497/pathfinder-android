@@ -1,4 +1,4 @@
-package xyz.thepathfinder;
+package xyz.thepathfinder.android.test;
 
 import org.glassfish.tyrus.server.Server;
 

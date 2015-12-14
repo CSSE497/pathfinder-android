@@ -1,5 +1,5 @@
 package xyz.thepathfinder.android;
 
-public interface PathfinderListener {
+public interface Listener {
 
 }

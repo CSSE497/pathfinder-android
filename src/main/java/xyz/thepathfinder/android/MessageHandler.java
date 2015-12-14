@@ -6,11 +6,11 @@ import com.google.gson.JsonParser;
 
 import javax.websocket.MessageHandler;
 
-public class PathfinderMessageHandler implements MessageHandler.Whole<String> {
+public class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
 
     private int receivedMessageCount;
 
-    protected PathfinderMessageHandler() {
+    protected MessageHandler() {
         this.receivedMessageCount = 0;
     }
 

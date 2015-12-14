@@ -3,10 +3,10 @@ package xyz.thepathfinder.android;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PathfinderModelRegistry {
+public class ModelRegistry {
     private final Map<String, PathfinderModel> models;
 
-    protected PathfinderModelRegistry() {
+    protected ModelRegistry() {
         this.models = new HashMap<String, PathfinderModel>();
     }
 

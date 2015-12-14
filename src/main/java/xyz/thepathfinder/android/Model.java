@@ -2,13 +2,13 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
-public abstract class PathfinderModel {
+public abstract class Model {
 
     private final Path path;
     private final PathfinderServices services;
     private boolean isConnected;
 
-    public PathfinderModel(String path, PathfinderServices services) {
+    public Model(String path, PathfinderServices services) {
         this.path = new Path(path);
         this.services = services;
         this.isConnected = false;
