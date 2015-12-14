@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-public abstract class Listenable<E extends PathfinderListener> extends Model {
+public abstract class Listenable<E extends Listener> extends Model {
 
     private List<E> listeners;
 

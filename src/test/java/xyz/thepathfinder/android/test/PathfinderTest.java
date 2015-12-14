@@ -6,8 +6,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import xyz.thepathfinder.TestMessager;
-import xyz.thepathfinder.TestServer;
 import xyz.thepathfinder.android.Cluster;
 import xyz.thepathfinder.android.Pathfinder;
 
@@ -15,7 +13,8 @@ import javax.websocket.DeploymentException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.logging.LogManager;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.junit.Assert.assertTrue;
 
@@ -26,7 +25,8 @@ public class PathfinderTest {
 
     @Before
     public void setupSever() {
-        LogManager.getLogManager().reset();
+        Logger l1 = Logger.getLogger("org.glassfish");
+        l1.setUseParentHandlers(false);
 
         this.server = new TestServer();
         this.messager = TestEndpoint.getMessager();

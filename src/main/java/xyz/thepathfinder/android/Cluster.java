@@ -3,6 +3,7 @@ package xyz.thepathfinder.android;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         this.transports = new HashMap<String, Transport>();
         this.commodities = new HashMap<String, Commodity>();
         this.subclusters = new HashMap<String, Cluster>();
-        this.routes = new LinkedList<Route>();
+        this.routes = new ArrayList<Route>();
 
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
         if(isRegistered) {

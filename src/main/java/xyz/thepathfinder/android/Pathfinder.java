@@ -16,8 +16,8 @@ public class Pathfinder {
     public Pathfinder(String applicationIdentifier, String userCredentials, URI websocketUrl) throws IOException, DeploymentException {
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 
-        PathfinderConnection connection = new PathfinderConnection(applicationIdentifier, userCredentials);
-        PathfinderModelRegistry registry = new PathfinderModelRegistry();
+        ModelRegistry registry = new ModelRegistry();
+        Connection connection = new Connection(applicationIdentifier, userCredentials, registry);
 
         this.services = new PathfinderServices(registry, connection);
 

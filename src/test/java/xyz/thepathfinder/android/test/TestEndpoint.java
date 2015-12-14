@@ -2,7 +2,6 @@ package xyz.thepathfinder.android.test;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import xyz.thepathfinder.TestMessager;
 
 import javax.websocket.CloseReason;
 import javax.websocket.OnClose;
@@ -16,7 +15,7 @@ import java.util.logging.Logger;
 @ServerEndpoint(value = "/socket")
 public class TestEndpoint {
 
-    Logger logger = Logger.getLogger("xyz.thepathfinder.android.test.TestEndpoint");
+    Logger logger = Logger.getLogger(TestEndpoint.class.getName());
 
     public static TestMessager messager = new TestMessager();
 
@@ -31,7 +30,7 @@ public class TestEndpoint {
     @OnMessage
     public String onMessage(String message, Session session) {
 
-        logger.log(Level.INFO, "Server received: " + message);
+        logger.info("Server received: " + message);
 
         JsonParser parser = new JsonParser();
         JsonElement messJson = parser.parse(message);
@@ -39,15 +38,15 @@ public class TestEndpoint {
         String receive = TestEndpoint.getMessager().getReceive();
         JsonElement recJson = parser.parse(receive);
         if(recJson.equals(messJson)) {
-            logger.log(Level.INFO, "Json correct");
+            logger.info("Json correct");
             TestEndpoint.getMessager().setCorrect(true);
         } else {
-            logger.log(Level.INFO, "Json incorrect");
+            logger.info("Json incorrect");
             TestEndpoint.getMessager().setCorrect(false);
         }
 
         String send = TestEndpoint.getMessager().getSend();
-        logger.log(Level.INFO, "Server sending: " + send);
+        logger.info("Server sending: " + send);
         return send;
     }
 

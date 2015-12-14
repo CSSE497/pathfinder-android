@@ -2,19 +2,19 @@ package xyz.thepathfinder.android;
 
 public class PathfinderServices {
 
-    private PathfinderModelRegistry registry;
-    private PathfinderConnection connection;
+    private ModelRegistry registry;
+    private Connection connection;
 
-    protected PathfinderServices(PathfinderModelRegistry registry, PathfinderConnection connection) {
+    protected PathfinderServices(ModelRegistry registry, Connection connection) {
         this.registry = registry;
         this.connection = connection;
     }
 
-    public PathfinderModelRegistry getRegistry() {
+    public ModelRegistry getRegistry() {
         return this.registry;
     }
 
-    public PathfinderConnection getConnection() {
+    public Connection getConnection() {
         return this.connection;
     }
 }

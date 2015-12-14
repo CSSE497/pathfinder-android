@@ -4,13 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ModelRegistry {
-    private final Map<String, PathfinderModel> models;
+    private final Map<String, Model> models;
 
     protected ModelRegistry() {
-        this.models = new HashMap<String, PathfinderModel>();
+        this.models = new HashMap<String, Model>();
     }
 
-    protected void registerModel(PathfinderModel model) {
+    protected void registerModel(Model model) {
         if(this.models.containsKey(model.getPath())) {
             throw new IllegalArgumentException("Path already exists: " + model.getPath());
         }
@@ -18,7 +18,7 @@ public class ModelRegistry {
         this.models.put(model.getPath(), model);
     }
 
-    protected PathfinderModel unregisterModel(String path) {
+    protected Model unregisterModel(String path) {
         return this.models.remove(path);
     }
 
@@ -26,8 +26,8 @@ public class ModelRegistry {
         return this.models.containsKey(path);
     }
 
-    protected PathfinderModel getModel(String path, String modelType) {
-        PathfinderModel model = this.models.get(path);
+    protected Model getModel(String path, String modelType) {
+        Model model = this.models.get(path);
         if(model == null) {
             return model;
         }

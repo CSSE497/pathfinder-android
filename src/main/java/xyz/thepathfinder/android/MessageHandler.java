@@ -4,26 +4,19 @@ package xyz.thepathfinder.android;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import javax.websocket.MessageHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
 
+    private final ModelRegistry registry;
+    private Logger logger = Logger.getLogger(MessageHandler.class.getName());
+
     private int receivedMessageCount;
 
-    protected MessageHandler() {
+    protected MessageHandler(ModelRegistry registry) {
+        this.registry = registry;
         this.receivedMessageCount = 0;
-    }
-
-    private String makeKey(SubscribableModel subscribableModel) {
-        return subscribableModel.getModel() + subscribableModel.getPath();
-    }
-
-    public void addMessageReceiver(SubscribableModel subscribableModel) {
-        
-    }
-
-    public SubscribableModel removeMessageReceiver(SubscribableModel subscribableModel) {
-        return null;
     }
 
     @Override
@@ -31,13 +24,9 @@ public class MessageHandler implements javax.websocket.MessageHandler.Whole<Stri
         this.receivedMessageCount++;
         JsonObject json = new JsonParser().parse(message).getAsJsonObject();
 
-        if(json.has("error")) {
-            throw new Error("Pathfinder error message received: " + json.toString());
-        }
-
 
         //TODO find the things that need to be notified
-        System.out.println("Received json: " + message);
+        logger.log(Level.INFO, "Received json: " + message);
     }
 
     public int getReceivedMessageCount() {

@@ -2,7 +2,7 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
-public abstract class SubscribableCrudModel<E extends PathfinderListener> extends SubscribableModel<E> {
+public abstract class SubscribableCrudModel<E extends Listener> extends SubscribableModel<E> {
 
     public SubscribableCrudModel(String path, PathfinderServices services) {
         super(path, services);

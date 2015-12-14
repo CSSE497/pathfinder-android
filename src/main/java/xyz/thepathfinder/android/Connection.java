@@ -5,23 +5,28 @@ import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.Session;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Connection extends Endpoint {
 
-    private String applictionIdentifier;
-    private String userCredentials;
+    private final String applictionIdentifier;
+    private final String userCredentials;
+    private final ModelRegistry registry;
     private Session session;
     private long sentMessageCount;
     private MessageHandler messageHandler;
+    private Logger logger = Logger.getLogger(Connection.class.getName());
 
-    protected Connection(String applictionIdentifier, String userCredentials) {
+    protected Connection(String applictionIdentifier, String userCredentials, ModelRegistry registry) {
         this.applictionIdentifier = applictionIdentifier;
         this.userCredentials = userCredentials;
+        this.registry = registry;
         this.sentMessageCount = 0L;
     }
 
     public void sendMessage(String message) {
-        System.out.println("Sending json: " + message);
+        logger.log(Level.INFO, "Sending json: " + message);
         if(this.isConnected()) {
             this.session.getAsyncRemote().sendText(message);
             this.sentMessageCount++;
@@ -32,14 +37,15 @@ public class Connection extends Endpoint {
 
     @Override
     public void onOpen(Session session, EndpointConfig config) {
-        System.out.print("Connected");
+        logger.log(Level.INFO, "Connection opened");
         this.session = session;
-        this.messageHandler = new MessageHandler();
+        this.messageHandler = new MessageHandler(this.registry);
         this.session.addMessageHandler(this.messageHandler);
     }
 
     @Override
     public void onClose(Session session, CloseReason closeReason) {
+        logger.log(Level.INFO, "Connection closed: " + closeReason);
         this.session = session;
     }
 

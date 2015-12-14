@@ -1,5 +1,5 @@
 package xyz.thepathfinder.android;
 
-public abstract class CommodityListener implements PathfinderListener{
+public abstract class CommodityListener implements Listener {
 
 }
