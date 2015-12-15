@@ -13,17 +13,35 @@ import java.util.Map;
 
 /**
  * Interface to the Pathfinder server's cluster API.
+ *
+ * @see Commodity
+ * @see ClusterListener
+ * @see Transport
  */
 public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
     private static final String MODEL = Pathfinder.CLUSTER;
 
+    /**
+     * Maps to each of the model directly under this cluster's
+     */
     private Map<String, Transport> transports;
     private Map<String, Commodity> commodities;
     private Map<String, Cluster> subclusters;
 
+    /**
+     * List of routes for this cluster. The routes object is an immutable list.
+     * The object should always be reassigned, never mutated.
+     */
     private List<Route> routes;
 
+    /**
+     * Constructor for a cluster object. This should called by {@link #getInstance(String, PathfinderServices)}.
+     * Each path must only refer to one object.
+     * @param path The path name of the cluster.
+     * @param services A service object to send messages to the server and keep track of all
+     *                 {@link Model} objects.
+     */
     private Cluster(String path, PathfinderServices services) {
         super(path, services);
 
@@ -40,6 +58,18 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
     }
 
+    /**
+     * Returns an instance of cluster object based on the path parameter. If there is
+     * a cluster with that path already created, it will return that cluster object.
+     * If there isn't a cluster with that path already created, it will create a new
+     * cluster object. If the path is associated with a different model type it will
+     * throw a <tt>ClassCastException</tt>.
+     * @param path The full path to pathfinder model
+     * @param services The pathfinder services object.
+     * @return A cluster with the specified path.
+     * @throws ClassCastException if the requested path is already associated with a
+     *         different {@link Model} type.
+     */
     protected static Cluster getInstance(String path, PathfinderServices services) {
         Cluster cluster = (Cluster) services.getRegistry().getModel(path, Cluster.MODEL);
 
@@ -50,8 +80,26 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return cluster;
     }
 
+    /**
+     * Returns an instance of cluster object based on the path in <tt>clusterJson</tt>. If there is
+     * a cluster with that path already created, it will return that cluster object with updated fields.
+     * If there isn't a cluster with that path already created, it will create a new
+     * cluster object and update the fields. If the path is associated with a different model type or
+     * the json will not parse to a cluster object's required fields it will throw a
+     * <tt>ClassCastException</tt>.
+     * @param clusterJson A json object that parses to a cluster.
+     * @param services The pathfinder services object.
+     * @return A cluster with the specified path.
+     * @throws ClassCastException if the requested path is already associated with a
+     *         different {@link Model} type. Also if the json object doesn't parse to
+     *         a cluster object.
+     */
     protected static Cluster getInstance(JsonObject clusterJson, PathfinderServices services) {
-        Cluster.checkClusterFields(clusterJson);
+        boolean canParseToCluster = Cluster.checkClusterFields(clusterJson);
+
+        if(!canParseToCluster) {
+            throw new ClassCastException("JsonObject could not be parsed to a Cluster object");
+        }
 
         String path = Cluster.getPath(clusterJson);
         Cluster cluster = Cluster.getInstance(path, services);
@@ -60,34 +108,18 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return cluster;
     }
 
-    private static void checkClusterFields(JsonObject clusterJson) {
-        if(!clusterJson.has("path")) {
-            throw new ClassCastException("No cluster path was found in the JSON");
-        }
-
-        if(!clusterJson.has("transports")) {
-            throw new ClassCastException("No list of transports was found in the JSON");
-        }
-
-        if(!clusterJson.get("transports").isJsonArray()) {
-            throw new ClassCastException("Transports were not a list in the JSON");
-        }
-
-        if(!clusterJson.has("commodities")) {
-            throw new ClassCastException("No list of commodities was found in the JSON");
-        }
-
-        if(!clusterJson.get("commodities").isJsonArray()) {
-            throw new ClassCastException("Commodities were not a list in the JSON");
-        }
-
-        if(!clusterJson.has("subClusters")) {
-            throw new ClassCastException("No list of subclusters was found in the JSON");
-        }
-
-        if(!clusterJson.get("subClusters").isJsonArray()) {
-            throw new ClassCastException("Subclusters were not a list in the JSON");
-        }
+    /**
+     * Checks the json object for all the required fields of a cluster object.
+     * @param clusterJson JsonObject to check if it will parse to a cluster.
+     */
+    private static boolean checkClusterFields(JsonObject clusterJson) {
+        return clusterJson.has("path") &&
+                clusterJson.has("transports") &&
+                clusterJson.get("transports").isJsonArray() &&
+                clusterJson.has("commodities") &&
+                clusterJson.get("commodities").isJsonArray() &&
+                clusterJson.has("subClusters") &&
+                clusterJson.get("subClusters").isJsonArray();
     }
 
     private static String getPath(JsonObject clusterJson) {
@@ -275,7 +307,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @return A collection of routes.
      */
     public List<Route> getRoutes() {
-        return Collections.unmodifiableList(this.routes);
+        return this.routes;
     }
 
     @Override

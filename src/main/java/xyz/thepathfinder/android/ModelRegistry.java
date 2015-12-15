@@ -32,11 +32,6 @@ public class ModelRegistry {
             return model;
         }
 
-        if(model.getModel() != modelType) {
-            throw new IllegalArgumentException("Model requested is a different model type, requested type: " +
-                    modelType + " registered type: " + model.getModel() + " path: " + path);
-        }
-
         return model;
     }
 }

@@ -8,22 +8,22 @@ import java.net.URI;
 
 /**
  * <p>
- * The <code>Pathfinder</code> class is the main entry point to the Pathfinder API. To create the Pathfinder class you need
+ * The <tt>Pathfinder</tt> class is the main entry point to the Pathfinder API. To create the Pathfinder class you need
  * a valid application identifier provided from your Pathfinder service manager, we provide the ability to get
- * an application identifier from <a href="thepathfinder.xyz">thepathfinder.xyz</a>. The connection also requires a JWT in the form of a
+ * an application identifier from <a href="http://thepathfinder.xyz">thepathfinder.xyz</a>. The connection also requires a JWT in the form of a
  * String to authenticate the user. The URI to your pathfinder provider is also required to initiate the
  * connection.
  * </p>
  *
  * <p>
- * The default cluster is available via the <code>getDefaultCluster()</code> method. Any other cluster available to
- * the user may be obtained through the <code>getCluster(path)</code> method, where the path is of the form
- * <code>"/default/clusterName/subclusterName/subsubclusterName"</code>.
+ * The default cluster is available via the {@link #getDefaultCluster} method. Any other cluster available to
+ * the user may be obtained through the {@link #getCluster(String)} method, where the path is of the form
+ * <tt>"/default/clusterName/subclusterName/subsubclusterName"</tt>.
  * </p>
  *
  * <p>
  * Note, when the creating a <code>Pathfinder</code> object the thread is blocked until the websocket to the
- * Pathfinder service is opened. blah
+ * Pathfinder service is opened.
  * </p>
  *
  * @author David Robinson

@@ -2,6 +2,21 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
+/**
+ * Interface to the Pathfinder server's commodity API. A commodity may be create
+ * by a {@link Cluster} object with the {@link Cluster#createCommodity(JsonObject, PathfinderServices)}
+ * method.
+ *
+ * <p>
+ * Be careful with the update methods, they do not update the object immediately.
+ * They send the updates to the pathfinder server. If server responds the commodity's
+ * fields will then be updated. To listen for updates add a {@link CommodityListener}.
+ * </p>
+ *
+ * @see Cluster
+ * @see CommodityListener
+ * @see Transport
+ */
 public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     private static final String MODEL = Pathfinder.COMMODITY;
@@ -30,7 +45,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         if(metadata == null) {
             this.metadata = new JsonObject();
         } else {
-            this.metadata = new JsonObject();
+            this.metadata = metadata;
         }
 
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
@@ -130,11 +145,22 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return commodityJson.get("metadata").getAsJsonObject();
     }
 
+    /**
+     * Updates the start location of this commodity to specified coordinates.
+     * This method updates the location of the commodity on the pathfinder server.
+     * The latitude and longitude are not updated in this object by this method.
+     * @param startLatitude The latitude to change the start location to.
+     * @param startLongitude The longitude to change the start location to.
+     */
     public void updateStartLocation(double startLatitude, double startLongitude) {
         this.update(startLatitude, startLongitude, null, null, null, null);
     }
 
-    public Double getStartLatitude() {
+    /**
+     * Returns the current start latitude of the commodity.
+     * @return The current start latitude of the commodity.
+     */
+    public double getStartLatitude() {
         return this.startLatitude;
     }
 
@@ -142,11 +168,21 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.startLatitude = latitude;
     }
 
+    /**
+     * Updates the start latitude of this commodity to the specified latitude.
+     * This method updates the start latitude of the commodity on the pathfinder server.
+     * The start latitude is not updated in this object by this method.
+     * @param startLatitude The start latitude to change to.
+     */
     public void updateStartLatitude(double startLatitude) {
         this.update(startLatitude, null, null, null, null, null);
     }
 
-    public Double getStartLongitude() {
+    /**
+     * Returns the current start longitude of the commodity.
+     * @return The current start longitude of the commodity.
+     */
+    public double getStartLongitude() {
         return this.startLongitude;
     }
 
@@ -154,15 +190,28 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.startLongitude = longitude;
     }
 
+    /**
+     * Updates the start longitude of this commodity to the specified longitude.
+     * This method updates the start longitude of the commodity on the pathfinder server.
+     * The start longitude is not updated in this object by this method.
+     * @param startLongitude The start longitude to change to.
+     */
     public void updateStartLongitude(double startLongitude) {
         this.update(null, startLongitude, null, null, null, null);
     }
 
+    /**
+     * Updates the end location of this commodity to specified coordinates.
+     * This method updates the location of the commodity on the pathfinder server.
+     * The latitude and longitude are not updated in this object by this method.
+     * @param endLatitude The latitude to change the end location to.
+     * @param endLongitude The longitude to change the end location to.
+     */
     public void updateEndLocation(double endLatitude, double endLongitude) {
         this.update(null, null, endLatitude, endLongitude, null, null);
     }
 
-    public Double getEndLatitude() {
+    public double getEndLatitude() {
         return this.endLatitude;
     }
 
@@ -174,7 +223,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.update(null, null, endLatitude, null, null, null);
     }
 
-    public Double getEndLongitude() {
+    public double getEndLongitude() {
         return this.endLongitude;
     }
 

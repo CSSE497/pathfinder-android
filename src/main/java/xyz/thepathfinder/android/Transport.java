@@ -25,7 +25,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         }
 
         if (metadata == null) {
-            metadata = new JsonObject();
+            this.metadata = new JsonObject();
         } else {
             this.metadata = metadata;
         }
