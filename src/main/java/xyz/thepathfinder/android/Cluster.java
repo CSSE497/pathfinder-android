@@ -11,6 +11,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Interface to the Pathfinder server's cluster API.
+ */
 public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
     private static final String MODEL = Pathfinder.CLUSTER;
@@ -126,6 +129,17 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         this.setSubclusters(subclusters);
     }
 
+    /**
+     * Creates an unconnected commodity under this cluster.
+     * @param name Name of the commodity, it must form a unique identifier when concatenated with this cluster's path.
+     * @param startLatitude The pick up latitude of the commodity.
+     * @param startLongitude The pick up longitude of the commodity.
+     * @param endLatitude The drop off latitude of the commodity.
+     * @param endLongitude The drop off longitude of the commodity.
+     * @param status The current status of the commodity. If <tt>null</tt> it will default to <tt>CommodityStatus.OFFLINE</tt>.
+     * @param metadata A JsonObject representing the metadata field of the commodity. If <tt>null</tt> it will default to an empty JsonObject.
+     * @return An unconnected commodity.
+     */
     public Commodity createCommodity(String name, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata) {
         if (!this.isConnected()) {
             throw new IllegalStateException("Not connected to cluster, cannot create commodity");
@@ -139,6 +153,19 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return Commodity.getInstance(json, services);
     }
 
+    /**
+     * Returns a commodity directly under this cluster by its name.
+     * @param name The name of the commodity.
+     * @return A commodity associated with that name if one exists, <tt>null</tt> if it doesn't exist.
+     */
+    public Commodity getCommodity(String name) {
+        return this.commodities.get(this.getChildPath(name));
+    }
+
+    /**
+     * Returns an immutable collection of this cluster's commodities.
+     * @return A collection of commodities.
+     */
     public Collection<Commodity> getCommodities() {
         return Collections.unmodifiableCollection(this.commodities.values());
     }
@@ -153,14 +180,28 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
     }
 
+    /**
+     * Creates an unconnected subcluster under this cluster.
+     * @param name Name of the subcluster, it must form a unique identifier when concatenated with this cluster's path.
+     * @return An unconnected subcluster.
+     */
     public Cluster createSubcluster(String name) {
         return Cluster.getInstance(this.getChildPath(name), this.getServices());
     }
 
+    /**
+     * Returns a direct descendant subcluster by its name.
+     * @param name The name of the subcluster
+     * @return A subcluster associated with the provided name if exists, <tt>null</tt> if it doesn't exist.
+     */
     public Cluster getSubcluster(String name) {
         return this.subclusters.get(this.getChildPath(name));
     }
 
+    /**
+     * Returns an immutable collection of this cluster's direct subclusters.
+     * @return An immutable collection of clusters.
+     */
     public Collection<Cluster> getSubclusters() {
         return Collections.unmodifiableCollection(this.subclusters.values());
     }
@@ -176,6 +217,15 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
     }
 
+    /**
+     * Creates an unconnected transport under this cluster.
+     * @param name Name of the transport, it must form a unique identifier when concatenated with this cluster's path.
+     * @param latitude The current latitude of the transport.
+     * @param longitude The current longitude of the transport.
+     * @param status The current status of the transport. If <tt>null</tt> it defaults to <tt>TransportStatus.OFFLINE</tt>
+     * @param metadata The transports's metadata field. If <tt>null</tt> it defaults to an empty JSON object.
+     * @return An unconnected transport
+     */
     public Transport createTransport(String name, double latitude, double longitude, TransportStatus status, JsonObject metadata) {
         if (!this.isConnected()) {
             throw new IllegalStateException("Not connected to cluster, cannot create transport");
@@ -189,10 +239,19 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return Transport.getInstance(json, this.getServices());
     }
 
+    /**
+     * Returns a transport directly under this cluster by its name.
+     * @param name The name of the transport.
+     * @return A transport associated with the provided name if exists, <tt>null</tt> if it doesn't exist.
+     */
     public Transport getTransport(String name) {
         return this.transports.get(this.getChildPath(name));
     }
 
+    /**
+     * Returns an immutable collection of this cluster's transports.
+     * @return A collection of transports.
+     */
     public Collection<Transport> getTransports() {
         return Collections.unmodifiableCollection(this.transports.values());
     }
@@ -211,15 +270,12 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         this.routes = routes;
     }
 
+    /**
+     * Returns an immutable collection of this cluster's routes.
+     * @return A collection of routes.
+     */
     public List<Route> getRoutes() {
         return Collections.unmodifiableList(this.routes);
-    }
-
-    public void subscribe() {
-        JsonObject modelJson = new JsonObject();
-        modelJson.addProperty("path", this.getPath());
-
-        super.subscribe(modelJson);
     }
 
     @Override

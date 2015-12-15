@@ -18,7 +18,7 @@ public abstract class SubscribableModel<E extends Listener> extends Listenable<E
         return json;
     }
 
-    public void subscribe(JsonObject value) {
+    public void subscribe() {
         JsonObject json = this.getMessageHeader("subscribe");
         this.getServices().getConnection().sendMessage(json.toString());
     }

@@ -255,14 +255,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         super.update(value);
     }
 
-    public void subscribe() {
-        JsonObject model = new JsonObject();
-        model.addProperty("model", this.getModel());
-        model.addProperty("path", this.getPath());
-
-        super.subscribe(model);
-    }
-
     @Override
     protected String getModel() {
         return Commodity.MODEL;

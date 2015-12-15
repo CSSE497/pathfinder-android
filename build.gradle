@@ -7,6 +7,21 @@ repositories {
     mavenCentral()
 }
 
+configure(allprojects) {
+    ext.javadocLinks = [
+            "http://docs.oracle.com/javase/7/docs/api/",
+            "http://docs.oracle.com/javaee/7/api/",
+            "http://google.github.io/gson/apidocs/"
+    ] as String[]
+}
+
+task javadocs(type: Javadoc) {
+    source = sourceSets.main.allJava
+    classpath = configurations.compile
+    options.memberLevel = JavadocMemberLevel.PUBLIC
+    options.links(project.ext.javadocLinks)
+}
+
 dependencies {
     compile 'javax.websocket:javax.websocket-client-api:1.1'
     compile 'org.glassfish.tyrus.bundles:tyrus-standalone-client:1.12'
