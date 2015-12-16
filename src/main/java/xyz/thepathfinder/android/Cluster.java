@@ -111,6 +111,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     /**
      * Checks the json object for all the required fields of a cluster object.
      * @param clusterJson JsonObject to check if it will parse to a cluster.
+     * @return Whether the json can be parsed to a cluster.
      */
     private static boolean checkClusterFields(JsonObject clusterJson) {
         return clusterJson.has("path") &&

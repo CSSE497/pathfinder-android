@@ -211,6 +211,10 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.update(null, null, endLatitude, endLongitude, null, null);
     }
 
+    /**
+     * Returns the current end latitude of the commodity.
+     * @return The current end latitude of the commodity.
+     */
     public double getEndLatitude() {
         return this.endLatitude;
     }
@@ -219,10 +223,20 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.endLatitude = latitude;
     }
 
+    /**
+     * Updates the end latitude of this commodity to the specified latitude.
+     * This method updates the end latitude of the commodity on the pathfinder server.
+     * The end latitude is not updated in this object by this method.
+     * @param endLatitude The end latitude to change to.
+     */
     public void updateEndLatitude(double endLatitude) {
         this.update(null, null, endLatitude, null, null, null);
     }
 
+    /**
+     * Returns the current end longitude of the commodity.
+     * @return The current end longitude of the commodity.
+     */
     public double getEndLongitude() {
         return this.endLongitude;
     }
@@ -231,10 +245,21 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.endLongitude = longitude;
     }
 
+    /**
+     * Updates the end longitude of this commodity to the specified longitude.
+     * This method updates the end longitude of the commodity on the pathfinder server.
+     * The end longitude is not updated in this object by this method.
+     * @param endLongitude The end longitude to change to.
+     */
     public void updateEndLongitude(double endLongitude) {
         this.update(null, null, null, endLongitude, null, null);
     }
 
+    /**
+     * Returns the current status of the commodity. See {@link CommodityStatus}
+     * for the status's available to commodities.
+     * @return The current status of the commodity.
+     */
     public CommodityStatus getStatus() {
         return this.status;
     }
@@ -258,10 +283,20 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.setStatus(Commodity.getStatus(status));
     }
 
+    /**
+     * Updates the status of this commodity to the specified status.
+     * This method updates the status of the commodity on the pathfinder server.
+     * The status is not updated in this object by this method.
+     * @param status The status to change to.
+     */
     public void updateStatus(CommodityStatus status) {
         this.update(null, null, null, null, status, null);
     }
 
+    /**
+     * Returns the metadata of the commodity in the form of a Json Object.
+     * @return The metadata of the commodity.
+     */
     public JsonObject getMetadata() {
         return this.metadata;
     }
@@ -270,10 +305,26 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.metadata = metadata;
     }
 
+    /**
+     * Updates the metadata of this commodity to the specified Json Object.
+     * This method updates the metadata of the commodity on the pathfinder server.
+     * The metadata is not updated in this object by this method.
+     * @param metadata The metadata to change to.
+     */
     public void updateMetadata(JsonObject metadata) {
         this.update(null, null, null, null, null, metadata);
     }
 
+    /**
+     * Sends update requests to the Pathfinder server. If a parameter is null it will
+     * not be updated. This method does not update this commodities fields.
+     * @param startLatitude The start latitude to change to.
+     * @param startLongitude The start longitude to change to.
+     * @param endLatitude The end latitude to change to.
+     * @param endLongitude The end longitude to change to.
+     * @param status The status to change to.
+     * @param metadata The metadata to change to.
+     */
     public void update(Double startLatitude, Double startLongitude, Double endLatitude, Double endLongitude, CommodityStatus status, JsonObject metadata) {
         JsonObject value = new JsonObject();
 
