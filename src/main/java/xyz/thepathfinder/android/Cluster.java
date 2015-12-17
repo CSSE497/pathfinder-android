@@ -20,13 +20,24 @@ import java.util.Map;
  */
 public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
+    /**
+     * String used in the model field of the pathfinder requests.
+     */
     private static final String MODEL = Pathfinder.CLUSTER;
 
     /**
-     * Maps to each of the model directly under this cluster's
+     * Maps a path in the form of a string to the transports directly under this cluster
      */
     private Map<String, Transport> transports;
+
+    /**
+     * Maps a path in the form of a string to the commodities directly under this cluster
+     */
     private Map<String, Commodity> commodities;
+
+    /**
+     * Maps a path in the form of a string to the subclusters directly under this cluster
+     */
     private Map<String, Cluster> subclusters;
 
     /**
@@ -91,7 +102,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param services The pathfinder services object.
      * @return A cluster with the specified path.
      * @throws ClassCastException if the requested path is already associated with a
-     *         different {@link Model} type. Also if the json object doesn't parse to
+     *         different {@link Model} type. Also, if the json object doesn't parse to
      *         a cluster object.
      */
     protected static Cluster getInstance(JsonObject clusterJson, PathfinderServices services) {
