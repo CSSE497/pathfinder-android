@@ -109,7 +109,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         boolean canParseToCluster = Cluster.checkClusterFields(clusterJson);
 
         if(!canParseToCluster) {
-            throw new ClassCastException("JsonObject could not be parsed to a Cluster object");
+            throw new ClassCastException("JSON could not be parsed to a cluster");
         }
 
         String path = Cluster.getPath(clusterJson);

@@ -28,8 +28,30 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     private CommodityStatus status;
     private JsonObject metadata;
 
-    protected Commodity(String path, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata, PathfinderServices services) {
+    private Route route;
+
+    protected Commodity(String path, PathfinderServices services) {
         super(path, services);
+
+        boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
+        if(isRegistered) {
+            throw new IllegalArgumentException("Commodity path already exists: " + path);
+        } else {
+            this.getServices().getRegistry().registerModel(this);
+        }
+
+        this.startLatitude = 0;
+        this.startLongitude = 0;
+        this.endLatitude = 0;
+        this.endLongitude = 0;
+        this.status = CommodityStatus.INACTIVE;
+        this.metadata = new JsonObject();
+
+        this.route = null;
+    }
+
+    protected Commodity(String path, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata, PathfinderServices services) {
+        this(path, services);
 
         this.startLatitude = startLatitude;
         this.startLongitude = startLongitude;
@@ -48,16 +70,17 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
             this.metadata = metadata;
         }
 
-        boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
-        if(isRegistered) {
-            throw new IllegalArgumentException("Commodity path already exists: " + path);
-        } else {
-            this.getServices().getRegistry().registerModel(this);
-        }
+        this.route = null;
     }
 
     protected static Commodity getInstance(String path, PathfinderServices services) {
-        return (Commodity) services.getRegistry().getModel(path, Commodity.MODEL);
+        Commodity commodity = (Commodity) services.getRegistry().getModel(path, Commodity.MODEL);
+
+        if(commodity == null) {
+            return new Commodity(path, services);
+        }
+
+        return commodity;
     }
 
     protected static Commodity getInstance(JsonObject commodityJson, PathfinderServices services) {
@@ -66,24 +89,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         String path = Commodity.getPath(commodityJson);
         Commodity commodity = Commodity.getInstance(path, services);
 
-        if(commodity == null) {
-            double startLatitude = Commodity.getStartLatitude(commodityJson);
-            double startLongitude = Commodity.getStartLongitude(commodityJson);
-            double endLatitude = Commodity.getEndLatitude(commodityJson);
-            double endLongitude = Commodity.getEndLongitude(commodityJson);
-            CommodityStatus status = Commodity.getStatus(commodityJson);
-            JsonObject metadata = Commodity.getMetadata(commodityJson);
-            commodity = new Commodity(path,
-                    startLatitude,
-                    startLongitude,
-                    endLatitude,
-                    endLongitude,
-                    status,
-                    metadata,
-                    services);
-        } else {
-            commodity.setCommodityFields(commodityJson);
-        }
+        commodity.setCommodityFields(commodityJson);
 
         return commodity;
     }
@@ -313,6 +319,14 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      */
     public void updateMetadata(JsonObject metadata) {
         this.update(null, null, null, null, null, metadata);
+    }
+
+    public Route getRoute() {
+        return this.route;
+    }
+
+    private void setRoute(Route route) {
+        this.route = route;
     }
 
     /**

@@ -12,23 +12,8 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     private JsonObject metadata;
     private Route route;
 
-    protected Transport(String path, double latitude, double longitude, TransportStatus status, JsonObject metadata, PathfinderServices services) {
+    protected Transport(String path, PathfinderServices services) {
         super(path, services);
-
-        this.latitude = latitude;
-        this.longitude = longitude;
-
-        if (status == null) {
-            this.status = TransportStatus.OFFLINE;
-        } else {
-            this.status = status;
-        }
-
-        if (metadata == null) {
-            this.metadata = new JsonObject();
-        } else {
-            this.metadata = metadata;
-        }
 
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
         if (isRegistered) {
@@ -36,52 +21,52 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         } else {
             this.getServices().getRegistry().registerModel(this);
         }
+
+        this.latitude = 0;
+        this.longitude = 0;
+        this.status = TransportStatus.OFFLINE;
+        this.metadata = null;
+        this.route = null;
+    }
+
+    protected Transport(String path, double longitude, double latitude, TransportStatus status, JsonObject metadata, PathfinderServices services) {
+        this(path, services);
     }
 
     public static Transport getInstance(String path, PathfinderServices services) {
-        return (Transport) services.getRegistry().getModel(path, Transport.MODEL);
-    }
+        Transport transport = (Transport) services.getRegistry().getModel(path, Transport.MODEL);
 
-    protected static Transport getInstance(JsonObject transportJson, PathfinderServices services) {
-        Transport.checkTransportFields(transportJson);
-
-        String path = Transport.getPath(transportJson);
-        Transport transport = Transport.getInstance(path, services);
-
-        if (transport == null) {
-            double latitude = Transport.getLatitude(transportJson);
-            double longitude = Transport.getLongitude(transportJson);
-            TransportStatus status = Transport.getStatus(transportJson);
-            JsonObject metadata = Transport.getMetadata(transportJson);
-            transport = new Transport(path,
-                    latitude,
-                    longitude,
-                    status,
-                    metadata,
-                    services);
-        } else {
-            transport.setTransportFields(transportJson);
+        if(transport == null) {
+            return new Transport(path, services);
         }
 
         return transport;
     }
 
-    private static void checkTransportField(JsonObject transportJson, String field) {
-        if (!transportJson.has(field)) {
-            throw new ClassCastException("No " + field + " was found in the JSON");
+    protected static Transport getInstance(JsonObject transportJson, PathfinderServices services) {
+        if(!Transport.checkTransportFields(transportJson)) {
+            throw new ClassCastException("Invalid JSON cannot be parsed to a Transport");
         }
+
+        String path = Transport.getPath(transportJson);
+        Transport transport = Transport.getInstance(path, services);
+
+        transport.setTransportFields(transportJson);
+
+        return transport;
     }
 
-    private static void checkTransportFields(JsonObject transportJson) {
-        Transport.checkTransportField(transportJson, "path");
-        Transport.checkTransportField(transportJson, "latitude");
-        Transport.checkTransportField(transportJson, "longitude");
-        Transport.checkTransportField(transportJson, "status");
-        Transport.checkTransportField(transportJson, "metadata");
+    private static boolean checkTransportField(JsonObject transportJson, String field) {
+        return transportJson.has(field);
+    }
 
-        if (!transportJson.get("metadata").isJsonObject()) {
-            throw new ClassCastException("Metadata was not a JSON object");
-        }
+    private static boolean checkTransportFields(JsonObject transportJson) {
+        return Transport.checkTransportField(transportJson, "path") &&
+                Transport.checkTransportField(transportJson, "latitude") &&
+                Transport.checkTransportField(transportJson, "longitude") &&
+                Transport.checkTransportField(transportJson, "status") &&
+                Transport.checkTransportField(transportJson, "metadata") &&
+                !transportJson.get("metadata").isJsonObject();
     }
 
     private void setTransportFields(JsonObject transportJson) {

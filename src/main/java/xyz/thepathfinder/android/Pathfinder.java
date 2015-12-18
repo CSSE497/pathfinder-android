@@ -92,7 +92,7 @@ public class Pathfinder {
 
     /**
      * Gets an unconnected cluster pointing to the default cluster for the application identifier provided.
-     * @return A unconnected cluster
+     * @return an unconnected cluster
      */
     public Cluster getDefaultCluster() {
         return Cluster.getInstance(Path.DEFAULT_PATH, this.services);
@@ -100,11 +100,29 @@ public class Pathfinder {
 
     /**
      * Gets an unconnected cluster pointing to the path specified.
-     * @param path path to the cluster
-     * @return A unconnected cluster
+     * @param path to the cluster
+     * @return an unconnected cluster
      */
     public Cluster getCluster(String path) {
         return Cluster.getInstance(path, this.services);
+    }
+
+    /**
+     * Gets an unconnected commodity pointing to the path specified.
+     * @param path to the commodity
+     * @return an unconnected commodity
+     */
+    public Commodity getCommodity(String path) {
+        return Commodity.getInstance(path, this.services);
+    }
+
+    /**
+     * Gets an unconnected transport pointing to the path specified.
+     * @param path to the transport
+     * @return an unconnected transport
+     */
+    public Transport getTransport(String path) {
+        return Transport.getInstance(path, this.services);
     }
 
     /**

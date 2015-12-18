@@ -19,6 +19,10 @@ public abstract class SubscribableModel<E extends Listener> extends Listenable<E
     }
 
     public void subscribe() {
+        if(!this.isConnected()) {
+            throw new IllegalStateException("Not connected to object on Pathfinder server");
+        }
+
         JsonObject json = this.getMessageHeader("subscribe");
         this.getServices().getConnection().sendMessage(json.toString());
     }
@@ -29,6 +33,10 @@ public abstract class SubscribableModel<E extends Listener> extends Listenable<E
     }
 
     public void routeSubscribe() {
+        if(!this.isConnected()) {
+            throw new IllegalStateException("Not connected to object on Pathfinder server");
+        }
+
         JsonObject json = this.getMessageHeader("routeSubscribe");
         this.getServices().getConnection().sendMessage(json.toString());
     }

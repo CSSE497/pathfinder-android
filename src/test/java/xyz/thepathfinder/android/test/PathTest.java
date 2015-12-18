@@ -56,7 +56,10 @@ public class PathTest {
         Path p2 = new Path("/blah/b1ob");
         Path p3 = new Path("/blah/blob");
 
+        String s = "/blah/blob";
+
         Assert.assertFalse(p1.equals(p2));
         Assert.assertTrue(p1.equals(p3));
+        Assert.assertFalse(p1.equals(s));
     }
 }
