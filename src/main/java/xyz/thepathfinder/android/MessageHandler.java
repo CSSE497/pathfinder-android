@@ -21,12 +21,10 @@ public class MessageHandler implements javax.websocket.MessageHandler.Whole<Stri
 
     @Override
     public void onMessage(String message) {
-        this.receivedMessageCount++;
-        JsonObject json = new JsonParser().parse(message).getAsJsonObject();
-
-
         //TODO find the things that need to be notified
         logger.log(Level.INFO, "Received json: " + message);
+        this.receivedMessageCount++;
+        JsonObject json = new JsonParser().parse(message).getAsJsonObject();
     }
 
     public int getReceivedMessageCount() {

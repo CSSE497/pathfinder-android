@@ -1,6 +1,10 @@
 package xyz.thepathfinder.android.test;
 
+import java.util.logging.Logger;
+
 public class TestMessager {
+
+    private static Logger logger = Logger.getLogger(TestMessager.class.getName());
 
     public String receive;
     public String send;
@@ -28,6 +32,11 @@ public class TestMessager {
 
     public boolean getCorrect() {
         return this.correct;
+    }
+
+    public void send(String message) {
+        this.logger.info("Sever sending: " + message);
+        TestEndpoint.session.getAsyncRemote().sendText(message);
     }
 
 }

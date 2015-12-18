@@ -9,14 +9,10 @@ import org.junit.Test;
 import xyz.thepathfinder.android.Cluster;
 import xyz.thepathfinder.android.Pathfinder;
 
-import javax.websocket.DeploymentException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static org.junit.Assert.assertTrue;
 
 public class PathfinderTest {
 
@@ -29,7 +25,7 @@ public class PathfinderTest {
         l1.setUseParentHandlers(false);
 
         this.server = new TestServer();
-        this.messager = TestEndpoint.getMessager();
+        this.messager = TestEndpoint.getMessenger();
     }
 
     @After
@@ -44,18 +40,46 @@ public class PathfinderTest {
     }
 
     @Test(timeout = 10000)
-    public void testConnection() throws URISyntaxException, IOException, DeploymentException, InterruptedException {
+    public void testConnection() throws URISyntaxException, IOException, InterruptedException {
         URI url = new URI("ws://localhost:8025/socket");
         Pathfinder pathfinder = new Pathfinder("9c4166bb-9535-49e1-8844-1904a0b1f45b", "", url);
-        assertTrue(pathfinder.isConnected());
+        Assert.assertFalse(pathfinder.isConnected());
+        pathfinder.connect();
+        Assert.assertTrue(pathfinder.isConnected());
         pathfinder.close();
+        Assert.assertFalse(pathfinder.isConnected());
+        pathfinder.connect();
+        Assert.assertTrue(pathfinder.isConnected());
+    }
+
+    @Test(expected = IllegalStateException.class, timeout = 10000)
+    public void testMessageWithNoConnection() throws URISyntaxException, IOException, InterruptedException {
+        URI url = new URI("ws://localhost:8025/socket");
+        Pathfinder pathfinder = new Pathfinder("9c4166bb-9535-49e1-8844-1904a0b1f45b", "", url);
+        Assert.assertFalse(pathfinder.isConnected());
+        Cluster cluster = pathfinder.getDefaultCluster();
+        cluster.connect();
+    }
+
+    @Test(expected = IllegalStateException.class, timeout = 10000)
+    public void testMessageWithNoConnection2() throws URISyntaxException, IOException, InterruptedException {
+        URI url = new URI("ws://localhost:8025/socket");
+        Pathfinder pathfinder = new Pathfinder("9c4166bb-9535-49e1-8844-1904a0b1f45b", "", url);
+        Assert.assertFalse(pathfinder.isConnected());
+        pathfinder.connect();
+        Assert.assertTrue(pathfinder.isConnected());
+        pathfinder.close();
+        Assert.assertFalse(pathfinder.isConnected());
+        Cluster cluster = pathfinder.getDefaultCluster();
+        cluster.connect();
     }
 
     @Test(timeout = 10000)
-    public void testGetDefaultCluster() throws URISyntaxException, IOException, DeploymentException, InterruptedException {
+    public void testGetDefaultCluster() throws URISyntaxException, IOException, InterruptedException {
         URI url = new URI("ws://localhost:8025/socket");
-        Pathfinder pathfinder = new Pathfinder("9c4166bb-9535-49e1-8844-1904a0b1f45b", "", url);
-        assertTrue(pathfinder.isConnected());
+        Pathfinder pathfinder = new Pathfinder("", "", url);
+        pathfinder.connect();
+        Assert.assertTrue(pathfinder.isConnected());
         Cluster cluster = pathfinder.getDefaultCluster();
 
         JsonObject receive = new JsonObject();
@@ -84,12 +108,12 @@ public class PathfinderTest {
 
         send.add("value", value);
 
-        this.messager.setSend(send.toString());
-
         cluster.connect();
+        Assert.assertEquals(1, pathfinder.getSentMessageCount());
+        Assert.assertEquals(0, pathfinder.getReceivedMessageCount());
+        this.messager.send(send.toString());
         this.waitForMessages(pathfinder, 1);
         Assert.assertTrue(this.messager.getCorrect());
-        cluster.subscribe();
         //this.waitForMessages(pathfinder, 3);
         //SubscribableCrudModel transport = cluster.createTransport("hi", 32.32,42, TransportStatus.OFFLINE,null);
         //this.waitForMessages(pathfinder, 5);

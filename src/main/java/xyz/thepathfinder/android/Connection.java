@@ -31,7 +31,7 @@ public class Connection extends Endpoint {
             this.session.getAsyncRemote().sendText(message);
             this.sentMessageCount++;
         } else {
-            throw new IllegalStateException("The connection to Pathfinder was closed or opened twice.");
+            throw new IllegalStateException("The connection to Pathfinder was closed.");
         }
     }
 
@@ -50,7 +50,7 @@ public class Connection extends Endpoint {
     }
 
     public boolean isConnected() {
-        return this.session.isOpen();
+        return this.session != null && this.session.isOpen();
     }
 
     public long getSentMessageCount() {
@@ -61,7 +61,7 @@ public class Connection extends Endpoint {
         return this.messageHandler.getReceivedMessageCount();
     }
 
-    public void close() throws IOException {
-        this.session.close();
+    public void close(CloseReason reason) throws IOException {
+        this.session.close(reason);
     }
 }

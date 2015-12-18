@@ -1,5 +1,6 @@
 package xyz.thepathfinder.android;
 
+import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
 import javax.websocket.DeploymentException;
 import javax.websocket.WebSocketContainer;
@@ -22,7 +23,7 @@ import java.net.URI;
  * </p>
  *
  * <p>
- * Note, when the creating a <code>Pathfinder</code> object the thread is blocked until the websocket to the
+ * Note, when connecting the<code>Pathfinder</code> object the thread is blocked until the web socket to the
  * Pathfinder service is opened.
  * </p>
  *
@@ -52,31 +53,46 @@ public class Pathfinder {
     private PathfinderServices services;
 
     /**
-     * Establishes a connection a Pathfinder server.
-     * @param applicationIdentifier Application Identifier provided by a Pathfinder service provider
-     * @param userCredentials JWT of the user's credentials
-     * @param websocketUrl URL to the Pathfinder websocket service provider
-     * @throws IOException If there was a problem connecting the Pathfinder server
+     * URL to the Pathfinder server being connected to.
      */
-    public Pathfinder(String applicationIdentifier, String userCredentials, URI websocketUrl) throws IOException {
-        WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+    private URI webSocketUrl;
+
+    /**
+     * Constructs a Pathfinder object.
+     * @param applicationIdentifier application Identifier provided by a Pathfinder service provider
+     * @param userCredentials JWT of the user's credentials
+     * @param webSocketUrl URL to the Pathfinder web socket service provider
+     */
+    public Pathfinder(String applicationIdentifier, String userCredentials, URI webSocketUrl) {
+        this.webSocketUrl = webSocketUrl;
 
         ModelRegistry registry = new ModelRegistry();
         Connection connection = new Connection(applicationIdentifier, userCredentials, registry);
 
         this.services = new PathfinderServices(registry, connection);
 
-        try {
-            container.connectToServer(connection, websocketUrl); // blocks until connection is established, JSR 356
-        } catch(DeploymentException e) {
-            // Invalid annotated connection object
-            e.printStackTrace();
+    }
+
+    /**
+     * Establishes a connection to the Pathfinder server, if the connection is not already open.
+     * This method blocks until the connection is established.
+     * @throws IOException problem connecting the Pathfinder server
+     */
+    public void connect() throws IOException{
+        if(!this.isConnected()) {
+            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+            try {
+                // blocks until connection is established, JSR 356
+                container.connectToServer(this.services.getConnection(), this.webSocketUrl);
+            } catch (DeploymentException e) {
+                e.printStackTrace(); // Invalid annotated connection object
+            }
         }
     }
 
     /**
      * Gets an unconnected cluster pointing to the default cluster for the application identifier provided.
-     * @return A unconnected cluster
+     * @return an unconnected cluster
      */
     public Cluster getDefaultCluster() {
         return Cluster.getInstance(Path.DEFAULT_PATH, this.services);
@@ -84,42 +100,72 @@ public class Pathfinder {
 
     /**
      * Gets an unconnected cluster pointing to the path specified.
-     * @param path path to the cluster
-     * @return A unconnected cluster
+     * @param path to the cluster
+     * @return an unconnected cluster
      */
     public Cluster getCluster(String path) {
         return Cluster.getInstance(path, this.services);
     }
 
     /**
-     * Gets whether or not the websocket is connected to the Pathfinder server.
-     * @return Whether the connection is still open
+     * Gets an unconnected commodity pointing to the path specified.
+     * @param path to the commodity
+     * @return an unconnected commodity
+     */
+    public Commodity getCommodity(String path) {
+        return Commodity.getInstance(path, this.services);
+    }
+
+    /**
+     * Gets an unconnected transport pointing to the path specified.
+     * @param path to the transport
+     * @return an unconnected transport
+     */
+    public Transport getTransport(String path) {
+        return Transport.getInstance(path, this.services);
+    }
+
+    /**
+     * Returns <tt>true</tt> if the web socket connection to the Pathfinder server is open.
+     * @return <tt>true</tt> if the connection is still open
      */
     public boolean isConnected() {
         return this.services.getConnection().isConnected();
     }
 
     /**
-     * Returns the number of websocket messages sent to the Pathfinder server.
-     * @return The number of websocket messages sent
+     * Returns the number of web socket messages sent to the Pathfinder server.
+     * @return The number of web socket messages sent
      */
     public long getSentMessageCount() {
         return this.services.getConnection().getSentMessageCount();
     }
 
     /**
-     * Returns the number of websocket messages received from the Pathfinder server.
-     * @return The number of websocket messsages received.
+     * Returns the number of web socket messages received from the Pathfinder server.
+     * @return The number of web socket messsages received.
      */
     public long getReceivedMessageCount() {
         return this.services.getConnection().getReceivedMessageCount();
     }
 
     /**
-     * Close the websocket connection to the Pathfinder server.
-     * @throws IOException If there was a connection error closing the connection.
+     * Closes the web socket connection to the Pathfinder server with a normal close condition.
+     * @throws IOException If there was error closing the connection.
      */
     public void close() throws IOException {
-        this.services.getConnection().close();
+        CloseReason reason = new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Connection ended by user");
+        this.close(reason);
+    }
+
+    /**
+     * Closes the web socket connection to the Pathfinder server, if it is still open, with the specified reason.
+     * @param reason The reason to close the connection.
+     * @throws IOException If there was error closing the connection.
+     */
+    public void close(CloseReason reason) throws IOException {
+        if(this.isConnected()) {
+            this.services.getConnection().close(reason);
+        }
     }
 }

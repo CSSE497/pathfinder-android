@@ -49,4 +49,17 @@ public class PathTest {
         String def = timePath.getParentPath();
         Assert.assertEquals("", def);
     }
+
+    @Test
+    public void testPathEquals() {
+        Path p1 = new Path("/blah/blob");
+        Path p2 = new Path("/blah/b1ob");
+        Path p3 = new Path("/blah/blob");
+
+        String s = "/blah/blob";
+
+        Assert.assertFalse(p1.equals(p2));
+        Assert.assertTrue(p1.equals(p3));
+        Assert.assertFalse(p1.equals(s));
+    }
 }
