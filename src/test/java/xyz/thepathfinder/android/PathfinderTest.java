@@ -37,6 +37,13 @@ public class PathfinderTest {
         }
     }
 
+    public void waitForMessages(TestMessager messager, int messageCount) throws InterruptedException {
+        while(messager.messagesReceived != messageCount) {
+            Thread.sleep(10);
+        }
+    }
+
+
     @Test(timeout = 10000)
     public void testConnection() throws URISyntaxException, IOException, InterruptedException {
         URI url = new URI("ws://localhost:8025/socket");
@@ -109,8 +116,10 @@ public class PathfinderTest {
         cluster.connect();
         Assert.assertEquals(1, pathfinder.getSentMessageCount());
         Assert.assertEquals(0, pathfinder.getReceivedMessageCount());
+        this.waitForMessages(this.messager, 1);
         this.messager.send(send.toString());
         this.waitForMessages(pathfinder, 1);
+        System.out.println(this.messager.getCorrect());
         Assert.assertTrue(this.messager.getCorrect());
         //this.waitForMessages(pathfinder, 3);
         //SubscribableCrudModel transport = cluster.createTransport("hi", 32.32,42, TransportStatus.OFFLINE,null);

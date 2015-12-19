@@ -45,6 +45,7 @@ public class TestEndpoint {
             logger.info("Json incorrect");
             TestEndpoint.getMessenger().setCorrect(false);
         }
+        TestEndpoint.getMessenger().messagesReceived++;
     }
 
     @OnClose

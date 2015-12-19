@@ -9,6 +9,7 @@ public class TestMessager {
     public String receive;
     public String send;
     public boolean correct;
+    public int messagesReceived = 0;
 
     public void setReceive(String message) {
         this.receive = message;
