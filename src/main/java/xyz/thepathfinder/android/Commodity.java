@@ -369,16 +369,23 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         super.update(value);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected String getModel() {
         return Commodity.MODEL;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected JsonObject toJson() {
+    protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
         json.addProperty("path", this.getPath());
+        json.addProperty("model", this.getModel());
         json.addProperty("startLatitude", this.getStartLatitude());
         json.addProperty("startLongitude", this.getStartLongitude());
         json.addProperty("endLatitude", this.getEndLatitude());
@@ -389,6 +396,9 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return json;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void notifyUpdate(JsonObject json) {
         //TODO implement

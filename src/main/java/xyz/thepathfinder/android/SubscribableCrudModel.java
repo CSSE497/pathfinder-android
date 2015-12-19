@@ -19,7 +19,7 @@ public abstract class SubscribableCrudModel<E extends Listener> extends Subscrib
         }
 
         JsonObject json = this.getMessageHeader("create");
-        json.add("value", this.toJson());
+        json.add("value", this.createValueJson());
 
         this.getServices().getConnection().sendMessage(json.toString());
     }
@@ -33,7 +33,7 @@ public abstract class SubscribableCrudModel<E extends Listener> extends Subscrib
         this.getServices().getConnection().sendMessage(json.toString());
     }
 
-    public void update(JsonObject value) {
+    protected void update(JsonObject value) {
         if (!this.isConnected()) {
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }

@@ -1,4 +1,4 @@
-package xyz.thepathfinder.android.test;
+package xyz.thepathfinder.android;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;

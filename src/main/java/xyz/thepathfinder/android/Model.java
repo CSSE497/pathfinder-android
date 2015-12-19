@@ -39,7 +39,16 @@ public abstract class Model {
         return this.isConnected;
     }
 
+    /**
+     * Returns the name of the model
+     * @return name of model
+     */
     protected abstract String getModel();
-    protected abstract JsonObject toJson();
+
+    /**
+     * Returns the value used in create request to the Pathfinder server
+     * @return the value JSON
+     */
+    protected abstract JsonObject createValueJson();
 
 }

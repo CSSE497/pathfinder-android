@@ -18,11 +18,11 @@ public class Path {
     /**
      * Constructs a path to a model. The path may not an empty string.
      * Other requirements are subject to change. If the path is null it
-     * is set to the default path.
+     * is set to the default pa
      * @param path a string representing the path
      * @throws IllegalArgumentException when the path is invalid.
      */
-    public Path(String path) {
+    protected Path(String path) {
         if(!Path.isValidPath(path)) {
             throw new IllegalArgumentException("Path cannot be an empty string");
         }

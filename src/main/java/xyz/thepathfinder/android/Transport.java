@@ -189,15 +189,23 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         super.update(value);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected String getModel() {
         return Transport.MODEL;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected JsonObject toJson() {
+    protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
+        json.addProperty("path", this.getPath());
+        json.addProperty("model", this.getModel());
         json.addProperty("latitude", this.getLatitude());
         json.addProperty("longitude", this.getLongitude());
         json.addProperty("status", this.getStatus().toString());
@@ -206,6 +214,9 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         return json;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void notifyUpdate(JsonObject json) {
         //TODO implement

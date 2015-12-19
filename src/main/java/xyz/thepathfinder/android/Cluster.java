@@ -12,7 +12,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Interface to the Pathfinder server's cluster API.
+ * <p>
+ * A cluster represents a set of commodities, sub-clusters, and transports.
+ * A cluster is used to group related models. That relation could be geographic
+ * type of transportation, or anything else. To sync the cluster with a
+ * cluster on the Pathfinder server use the {@link Cluster#connect} method.
+ * </p>
+ *
+ * <p>
+ * Note, that clusters, as are all models, are implemented as singletons.
+ * If a cluster already exists with the same path it will be returned, not a
+ * new object. Use {@link Cluster#getInstance} to retrieve an cluster object.
+ * </p>
  *
  * @see Commodity
  * @see ClusterListener
@@ -134,10 +145,21 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
                 clusterJson.get("subClusters").isJsonArray();
     }
 
+    /**
+     * Returns the path as a string from a JSON object formatted as cluster.
+     * @param clusterJson JSON object that represents a cluster
+     * @return The path of the cluster
+     */
     private static String getPath(JsonObject clusterJson) {
         return clusterJson.get("path").getAsString();
     }
 
+    /**
+     * Returns a list of commodities from a JSON object representing a cluster.
+     * @param clusterJson JSON object that represents a cluster
+     * @param services a pathfinder services object
+     * @return A list of commodities from the JSON object
+     */
     private static List<Commodity> getCommodities(JsonObject clusterJson, PathfinderServices services) {
         List<Commodity> commodities = new LinkedList<Commodity>();
         for(JsonElement commodity: clusterJson.getAsJsonArray("commodities")) {
@@ -146,6 +168,12 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return commodities;
     }
 
+    /**
+     * Returns a list of sub-clusters from a JSON object representing a cluster.
+     * @param clusterJson JSON object that represents a cluster
+     * @param services a pathfinder services object
+     * @return A list of sub-clusters from the JSON object
+     */
     private static List<Cluster> getSubclusters(JsonObject clusterJson, PathfinderServices services) {
         List<Cluster> clusters = new LinkedList<Cluster>();
         for(JsonElement cluster: clusterJson.getAsJsonArray("subClusters")) {
@@ -154,6 +182,12 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return clusters;
     }
 
+    /**
+     * Returns a list of transports from a JSON object representing a cluster.
+     * @param clusterJson JSON object that represents a cluster
+     * @param services a pathfinder services object
+     * @return A list of transports from the JSON object
+     */
     private static List<Transport> getTransports(JsonObject clusterJson, PathfinderServices services) {
         List<Transport> transports = new LinkedList<Transport>();
         for(JsonElement transport: clusterJson.getAsJsonArray("transports")) {
@@ -162,6 +196,10 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return transports;
     }
 
+    /**
+     * Sets this cluster's fields to the values specified in the JSON object representing a cluster.
+     * @param clusterJson JSON object that represents a cluster
+     */
     private void setClusterFields(JsonObject clusterJson) {
         List<Commodity> commodities = Cluster.getCommodities(clusterJson, this.getServices());
         this.setCommodities(commodities);
@@ -183,6 +221,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param status The current status of the commodity. If <tt>null</tt> it will default to <tt>CommodityStatus.OFFLINE</tt>.
      * @param metadata A JsonObject representing the metadata field of the commodity. If <tt>null</tt> it will default to an empty JsonObject.
      * @return An unconnected commodity.
+     * @throws IllegalStateException when this cluster is not connected.
      */
     public Commodity createCommodity(String name, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata) {
         if (!this.isConnected()) {
@@ -193,8 +232,14 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return new Commodity(path, startLatitude, startLongitude, endLatitude, endLongitude, status, metadata, this.getServices());
     }
 
-    private Commodity createCommodity(JsonObject json, PathfinderServices services) {
-        return Commodity.getInstance(json, services);
+    /**
+     * Creates a commodity with a values specified in the JSON object.
+     * @param commodityJson a JSON object that represents a commodity
+     * @param services a pathfinder services object
+     * @return A commodity with the values in the JSON object
+     */
+    private Commodity createCommodity(JsonObject commodityJson, PathfinderServices services) {
+        return Commodity.getInstance(commodityJson, services);
     }
 
     /**
@@ -214,10 +259,10 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return Collections.unmodifiableCollection(this.commodities.values());
     }
 
-    public Commodity removeCommodity(Commodity commodity) {
-        return this.commodities.remove(commodity.getPath());
-    }
-
+    /**
+     * Sets this cluster's commodities.
+     * @param commodities an iterable collection of commodities
+     */
     private void setCommodities(Iterable<Commodity> commodities) {
         for(Commodity commodity: commodities) {
             this.commodities.put(commodity.getPath(), commodity);
@@ -228,8 +273,13 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * Creates an unconnected subcluster under this cluster.
      * @param name Name of the subcluster, it must form a unique identifier when concatenated with this cluster's path.
      * @return An unconnected subcluster.
+     * @throws IllegalStateException when this cluster is not connected.
      */
     public Cluster createSubcluster(String name) {
+        if(!this.isConnected()) {
+            throw new IllegalStateException("The cluster is not connected on the Pathfinder server");
+        }
+
         return Cluster.getInstance(this.getChildPath(name), this.getServices());
     }
 
@@ -250,11 +300,10 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return Collections.unmodifiableCollection(this.subclusters.values());
     }
 
-    //TODO think about how to deal with the remove methods
-    public Cluster removeSubcluster(Cluster cluster) {
-        return this.subclusters.remove(cluster.getPath());
-    }
-
+    /**
+     * Sets this cluster's sub-clusters.
+     * @param subclusters an iterable collection of clusters
+     */
     private void setSubclusters(Iterable<Cluster> subclusters) {
         for(Cluster cluster: subclusters) {
             this.subclusters.put(cluster.getPath(), cluster);
@@ -269,6 +318,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param status The current status of the transport. If <tt>null</tt> it defaults to <tt>TransportStatus.OFFLINE</tt>
      * @param metadata The transports's metadata field. If <tt>null</tt> it defaults to an empty JSON object.
      * @return An unconnected transport
+     * @throws IllegalStateException when this cluster has not been connected.
      */
     public Transport createTransport(String name, double latitude, double longitude, TransportStatus status, JsonObject metadata) {
         if (!this.isConnected()) {
@@ -279,8 +329,13 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return new Transport(path, latitude, longitude, status, metadata, this.getServices());
     }
 
-    private Transport createTransport(JsonObject json) {
-        return Transport.getInstance(json, this.getServices());
+    /**
+     * Creates a connected transport under this cluster with the values in the JSON object provided.
+     * @param transportJson a JSON object that represents a transport.
+     * @return A transport with the values in the JSON object.
+     */
+    private Transport createTransport(JsonObject transportJson) {
+        return Transport.getInstance(transportJson, this.getServices());
     }
 
     /**
@@ -300,16 +355,20 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return Collections.unmodifiableCollection(this.transports.values());
     }
 
-    public Transport removeTransport(Transport transport) {
-        return this.transports.remove(transport.getPath());
-    }
-
+    /**
+     * Sets this cluster's transports.
+     * @param transports an iterable collection of transports
+     */
     private void setTransports(Iterable<Transport> transports) {
         for(Transport transport: transports) {
             this.transports.put(transport.getPath(), transport);
         }
     }
 
+    /**
+     * Sets this cluster's routes.
+     * @param routes a list of routes for this cluster
+     */
     private void setRoutes(List<Route> routes) {
         this.routes = routes;
     }
@@ -322,18 +381,31 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return this.routes;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected String getModel() {
         return Cluster.MODEL;
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected JsonObject toJson() {
+    protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("parentPath", this.getParentPath());
+
+        json.addProperty("path", this.getPath());
+        json.addProperty("model", this.getModel());
+
         return json;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void notifyUpdate(JsonObject json) {
         // IMPLEMENTME: 12/12/15
