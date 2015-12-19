@@ -19,17 +19,54 @@ import com.google.gson.JsonObject;
  */
 public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
+    /**
+     * String used in the model field of the pathfinder requests.
+     */
     private static final String MODEL = Pathfinder.COMMODITY;
 
-    private double startLongitude;
+    /**
+     * The pickup latitude of the commodity.
+     */
     private double startLatitude;
-    private double endLongitude;
+
+    /**
+     * The pickup longitude of the commodity.
+     */
+    private double startLongitude;
+
+    /**
+     * The drop off latitude of the commodity.
+     */
     private double endLatitude;
+
+    /**
+     * The drop off longitude of the commodity.
+     */
+    private double endLongitude;
+
+    /**
+     * The current status of this commodity.
+     */
     private CommodityStatus status;
+
+    /**
+     * The metadata of this commodity.
+     */
     private JsonObject metadata;
 
+    /**
+     * The route of this commodity.
+     */
     private Route route;
 
+    /**
+     * Constructs a commodity object with the path specified. When creating the commodity
+     * it uses default values, so that requests are fully qualified. The default values
+     * are zero for all the locations, the status is inactive, and the metadata is an
+     * empty JSON object.
+     * @param path the path to commodity
+     * @param services a pathfinder services objects
+     */
     protected Commodity(String path, PathfinderServices services) {
         super(path, services);
 
@@ -50,6 +87,17 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.route = null;
     }
 
+    /**
+     * Constructs a commodity object with the specified parameters.
+     * @param path the path on the Pathfinder server.
+     * @param startLatitude the pickup latitude of the commodity.
+     * @param startLongitude the pickup longitude of the commodity.
+     * @param endLatitude the drop off latitude of the commodity.
+     * @param endLongitude the drop off longitude of the commodity.
+     * @param status the current status of the commodity.
+     * @param metadata a JSON object that holds metadata for the commodity.
+     * @param services a pathfinder services object.
+     */
     protected Commodity(String path, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata, PathfinderServices services) {
         this(path, services);
 
@@ -73,6 +121,14 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.route = null;
     }
 
+    /**
+     * Returns a commodity that has been registered with the {@link ModelRegistry} or a new
+     * commodity if one hasn't been created with that path.
+     * @param path the path to model on the pathfinder server
+     * @param services a pathfinder services object.
+     * @return the commodity object created with the path specified.
+     * @throws ClassCastException if the path requested is already used by a different model type.
+     */
     protected static Commodity getInstance(String path, PathfinderServices services) {
         Commodity commodity = (Commodity) services.getRegistry().getModel(path, Commodity.MODEL);
 
@@ -83,6 +139,15 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return commodity;
     }
 
+    /**
+     * Returns a commodity that has been registered with the {@link ModelRegistry} or a new
+     * commodity if one hasn't been created with that path. The commodity will be updated to
+     * reflect the values in JSON object provided.
+     * @param commodityJson a JSON object that represents a commodity.
+     * @param services a pathfinder services object.
+     * @return the commodity object created with the path specified.
+     * @throws ClassCastException if the path requested is already used by a different model type.
+     */
     protected static Commodity getInstance(JsonObject commodityJson, PathfinderServices services) {
         Commodity.checkCommodityFields(commodityJson);
 
