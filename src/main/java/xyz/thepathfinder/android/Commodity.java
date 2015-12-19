@@ -130,7 +130,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @throws ClassCastException if the path requested is already used by a different model type.
      */
     protected static Commodity getInstance(String path, PathfinderServices services) {
-        Commodity commodity = (Commodity) services.getRegistry().getModel(path, Commodity.MODEL);
+        Commodity commodity = (Commodity) services.getRegistry().getModel(path);
 
         if(commodity == null) {
             return new Commodity(path, services);
@@ -149,7 +149,9 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @throws ClassCastException if the path requested is already used by a different model type.
      */
     protected static Commodity getInstance(JsonObject commodityJson, PathfinderServices services) {
-        Commodity.checkCommodityFields(commodityJson);
+       if(!Commodity.checkCommodityFields(commodityJson)) {
+           throw new ClassCastException("JSON could not be parsed to a commodity");
+       }
 
         String path = Commodity.getPath(commodityJson);
         Commodity commodity = Commodity.getInstance(path, services);
@@ -159,26 +161,38 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return commodity;
     }
 
-    private static void checkCommodityField(JsonObject commodityJson, String field) {
-        if(!commodityJson.has(field)) {
-            throw new ClassCastException("No " + field + " was found in the JSON");
-        }
+    /**
+     * Checks a JSON object for a specific field.
+     * @param commodityJson a JSON object that represents a commodity.
+     * @param field the field to check for.
+     * @return <tt>true</tt> if the JSON object has the field, <tt>false</tt> otherwise.
+     */
+    private static boolean checkCommodityField(JsonObject commodityJson, String field) {
+        return commodityJson.has(field);
     }
 
-    private static void checkCommodityFields(JsonObject commodityJson) {
-        Commodity.checkCommodityField(commodityJson, "path");
-        Commodity.checkCommodityField(commodityJson, "startLatitude");
-        Commodity.checkCommodityField(commodityJson, "startLongitude");
-        Commodity.checkCommodityField(commodityJson, "endLatitude");
-        Commodity.checkCommodityField(commodityJson, "endLongitude");
-        Commodity.checkCommodityField(commodityJson, "status");
-        Commodity.checkCommodityField(commodityJson, "metadata");
-
-        if(!commodityJson.get("metadata").isJsonObject()) {
-            throw new ClassCastException("Metadata was not a JSON object");
-        }
+    /**
+     * Checks if a JSON object can be parsed to a commodity.
+     * @param commodityJson JSON object to check.
+     * @return <tt>true</tt> if the JSON object can be parsed to a commodity,
+     *      <tt>false</tt> otherwise.
+     */
+    private static boolean checkCommodityFields(JsonObject commodityJson) {
+        return Commodity.checkCommodityField(commodityJson, "path") &&
+                Commodity.checkCommodityField(commodityJson, "startLatitude") &&
+                Commodity.checkCommodityField(commodityJson, "startLongitude") &&
+                Commodity.checkCommodityField(commodityJson, "endLatitude") &&
+                Commodity.checkCommodityField(commodityJson, "endLongitude") &&
+                Commodity.checkCommodityField(commodityJson, "status") &&
+                Commodity.checkCommodityField(commodityJson, "metadata") &&
+                commodityJson.get("metadata").isJsonObject();
     }
 
+    /**
+     * Sets this commodities fields to the values specified in a JSON object
+     * that represents a commodity.
+     * @param commodityJson JSON object that represents a commodity.
+     */
     private void setCommodityFields(JsonObject commodityJson) {
         this.setStartLatitude(Commodity.getStartLatitude(commodityJson));
         this.setStartLongitude(Commodity.getStartLongitude(commodityJson));
@@ -188,30 +202,65 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.setMetadata(Commodity.getMetadata(commodityJson));
     }
 
+    /**
+     * Returns the path for a JSON object that represents a commodity.
+     * @param commodityJson a JSON object that represents a commodity.
+     * @return the path of the object.
+     */
     private static String getPath(JsonObject commodityJson) {
         return commodityJson.get("path").getAsString();
     }
 
+    /**
+     * Returns the start latitude for a JSON object that represents a commodity.
+     * @param commodityJson a JSON object that represents a commodity.
+     * @return the start latitude of the object.
+     */
     private static double getStartLatitude(JsonObject commodityJson) {
         return commodityJson.get("startLatitude").getAsDouble();
     }
 
+    /**
+     * Returns the start longitude for a JSON object that represents a commodity.
+     * @param commodityJson a JSON object that represents a commodity.
+     * @return the start longitude of the object.
+     */
     private static double getStartLongitude(JsonObject commodityJson) {
         return commodityJson.get("startLongitude").getAsDouble();
     }
 
+    /**
+     * Returns the end latitude for a JSON object that represents a commodity.
+     * @param commodityJson a JSON object that represents a commodity.
+     * @return the end latitude of the object.
+     */
     private static double getEndLatitude(JsonObject commodityJson) {
         return commodityJson.get("endLatitude").getAsDouble();
     }
 
+    /**
+     * Returns the end longitude for a JSON object that represents a commodity.
+     * @param commodityJson a JSON object that represents a commodity.
+     * @return the end longitude of the object.
+     */
     private static double getEndLongitude(JsonObject commodityJson) {
         return commodityJson.get("endLongitude").getAsDouble();
     }
 
+    /**
+     * Returns the status for a JSON object that represents a commodity.
+     * @param commodityJson a JSON object that represents a commodity.
+     * @return the status of the object.
+     */
     private static CommodityStatus getStatus(JsonObject commodityJson) {
         return Commodity.getStatus(commodityJson.get("status").getAsString());
     }
 
+    /**
+     * Returns the metadata for a JSON object that represents a commodity.
+     * @param commodityJson a JSON object that represents a commodity.
+     * @return the metadata of the object.
+     */
     private static JsonObject getMetadata(JsonObject commodityJson) {
         return commodityJson.get("metadata").getAsJsonObject();
     }
@@ -235,6 +284,10 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return this.startLatitude;
     }
 
+    /**
+     * Sets the start latitude field to a new latitude
+     * @param latitude the latitude to change to.
+     */
     private void setStartLatitude(double latitude) {
         this.startLatitude = latitude;
     }
@@ -257,6 +310,10 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return this.startLongitude;
     }
 
+    /**
+     * Sets the start longitude field to a new longitude
+     * @param longitude the longitude to change to.
+     */
     private void setStartLongitude(double longitude) {
         this.startLongitude = longitude;
     }
@@ -290,6 +347,10 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return this.endLatitude;
     }
 
+    /**
+     * Sets the end latitude field to a new latitude
+     * @param latitude the latitude to change to.
+     */
     private void setEndLatitude(double latitude) {
         this.endLatitude = latitude;
     }
@@ -312,6 +373,10 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return this.endLongitude;
     }
 
+    /**
+     * Sets the end longitude field to a new longitude
+     * @param longitude the longitude to change to.
+     */
     private void setEndLongitude(double longitude) {
         this.endLongitude = longitude;
     }
@@ -335,6 +400,11 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return this.status;
     }
 
+    /**
+     * Returns the enum version of a status from a string.
+     * @param status the status as a string.
+     * @return the status as an enum.
+     */
     private static CommodityStatus getStatus(String status) {
         CommodityStatus[] values = CommodityStatus.values();
         for (int k = 0; k < values.length; k++) {
@@ -346,10 +416,24 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return null;
     }
 
+    /**
+     * Sets the status field to a new status
+     * @param status the status to change to.
+     * @throws IllegalArgumentException when an illegal status is provided
+     */
     private void setStatus(CommodityStatus status) {
-        this.status = status;
+        if(status != null) {
+            this.status = status;
+        } else {
+            throw new IllegalArgumentException("Illegal status");
+        }
     }
 
+    /**
+     * Sets the status field to a new status
+     * @param status the status to change to.
+     * @throws IllegalArgumentException when an illegal status is provided
+     */
     private void setStatus(String status) {
         this.setStatus(Commodity.getStatus(status));
     }
@@ -372,8 +456,17 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return this.metadata;
     }
 
+    /**
+     * Sets the metadata field to a new JSON object. If null it is set to
+     * an empty JSON object.
+     * @param metadata the JSON object to change to.
+     */
     private void setMetadata(JsonObject metadata) {
-        this.metadata = metadata;
+        if(metadata == null) {
+            this.metadata = new JsonObject();
+        } else {
+            this.metadata = metadata;
+        }
     }
 
     /**
@@ -386,10 +479,18 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.update(null, null, null, null, null, metadata);
     }
 
+    /**
+     * Returns the route for this commodity.
+     * @return a route.
+     */
     public Route getRoute() {
         return this.route;
     }
 
+    /**
+     * Sets the route field to a new route
+     * @param route the route to change to.
+     */
     private void setRoute(Route route) {
         this.route = route;
     }

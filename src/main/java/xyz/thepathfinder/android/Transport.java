@@ -34,7 +34,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     }
 
     public static Transport getInstance(String path, PathfinderServices services) {
-        Transport transport = (Transport) services.getRegistry().getModel(path, Transport.MODEL);
+        Transport transport = (Transport) services.getRegistry().getModel(path);
 
         if(transport == null) {
             return new Transport(path, services);

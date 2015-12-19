@@ -6,12 +6,17 @@ package xyz.thepathfinder.android;
 public class Path {
 
     /**
-     * Path to the default cluster
+     * Separator for path names.
      */
-    public static String DEFAULT_PATH = "/default";
+    private static final String PATH_SEPARATOR = "/";
 
     /**
-     * A string representing the path
+     * Path to the default cluster.
+     */
+    public static final String DEFAULT_PATH = "/default";
+
+    /**
+     * A string representing the path.
      */
     private String path;
 
@@ -34,24 +39,40 @@ public class Path {
         }
     }
 
+    /**
+     * Returns if the provided path's characters are valid on the Pathfinder server.
+     * @param path to check.
+     * @return <tt>true</tt> if allowed, <tt>false</tt> otherwise.
+     */
     public static boolean isValidPath(String path) {
         return !(path != null && path.equals(""));
     }
 
+    /**
+     * Returns if the provided name is a valid name.
+     * @param name to check.
+     * @return <tt>true</tt> if allowed, <tt>false</tt> otherwise.
+     */
     public static boolean isValidName(String name) {
-        return !name.contains("/");
+        return !name.contains(Path.PATH_SEPARATOR);
     }
 
+    /**
+     * Returns the child path of this path plus the name provided.
+     * @param name to add.
+     * @return the child's path.
+     * @throws IllegalArgumentException if the name is invalid, see {@link Path#isValidName(String)}.
+     */
     public String getChildPath(String name) {
         if(Path.isValidName(name)) {
-            return this.path + "/" + name;
+            return this.path + Path.PATH_SEPARATOR + name;
         } else {
             throw new IllegalArgumentException("Invalid path name: " + name);
         }
     }
 
     public String getName() {
-        int lastSlashIndex = this.path.lastIndexOf('/') + 1;
+        int lastSlashIndex = this.path.lastIndexOf(Path.PATH_SEPARATOR) + 1;
         return this.path.substring(lastSlashIndex);
     }
 
@@ -60,7 +81,7 @@ public class Path {
     }
 
     public String getParentPath() {
-        int lastSlashIndex = this.path.lastIndexOf('/');
+        int lastSlashIndex = this.path.lastIndexOf(Path.PATH_SEPARATOR);
         return this.path.substring(0, lastSlashIndex);
     }
 

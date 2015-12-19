@@ -4,8 +4,19 @@ package xyz.thepathfinder.android;
  * An enum for the possible status of an {@link Action}.
  */
 public enum ActionStatus {
+    /**
+     * The start of a transports route.
+     */
     START("start"),
+
+    /**
+     * A commodity pickup will occur at this location.
+     */
     PICK_UP("pickup"),
+
+    /**
+     * A commodity drop off will occur at this location.
+     */
     DROP_OFF("dropoff");
 
     /**

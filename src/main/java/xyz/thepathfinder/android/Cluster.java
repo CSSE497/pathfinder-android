@@ -88,14 +88,15 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * throw a <tt>ClassCastException</tt>.
      * @param path The full path to pathfinder model
      * @param services The pathfinder services object.
-     * @return A cluster with the specified path.
+     * @return A cluster with the specified path. If path is an empty string it returns
+     *          <tt>null</tt>.
      * @throws ClassCastException if the requested path is already associated with a
      *         different {@link Model} type.
      */
     protected static Cluster getInstance(String path, PathfinderServices services) {
-        Cluster cluster = (Cluster) services.getRegistry().getModel(path, Cluster.MODEL);
+        Cluster cluster = (Cluster) services.getRegistry().getModel(path);
 
-        if(cluster == null) {
+        if(cluster == null && !path.equals("")) {
             cluster = new Cluster(path, services);
         }
 

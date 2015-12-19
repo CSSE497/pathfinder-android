@@ -1,5 +1,9 @@
 package xyz.thepathfinder.android;
 
-public abstract class TransportListener implements Listener {
+/**
+ * The <tt>TransportListener</tt> interface gives developers access to notifications
+ * when a transport is modified. The notifications also include route notifications.
+ */
+public interface TransportListener extends Listener {
 
 }
