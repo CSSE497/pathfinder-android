@@ -71,20 +71,39 @@ public class Path {
         }
     }
 
+    /**
+     * Returns the name of the model. If the path of this model is
+     * <tt>"/default/cluster1/subcluster1/transport3"</tt> the name is
+     * <tt>"transport3"</tt>.
+     * @return the name of the model.
+     */
     public String getName() {
         int lastSlashIndex = this.path.lastIndexOf(Path.PATH_SEPARATOR) + 1;
         return this.path.substring(lastSlashIndex);
     }
 
+    /**
+     * Returns the path of the model.
+     * @return the path of the model.
+     */
     public String getPath() {
         return path;
     }
 
+    /**
+     * Returns the parent's path of this path. If the path of this model
+     * is <tt>"/default/cluster1/subcluster1/transport3"</tt> the name is
+     * <tt>"/default/cluster1/subcluster1"</tt>.
+     * @return the path of the parent of this path.
+     */
     public String getParentPath() {
         int lastSlashIndex = this.path.lastIndexOf(Path.PATH_SEPARATOR);
         return this.path.substring(0, lastSlashIndex);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean equals(Object o) {
         if(o instanceof Path) {
