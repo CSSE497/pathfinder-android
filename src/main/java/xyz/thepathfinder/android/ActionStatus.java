@@ -2,6 +2,8 @@ package xyz.thepathfinder.android;
 
 /**
  * An enum for the possible status of an {@link Action}.
+ *
+ * @author David Robinson
  */
 public enum ActionStatus {
     /**
@@ -26,6 +28,7 @@ public enum ActionStatus {
 
     /**
      * A constructor to make each possible status.
+     *
      * @param status the string associated with the status.
      */
     private ActionStatus(String status) {
@@ -34,6 +37,7 @@ public enum ActionStatus {
 
     /**
      * Checks if this status is the same as the provided status.
+     *
      * @param status a string of status
      * @return <tt>true</tt> if the status are the same, <tt>false</tt> otherwise.
      */

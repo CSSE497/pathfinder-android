@@ -7,6 +7,9 @@ import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author David Robinson
+ */
 public class Route {
 
     private final Transport transport;
@@ -33,7 +36,7 @@ public class Route {
         JsonArray actions = json.getAsJsonArray("actions");
         List<Action> list = new ArrayList<Action>();
 
-        for(JsonElement element: actions) {
+        for (JsonElement element : actions) {
             list.add(new Action(element.getAsJsonObject(), services));
         }
 

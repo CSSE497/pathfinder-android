@@ -2,8 +2,16 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.logging.Logger;
+
+/**
+ * @author David Robinson
+ */
 public class Transport extends SubscribableCrudModel<TransportListener> {
 
+    private Logger logger = Logger.getLogger(Transport.class.getName());
     private static final String MODEL = Pathfinder.TRANSPORT;
 
     private double longitude;
@@ -29,14 +37,19 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         this.route = null;
     }
 
-    protected Transport(String path, double longitude, double latitude, TransportStatus status, JsonObject metadata, PathfinderServices services) {
+    protected Transport(String path, double latitude, double longitude, TransportStatus status, JsonObject metadata, PathfinderServices services) {
         this(path, services);
+
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.status = status;
+        this.metadata = metadata;
     }
 
     public static Transport getInstance(String path, PathfinderServices services) {
         Transport transport = (Transport) services.getRegistry().getModel(path);
 
-        if(transport == null) {
+        if (transport == null) {
             return new Transport(path, services);
         }
 
@@ -44,14 +57,14 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     }
 
     protected static Transport getInstance(JsonObject transportJson, PathfinderServices services) {
-        if(!Transport.checkTransportFields(transportJson)) {
+        if (!Transport.checkTransportFields(transportJson)) {
             throw new ClassCastException("Invalid JSON cannot be parsed to a Transport");
         }
 
         String path = Transport.getPath(transportJson);
         Transport transport = Transport.getInstance(path, services);
 
-        transport.setTransportFields(transportJson);
+        transport.notifyUpdate(null, transportJson);
 
         return transport;
     }
@@ -69,31 +82,9 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
                 !transportJson.get("metadata").isJsonObject();
     }
 
-    private void setTransportFields(JsonObject transportJson) {
-        this.setLatitude(Transport.getLatitude(transportJson));
-        this.setLongitude(Transport.getLongitude(transportJson));
-        this.setStatus(Transport.getStatus(transportJson));
-        this.setMetadata(Transport.getMetadata(transportJson));
-    }
 
     private static String getPath(JsonObject transportJson) {
         return transportJson.get("path").getAsString();
-    }
-
-    private static double getLatitude(JsonObject transportJson) {
-        return transportJson.get("latitude").getAsDouble();
-    }
-
-    private static double getLongitude(JsonObject transportJson) {
-        return transportJson.get("longitude").getAsDouble();
-    }
-
-    private static TransportStatus getStatus(JsonObject transportJson) {
-        return Transport.getStatus(transportJson.get("status").getAsString());
-    }
-
-    private static JsonObject getMetadata(JsonObject transportJson) {
-        return transportJson.get("metadata").getAsJsonObject();
     }
 
     public void updateLocation(double latitude, double longitude) {
@@ -134,9 +125,9 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
     private static TransportStatus getStatus(String status) {
         TransportStatus[] values = TransportStatus.values();
-        for (int k = 0; k < values.length; k++) {
-            if (values[k].equals(status)) {
-                return values[k];
+        for (TransportStatus value : values) {
+            if (value.equals(status)) {
+                return value;
             }
         }
 
@@ -214,11 +205,85 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         return json;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void notifyUpdate(JsonObject json) {
-        //TODO implement
+    protected boolean updateFields(JsonObject json) {
+        double prevLatitude;
+        double prevLongitude;
+        TransportStatus prevStatus;
+        JsonObject prevMetadata;
+
+        boolean updated = false;
+
+        prevLatitude = this.getLatitude();
+        if (json.has("latitude")) {
+            this.setLatitude(json.get("latitude").getAsDouble());
+        }
+
+        prevLongitude = this.getLongitude();
+        if (json.has("longitude")) {
+            this.setLongitude(json.get("longitude").getAsDouble());
+        }
+
+        prevStatus = this.getStatus();
+        if (json.has("status")) {
+            this.setStatus(Transport.getStatus(json.get("status").getAsString()));
+        }
+
+        prevMetadata = this.getMetadata();
+        if (json.has("metadata")) {
+            this.setMetadata(json.get("metadata").getAsJsonObject());
+        }
+
+        List<TransportListener> listeners = this.getListeners();
+
+        if (this.getLatitude() != prevLatitude) {
+            for (TransportListener listener : listeners) {
+                listener.latitudeUpdated(this.getLatitude());
+            }
+            updated = true;
+        }
+
+        if (this.getLongitude() != prevLongitude) {
+            for (TransportListener listener : listeners) {
+                listener.longitudeUpdated(this.getLongitude());
+            }
+            updated = true;
+        }
+
+        if (this.getStatus().equals(prevStatus)) {
+            for (TransportListener listener : listeners) {
+                listener.statusUpdated(this.getStatus());
+            }
+            updated = true;
+        }
+
+        if (this.getMetadata().equals(prevMetadata)) {
+            for (TransportListener listener : listeners) {
+                listener.metadataUpdated(this.getMetadata());
+            }
+            updated = true;
+        }
+
+        if (updated) {
+            String parentPath = this.getParentPath();
+            Cluster parentCluster = Cluster.getInstance(parentPath, this.getServices());
+
+            Collection<Transport> transports = parentCluster.getTransports();
+
+            List<ClusterListener> clusterListeners = parentCluster.getListeners();
+            for (ClusterListener listener : clusterListeners) {
+                listener.transportUpdated(this);
+                listener.transportsUpdated(transports);
+            }
+        }
+
+        return updated;
+    }
+
+    protected void route(JsonObject json, PathfinderServices services) {
+        JsonObject route = json.getAsJsonObject("value");
+        this.route = new Route(route, services);
+        for (TransportListener listener : this.getListeners()) {
+            listener.routed(this.getRoute());
+        }
     }
 }

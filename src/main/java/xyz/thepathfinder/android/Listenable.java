@@ -8,9 +8,11 @@ import java.util.List;
 
 /**
  * Allows objects to listen for notifications.
+ *
  * @param <E> the listener object type
+ * @author David Robinson
  */
-public abstract class Listenable<E extends Listener> {
+public abstract class Listenable<E extends Listener<? extends Model>> {
 
     /**
      * The list of listeners
@@ -26,6 +28,7 @@ public abstract class Listenable<E extends Listener> {
 
     /**
      * Adds a listener to the object.
+     *
      * @param listener to add.
      */
     public void addListener(E listener) {
@@ -34,6 +37,7 @@ public abstract class Listenable<E extends Listener> {
 
     /**
      * Removes a listener from the object.
+     *
      * @param listener to remove.
      */
     public void removeListener(E listener) {
@@ -42,15 +46,19 @@ public abstract class Listenable<E extends Listener> {
 
     /**
      * Returns a list of all the current listeners.
+     *
      * @return a list of listeners.
      */
     public List<E> getListeners() {
-        return Collections.unmodifiableList(this.listeners);
+        return Collections.<E>unmodifiableList(this.listeners);
     }
 
     /**
      * Method called when an update occurs.
-     * @param json object of the updated model.
+     *
+     * @param reason for notifying the model.
+     * @param json   object of the updated model.
+     * @return <tt>true</tt> if the model was updated, <tt>false</tt> otherwise.
      */
-    protected abstract void notifyUpdate(JsonObject json);
+    protected abstract boolean notifyUpdate(String reason, JsonObject json);
 }

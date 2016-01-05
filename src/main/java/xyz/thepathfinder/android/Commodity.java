@@ -2,6 +2,10 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.logging.Logger;
+
 /**
  * Interface to the Pathfinder server's commodity API. A commodity may be create
  * by a {@link Cluster} object with the {@link Cluster#createCommodity(JsonObject, PathfinderServices)}
@@ -13,11 +17,14 @@ import com.google.gson.JsonObject;
  * fields will then be updated. To listen for updates add a {@link CommodityListener}.
  * </p>
  *
+ * @author David Robinson
  * @see Cluster
  * @see CommodityListener
  * @see Transport
  */
 public class Commodity extends SubscribableCrudModel<CommodityListener> {
+
+    private Logger logger = Logger.getLogger(Commodity.class.getName());
 
     /**
      * String used in the model field of the pathfinder requests.
@@ -64,14 +71,15 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * it uses default values, so that requests are fully qualified. The default values
      * are zero for all the locations, the status is inactive, and the metadata is an
      * empty JSON object.
-     * @param path the path to commodity
+     *
+     * @param path     the path to commodity
      * @param services a pathfinder services objects
      */
     protected Commodity(String path, PathfinderServices services) {
         super(path, services);
 
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
-        if(isRegistered) {
+        if (isRegistered) {
             throw new IllegalArgumentException("Commodity path already exists: " + path);
         } else {
             this.getServices().getRegistry().registerModel(this);
@@ -89,14 +97,15 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Constructs a commodity object with the specified parameters.
-     * @param path the path on the Pathfinder server.
-     * @param startLatitude the pickup latitude of the commodity.
+     *
+     * @param path           the path on the Pathfinder server.
+     * @param startLatitude  the pickup latitude of the commodity.
      * @param startLongitude the pickup longitude of the commodity.
-     * @param endLatitude the drop off latitude of the commodity.
-     * @param endLongitude the drop off longitude of the commodity.
-     * @param status the current status of the commodity.
-     * @param metadata a JSON object that holds metadata for the commodity.
-     * @param services a pathfinder services object.
+     * @param endLatitude    the drop off latitude of the commodity.
+     * @param endLongitude   the drop off longitude of the commodity.
+     * @param status         the current status of the commodity.
+     * @param metadata       a JSON object that holds metadata for the commodity.
+     * @param services       a pathfinder services object.
      */
     protected Commodity(String path, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata, PathfinderServices services) {
         this(path, services);
@@ -106,13 +115,13 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.endLatitude = endLatitude;
         this.endLongitude = endLongitude;
 
-        if(status == null) {
+        if (status == null) {
             this.status = CommodityStatus.INACTIVE;
         } else {
             this.status = status;
         }
 
-        if(metadata == null) {
+        if (metadata == null) {
             this.metadata = new JsonObject();
         } else {
             this.metadata = metadata;
@@ -124,7 +133,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     /**
      * Returns a commodity that has been registered with the {@link ModelRegistry} or a new
      * commodity if one hasn't been created with that path.
-     * @param path the path to model on the pathfinder server
+     *
+     * @param path     the path to model on the pathfinder server
      * @param services a pathfinder services object.
      * @return the commodity object created with the path specified.
      * @throws ClassCastException if the path requested is already used by a different model type.
@@ -132,7 +142,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     protected static Commodity getInstance(String path, PathfinderServices services) {
         Commodity commodity = (Commodity) services.getRegistry().getModel(path);
 
-        if(commodity == null) {
+        if (commodity == null) {
             return new Commodity(path, services);
         }
 
@@ -143,28 +153,30 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * Returns a commodity that has been registered with the {@link ModelRegistry} or a new
      * commodity if one hasn't been created with that path. The commodity will be updated to
      * reflect the values in JSON object provided.
+     *
      * @param commodityJson a JSON object that represents a commodity.
-     * @param services a pathfinder services object.
+     * @param services      a pathfinder services object.
      * @return the commodity object created with the path specified.
      * @throws ClassCastException if the path requested is already used by a different model type.
      */
     protected static Commodity getInstance(JsonObject commodityJson, PathfinderServices services) {
-       if(!Commodity.checkCommodityFields(commodityJson)) {
-           throw new ClassCastException("JSON could not be parsed to a commodity");
-       }
+        if (!Commodity.checkCommodityFields(commodityJson)) {
+            throw new ClassCastException("JSON could not be parsed to a commodity");
+        }
 
         String path = Commodity.getPath(commodityJson);
         Commodity commodity = Commodity.getInstance(path, services);
 
-        commodity.setCommodityFields(commodityJson);
+        commodity.notifyUpdate(null, commodityJson);
 
         return commodity;
     }
 
     /**
      * Checks a JSON object for a specific field.
+     *
      * @param commodityJson a JSON object that represents a commodity.
-     * @param field the field to check for.
+     * @param field         the field to check for.
      * @return <tt>true</tt> if the JSON object has the field, <tt>false</tt> otherwise.
      */
     private static boolean checkCommodityField(JsonObject commodityJson, String field) {
@@ -173,9 +185,10 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Checks if a JSON object can be parsed to a commodity.
+     *
      * @param commodityJson JSON object to check.
      * @return <tt>true</tt> if the JSON object can be parsed to a commodity,
-     *      <tt>false</tt> otherwise.
+     * <tt>false</tt> otherwise.
      */
     private static boolean checkCommodityFields(JsonObject commodityJson) {
         return Commodity.checkCommodityField(commodityJson, "path") &&
@@ -189,21 +202,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     }
 
     /**
-     * Sets this commodities fields to the values specified in a JSON object
-     * that represents a commodity.
-     * @param commodityJson JSON object that represents a commodity.
-     */
-    private void setCommodityFields(JsonObject commodityJson) {
-        this.setStartLatitude(Commodity.getStartLatitude(commodityJson));
-        this.setStartLongitude(Commodity.getStartLongitude(commodityJson));
-        this.setEndLatitude(Commodity.getEndLatitude(commodityJson));
-        this.setEndLongitude(Commodity.getEndLongitude(commodityJson));
-        this.setStatus(Commodity.getStatus(commodityJson));
-        this.setMetadata(Commodity.getMetadata(commodityJson));
-    }
-
-    /**
      * Returns the path for a JSON object that represents a commodity.
+     *
      * @param commodityJson a JSON object that represents a commodity.
      * @return the path of the object.
      */
@@ -212,64 +212,11 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     }
 
     /**
-     * Returns the start latitude for a JSON object that represents a commodity.
-     * @param commodityJson a JSON object that represents a commodity.
-     * @return the start latitude of the object.
-     */
-    private static double getStartLatitude(JsonObject commodityJson) {
-        return commodityJson.get("startLatitude").getAsDouble();
-    }
-
-    /**
-     * Returns the start longitude for a JSON object that represents a commodity.
-     * @param commodityJson a JSON object that represents a commodity.
-     * @return the start longitude of the object.
-     */
-    private static double getStartLongitude(JsonObject commodityJson) {
-        return commodityJson.get("startLongitude").getAsDouble();
-    }
-
-    /**
-     * Returns the end latitude for a JSON object that represents a commodity.
-     * @param commodityJson a JSON object that represents a commodity.
-     * @return the end latitude of the object.
-     */
-    private static double getEndLatitude(JsonObject commodityJson) {
-        return commodityJson.get("endLatitude").getAsDouble();
-    }
-
-    /**
-     * Returns the end longitude for a JSON object that represents a commodity.
-     * @param commodityJson a JSON object that represents a commodity.
-     * @return the end longitude of the object.
-     */
-    private static double getEndLongitude(JsonObject commodityJson) {
-        return commodityJson.get("endLongitude").getAsDouble();
-    }
-
-    /**
-     * Returns the status for a JSON object that represents a commodity.
-     * @param commodityJson a JSON object that represents a commodity.
-     * @return the status of the object.
-     */
-    private static CommodityStatus getStatus(JsonObject commodityJson) {
-        return Commodity.getStatus(commodityJson.get("status").getAsString());
-    }
-
-    /**
-     * Returns the metadata for a JSON object that represents a commodity.
-     * @param commodityJson a JSON object that represents a commodity.
-     * @return the metadata of the object.
-     */
-    private static JsonObject getMetadata(JsonObject commodityJson) {
-        return commodityJson.get("metadata").getAsJsonObject();
-    }
-
-    /**
      * Updates the start location of this commodity to specified coordinates.
      * This method updates the location of the commodity on the pathfinder server.
      * The latitude and longitude are not updated in this object by this method.
-     * @param startLatitude The latitude to change the start location to.
+     *
+     * @param startLatitude  The latitude to change the start location to.
      * @param startLongitude The longitude to change the start location to.
      */
     public void updateStartLocation(double startLatitude, double startLongitude) {
@@ -278,6 +225,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Returns the current start latitude of the commodity.
+     *
      * @return The current start latitude of the commodity.
      */
     public double getStartLatitude() {
@@ -286,6 +234,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Sets the start latitude field to a new latitude
+     *
      * @param latitude the latitude to change to.
      */
     private void setStartLatitude(double latitude) {
@@ -296,6 +245,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * Updates the start latitude of this commodity to the specified latitude.
      * This method updates the start latitude of the commodity on the pathfinder server.
      * The start latitude is not updated in this object by this method.
+     *
      * @param startLatitude The start latitude to change to.
      */
     public void updateStartLatitude(double startLatitude) {
@@ -304,6 +254,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Returns the current start longitude of the commodity.
+     *
      * @return The current start longitude of the commodity.
      */
     public double getStartLongitude() {
@@ -312,6 +263,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Sets the start longitude field to a new longitude
+     *
      * @param longitude the longitude to change to.
      */
     private void setStartLongitude(double longitude) {
@@ -322,6 +274,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * Updates the start longitude of this commodity to the specified longitude.
      * This method updates the start longitude of the commodity on the pathfinder server.
      * The start longitude is not updated in this object by this method.
+     *
      * @param startLongitude The start longitude to change to.
      */
     public void updateStartLongitude(double startLongitude) {
@@ -332,7 +285,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * Updates the end location of this commodity to specified coordinates.
      * This method updates the location of the commodity on the pathfinder server.
      * The latitude and longitude are not updated in this object by this method.
-     * @param endLatitude The latitude to change the end location to.
+     *
+     * @param endLatitude  The latitude to change the end location to.
      * @param endLongitude The longitude to change the end location to.
      */
     public void updateEndLocation(double endLatitude, double endLongitude) {
@@ -341,6 +295,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Returns the current end latitude of the commodity.
+     *
      * @return The current end latitude of the commodity.
      */
     public double getEndLatitude() {
@@ -349,6 +304,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Sets the end latitude field to a new latitude
+     *
      * @param latitude the latitude to change to.
      */
     private void setEndLatitude(double latitude) {
@@ -359,6 +315,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * Updates the end latitude of this commodity to the specified latitude.
      * This method updates the end latitude of the commodity on the pathfinder server.
      * The end latitude is not updated in this object by this method.
+     *
      * @param endLatitude The end latitude to change to.
      */
     public void updateEndLatitude(double endLatitude) {
@@ -367,6 +324,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Returns the current end longitude of the commodity.
+     *
      * @return The current end longitude of the commodity.
      */
     public double getEndLongitude() {
@@ -375,6 +333,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Sets the end longitude field to a new longitude
+     *
      * @param longitude the longitude to change to.
      */
     private void setEndLongitude(double longitude) {
@@ -385,6 +344,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * Updates the end longitude of this commodity to the specified longitude.
      * This method updates the end longitude of the commodity on the pathfinder server.
      * The end longitude is not updated in this object by this method.
+     *
      * @param endLongitude The end longitude to change to.
      */
     public void updateEndLongitude(double endLongitude) {
@@ -394,6 +354,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     /**
      * Returns the current status of the commodity. See {@link CommodityStatus}
      * for the status's available to commodities.
+     *
      * @return The current status of the commodity.
      */
     public CommodityStatus getStatus() {
@@ -402,6 +363,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Returns the enum version of a status from a string.
+     *
      * @param status the status as a string.
      * @return the status as an enum.
      */
@@ -418,11 +380,12 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Sets the status field to a new status
+     *
      * @param status the status to change to.
      * @throws IllegalArgumentException when an illegal status is provided
      */
     private void setStatus(CommodityStatus status) {
-        if(status != null) {
+        if (status != null) {
             this.status = status;
         } else {
             throw new IllegalArgumentException("Illegal status");
@@ -431,6 +394,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Sets the status field to a new status
+     *
      * @param status the status to change to.
      * @throws IllegalArgumentException when an illegal status is provided
      */
@@ -442,6 +406,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * Updates the status of this commodity to the specified status.
      * This method updates the status of the commodity on the pathfinder server.
      * The status is not updated in this object by this method.
+     *
      * @param status The status to change to.
      */
     public void updateStatus(CommodityStatus status) {
@@ -450,6 +415,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Returns the metadata of the commodity in the form of a Json Object.
+     *
      * @return The metadata of the commodity.
      */
     public JsonObject getMetadata() {
@@ -459,10 +425,11 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     /**
      * Sets the metadata field to a new JSON object. If null it is set to
      * an empty JSON object.
+     *
      * @param metadata the JSON object to change to.
      */
     private void setMetadata(JsonObject metadata) {
-        if(metadata == null) {
+        if (metadata == null) {
             this.metadata = new JsonObject();
         } else {
             this.metadata = metadata;
@@ -473,6 +440,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * Updates the metadata of this commodity to the specified Json Object.
      * This method updates the metadata of the commodity on the pathfinder server.
      * The metadata is not updated in this object by this method.
+     *
      * @param metadata The metadata to change to.
      */
     public void updateMetadata(JsonObject metadata) {
@@ -481,6 +449,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Returns the route for this commodity.
+     *
      * @return a route.
      */
     public Route getRoute() {
@@ -489,6 +458,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Sets the route field to a new route
+     *
      * @param route the route to change to.
      */
     private void setRoute(Route route) {
@@ -498,37 +468,38 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     /**
      * Sends update requests to the Pathfinder server. If a parameter is null it will
      * not be updated. This method does not update this commodities fields.
-     * @param startLatitude The start latitude to change to.
+     *
+     * @param startLatitude  The start latitude to change to.
      * @param startLongitude The start longitude to change to.
-     * @param endLatitude The end latitude to change to.
-     * @param endLongitude The end longitude to change to.
-     * @param status The status to change to.
-     * @param metadata The metadata to change to.
+     * @param endLatitude    The end latitude to change to.
+     * @param endLongitude   The end longitude to change to.
+     * @param status         The status to change to.
+     * @param metadata       The metadata to change to.
      */
     public void update(Double startLatitude, Double startLongitude, Double endLatitude, Double endLongitude, CommodityStatus status, JsonObject metadata) {
         JsonObject value = new JsonObject();
 
-        if(startLatitude != null) {
+        if (startLatitude != null) {
             value.addProperty("startLatitude", startLatitude);
         }
 
-        if(startLongitude != null) {
+        if (startLongitude != null) {
             value.addProperty("startLongitude", startLongitude);
         }
 
-        if(endLatitude != null) {
+        if (endLatitude != null) {
             value.addProperty("endLatitude", endLatitude);
         }
 
-        if(endLongitude != null) {
+        if (endLongitude != null) {
             value.addProperty("endLongitude", endLongitude);
         }
 
-        if(status != null) {
+        if (status != null) {
             value.addProperty("status", status.toString());
         }
 
-        if(metadata != null) {
+        if (metadata != null) {
             value.add("metadata", metadata);
         }
 
@@ -562,12 +533,112 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return json;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void notifyUpdate(JsonObject json) {
-        //TODO implement
+    protected boolean updateFields(JsonObject json) {
+        double prevStartLatitude;
+        double prevStartLongitude;
+        double prevEndLatitude;
+        double prevEndLongitude;
+        CommodityStatus prevStatus;
+        JsonObject prevMetadata;
+
+        boolean updated = false;
+
+        prevStartLatitude = this.getStartLatitude();
+        if (json.has("startLatitude")) {
+            this.setStartLatitude(json.get("startLatitude").getAsDouble());
+        }
+
+        prevStartLongitude = this.getStartLongitude();
+        if (json.has("startLongitude")) {
+            this.setStartLongitude(json.get("startLongitude").getAsDouble());
+        }
+
+        prevEndLatitude = this.getEndLatitude();
+        if (json.has("endLatitude")) {
+            this.setEndLatitude(json.get("endLatitude").getAsDouble());
+        }
+
+        prevEndLongitude = this.getEndLongitude();
+        if (json.has("endLongitude")) {
+            this.setEndLongitude(json.get("endLongitude").getAsDouble());
+        }
+
+        prevStatus = this.getStatus();
+        if (json.has("status")) {
+            this.setStatus(Commodity.getStatus(json.get("status").getAsString()));
+        }
+
+        prevMetadata = this.getMetadata();
+        if (json.has("metadata")) {
+            this.setMetadata(json.get("metadata").getAsJsonObject());
+        }
+
+        List<CommodityListener> listeners = this.getListeners();
+
+        if (this.getStartLatitude() != prevStartLatitude) {
+            for (CommodityListener listener : listeners) {
+                listener.startLatitudeUpdated(this.getStartLatitude());
+            }
+            updated = true;
+        }
+
+        if (this.getEndLongitude() != prevStartLongitude) {
+            for (CommodityListener listener : listeners) {
+                listener.startLongitudeUpdated(this.getStartLongitude());
+            }
+            updated = true;
+        }
+
+
+        if (this.getEndLatitude() != prevEndLatitude) {
+            for (CommodityListener listener : listeners) {
+                listener.endLatitudeUpdated(this.getEndLatitude());
+            }
+            updated = true;
+        }
+
+        if (this.getEndLongitude() != prevEndLongitude) {
+            for (CommodityListener listener : listeners) {
+                listener.endLongitudeUpdated(this.getEndLongitude());
+            }
+            updated = true;
+        }
+
+        if (this.getStatus().equals(prevStatus)) {
+            for (CommodityListener listener : listeners) {
+                listener.statusUpdated(this.getStatus());
+            }
+            updated = true;
+        }
+
+        if (this.getMetadata().equals(prevMetadata)) {
+            for (CommodityListener listener : listeners) {
+                listener.metadataUpdated(this.getMetadata());
+            }
+            updated = true;
+        }
+
+        if (updated) {
+            String parentPath = this.getParentPath();
+            Cluster parentCluster = Cluster.getInstance(parentPath, this.getServices());
+
+            Collection<Commodity> commodities = parentCluster.getCommodities();
+
+            List<ClusterListener> clusterListeners = parentCluster.getListeners();
+            for (ClusterListener listener : clusterListeners) {
+                listener.commodityUpdated(this);
+                listener.commoditiesUpdated(commodities);
+            }
+        }
+
+        return updated;
     }
 
+    protected void route(JsonObject json, PathfinderServices services) {
+        JsonObject route = json.getAsJsonObject("value");
+        this.setRoute(new Route(route, services));
+        for (CommodityListener listener : this.getListeners()) {
+            listener.routed(this.getRoute());
+        }
+    }
 }

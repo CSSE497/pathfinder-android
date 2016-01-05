@@ -11,6 +11,8 @@ import java.util.logging.Logger;
 /**
  * Controls access the web socket connection with the Pathfinder sever.
  * To gain access to the connection use {@link PathfinderServices#getConnection()}.
+ *
+ * @author David Robinson
  */
 public class Connection extends Endpoint {
 
@@ -52,9 +54,10 @@ public class Connection extends Endpoint {
     /**
      * Constructs a connection object that controls access to the web socket connection
      * with the Pathfinder Server.
+     *
      * @param applictionIdentifier the application identifier provided by the Pathfinder server for the application
-     * @param userCredentials the user's credentials for this application
-     * @param registry a model registry
+     * @param userCredentials      the user's credentials for this application
+     * @param registry             a model registry
      */
     protected Connection(String applictionIdentifier, String userCredentials, ModelRegistry registry) {
         this.applictionIdentifier = applictionIdentifier;
@@ -65,12 +68,13 @@ public class Connection extends Endpoint {
 
     /**
      * Sends a text message through the web socket to the Pathfinder server.
+     *
      * @param message the message to be sent.
      * @throws IllegalStateException the web socket is not connected.
      */
     public void sendMessage(String message) {
         logger.log(Level.INFO, "Sending json: " + message);
-        if(this.isConnected()) {
+        if (this.isConnected()) {
             this.session.getAsyncRemote().sendText(message);
             this.sentMessageCount++;
         } else {
@@ -100,6 +104,7 @@ public class Connection extends Endpoint {
 
     /**
      * Returns if the web socket is connected.
+     *
      * @return <tt>true</tt> if the web socket is connected, <tt>false</tt> otherwise.
      */
     public boolean isConnected() {
@@ -108,6 +113,7 @@ public class Connection extends Endpoint {
 
     /**
      * Returns the number of messages sent through the web socket.
+     *
      * @return the number of messages sent.
      */
     public long getSentMessageCount() {
@@ -116,6 +122,7 @@ public class Connection extends Endpoint {
 
     /**
      * Returns the number of messages receive through the web socket.
+     *
      * @return the number of messages received.
      */
     public long getReceivedMessageCount() {
@@ -124,6 +131,7 @@ public class Connection extends Endpoint {
 
     /**
      * Closes the web socket connection with the Pathfinder server.
+     *
      * @param reason the reason for closing the web socket.
      * @throws IOException if the web socket failed to close properly.
      */

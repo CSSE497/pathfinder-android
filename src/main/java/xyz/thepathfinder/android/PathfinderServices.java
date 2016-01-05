@@ -1,7 +1,7 @@
 package xyz.thepathfinder.android;
 
 /**
- * 
+ * @author David Robinson
  */
 public class PathfinderServices {
 

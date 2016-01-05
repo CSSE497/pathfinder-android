@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
  * Actions represent transport and commodity actions, such as picking up a commodity,
  * dropping off a commodity, or a transport start location. Actions occur at specific
  * locations and an associated model.
+ *
+ * @author David Robinson
  */
 public class Action {
 
@@ -31,8 +33,9 @@ public class Action {
 
     /**
      * Constructs an Action with a JSON object that represents an Action.
+     *
      * @param actionJson JSON object that represents an Action.
-     * @param services a pathfinder services object.
+     * @param services   a pathfinder services object.
      */
     protected Action(JsonObject actionJson, PathfinderServices services) {
         this.status = Action.getStatus(actionJson);
@@ -43,6 +46,7 @@ public class Action {
 
     /**
      * Returns the status of the action.
+     *
      * @return the status
      */
     public ActionStatus getStatus() {
@@ -51,6 +55,7 @@ public class Action {
 
     /**
      * The latitude that the action occurs at.
+     *
      * @return the latitude
      */
     public double getLatitude() {
@@ -59,6 +64,7 @@ public class Action {
 
     /**
      * The longitude that the action occurs at.
+     *
      * @return the longitude
      */
     public double getLongitude() {
@@ -68,6 +74,7 @@ public class Action {
     /**
      * Returns the model associated with this action. It can either be a
      * transport or a commodity.
+     *
      * @return the model associate with the action.
      */
     public SubscribableCrudModel getModel() {
@@ -76,6 +83,7 @@ public class Action {
 
     /**
      * Returns the status of an action in the form a JSON object.
+     *
      * @param json a JSON object that represents an action.
      * @return the status of the action.
      */
@@ -85,6 +93,7 @@ public class Action {
 
     /**
      * Returns the status of an action in the form of a string.
+     *
      * @param status a string with the status of the action
      * @return an ActionStatus that represents the string.
      */
@@ -101,6 +110,7 @@ public class Action {
 
     /**
      * Returns the latitude of an action in the form a JSON object.
+     *
      * @param json a JSON object that represents an action.
      * @return the latitude of the action.
      */
@@ -110,6 +120,7 @@ public class Action {
 
     /**
      * Returns the longitude of an action in the form a JSON object.
+     *
      * @param json a JSON object that represents an action.
      * @return the longitude of the action.
      */
@@ -119,7 +130,8 @@ public class Action {
 
     /**
      * Returns the model of an action in the form a JSON object.
-     * @param json a JSON object that represents an action.
+     *
+     * @param json     a JSON object that represents an action.
      * @param services a pathfinder services object.
      * @return the model of the action.
      * @throws IllegalArgumentException when the model isn't a transport or commodity.
@@ -128,9 +140,9 @@ public class Action {
         JsonObject model = json.getAsJsonObject("model");
         String type = model.get("model").getAsString();
 
-        if(type.equals(Pathfinder.TRANSPORT)) {
-           return Transport.getInstance(model, services);
-        } else if(type.equals(Pathfinder.COMMODITY)) {
+        if (type.equals(Pathfinder.TRANSPORT)) {
+            return Transport.getInstance(model, services);
+        } else if (type.equals(Pathfinder.COMMODITY)) {
             return Commodity.getInstance(json, services);
         }
 

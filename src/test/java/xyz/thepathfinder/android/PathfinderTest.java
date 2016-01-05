@@ -90,12 +90,12 @@ public class PathfinderTest {
         JsonObject receive = new JsonObject();
         receive.addProperty("model", "Cluster");
         receive.addProperty("path", "/default");
-        receive.addProperty("type", "read");
+        receive.addProperty("message", "read");
 
         this.messager.setReceive(receive.toString());
 
         JsonObject send = new JsonObject();
-        send.addProperty("type", "model");
+        send.addProperty("message", "model");
         send.addProperty("path", "/default");
         send.addProperty("model", "Cluster");
 
