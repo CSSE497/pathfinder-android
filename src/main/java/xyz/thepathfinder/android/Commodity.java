@@ -533,6 +533,9 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return json;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected boolean updateFields(JsonObject json) {
         double prevStartLatitude;
         double prevStartLongitude;
@@ -634,6 +637,9 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return updated;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     protected void route(JsonObject json, PathfinderServices services) {
         JsonObject route = json.getAsJsonObject("value");
         this.setRoute(new Route(route, services));

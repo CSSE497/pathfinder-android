@@ -7,20 +7,42 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * Routes all web socket messages received to the receiving models.
+ *
  * @author David Robinson
  */
 public class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
 
+    /**
+     * Holds access to all the models.
+     */
     private final ModelRegistry registry;
-    private Logger logger = Logger.getLogger(MessageHandler.class.getName());
 
+    /**
+     * Logs all messages
+     */
+    private static Logger logger = Logger.getLogger(MessageHandler.class.getName());
+
+    /**
+     * Number of messages received, helps with testing.
+     */
     private int receivedMessageCount;
 
+    /**
+     * Constructs the message handler.
+     *
+     * @param registry to find models.
+     */
     protected MessageHandler(ModelRegistry registry) {
         this.registry = registry;
         this.receivedMessageCount = 0;
     }
 
+    /**
+     * Invoked when the web socket receives a message.
+     *
+     * @param message the message received as a String.
+     */
     @Override
     public void onMessage(String message) {
         logger.log(Level.INFO, "Received json: " + message);
@@ -39,6 +61,11 @@ public class MessageHandler implements javax.websocket.MessageHandler.Whole<Stri
         }
     }
 
+    /**
+     * Returns the number of message received by the web socket.
+     *
+     * @return number of messages received by the web socket.
+     */
     public int getReceivedMessageCount() {
         return this.receivedMessageCount;
     }

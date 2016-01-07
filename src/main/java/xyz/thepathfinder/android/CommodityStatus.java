@@ -1,7 +1,7 @@
 package xyz.thepathfinder.android;
 
 /**
- * An enum for the possible status of a {@link Commodity}.
+ * An enum for the possible statuses of a {@link Commodity}.
  *
  * @author David Robinson
  */

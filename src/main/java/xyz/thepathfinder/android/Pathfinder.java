@@ -6,6 +6,9 @@ import javax.websocket.DeploymentException;
 import javax.websocket.WebSocketContainer;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * <p>
@@ -30,7 +33,10 @@ import java.net.URI;
  * <pre><code>   URI pathfinderURL = new URI("ws://api.thepathfinder.xyz:9000/socket");
  *   Pathfinder pathfinder = new Pathfinder("myAppId", "UserJWT", pathfinderURL);
  *   pathfinder.connect();
- *   Cluster defaultCluster = pathfinder.getDefaultCluster();
+ *   Cluster cluster = pathfinder.getCluster("/default/cluster1/subcluster2");
+ *   MyClusterListener clusterListener = new MyClusterListener();
+ *   cluster.addListener(clusterListener);
+ *   cluster.connect();
  * {@literal   // more code ...}
  *   pathfinder.close();</code></pre>
  *
@@ -68,20 +74,43 @@ public class Pathfinder {
     private URI webSocketUrl;
 
     /**
+     * Logs all messages
+     */
+    private static Logger logger = Logger.getLogger(Pathfinder.class.getName());
+
+    /**
+     * Constructs a Pathfinder object.
+     *
+     * @param applicationIdentifier application Identifier provided by a Pathfinder service provider
+     * @param userCredentials       JWT of the user's credentials
+     */
+    public Pathfinder(String applicationIdentifier, String userCredentials) {
+        try {
+            this.webSocketUrl = new URI("ws://api.thepathfinder.xyz/socket");
+        } catch(URISyntaxException e) {
+            logger.log(Level.SEVERE, e.getMessage());
+        }
+
+        ModelRegistry registry = new ModelRegistry();
+        Connection connection = new Connection(applicationIdentifier, userCredentials, registry);
+
+        this.services = new PathfinderServices(registry, connection);
+    }
+
+    /**
      * Constructs a Pathfinder object.
      *
      * @param applicationIdentifier application Identifier provided by a Pathfinder service provider
      * @param userCredentials       JWT of the user's credentials
      * @param webSocketUrl          URL to the Pathfinder web socket service provider
      */
-    public Pathfinder(String applicationIdentifier, String userCredentials, URI webSocketUrl) {
+    protected Pathfinder(String applicationIdentifier, String userCredentials, URI webSocketUrl) {
         this.webSocketUrl = webSocketUrl;
 
         ModelRegistry registry = new ModelRegistry();
         Connection connection = new Connection(applicationIdentifier, userCredentials, registry);
 
         this.services = new PathfinderServices(registry, connection);
-
     }
 
     /**

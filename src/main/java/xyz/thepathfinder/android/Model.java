@@ -109,106 +109,113 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         return this.isConnected;
     }
 
+    /**
+     * Invokes the model unspecific notifications.
+     *
+     * @param reason message type
+     * @param json the message
+     * @return <tt>true</tt> if model changed in any way, <tt>false</tt> otherwise.
+     */
     @SuppressWarnings("unchecked")
     private boolean updateType(String reason, JsonObject json) {
         boolean updated = false;
-        JsonObject value = null;
+                JsonObject value = null;
 
         if (json.has("value")) {
-            value = json.getAsJsonObject("value");
-            updated = this.updateFields(value);
+                    value = json.getAsJsonObject("value");
+                    updated = this.updateFields(value);
         }
 
-        List<E> listeners = this.getListeners();
+                List<E> listeners = this.getListeners();
 
         if (updated && !reason.equals("updated")) {
             for (Listener listener : listeners) {
-                listener.updated(this);
+                        listener.updated(this);
             }
         }
 
         if (reason.equals("updated")) {
             for (Listener listener : listeners) {
-                listener.updated(this);
+                        listener.updated(this);
             }
             return updated;
         }
 
         if (reason.equals("routed")) {
-            this.route(json, this.getServices());
-            return updated;
+                    this.route(json, this.getServices());
+            return true;
         }
 
         if (reason.equals("model")) {
             for (Listener listener : listeners) {
-                listener.connected(this);
+                        listener.connected(this);
             }
             return updated;
         }
 
         if (reason.equals("subscribed")) {
             for (Listener listener : listeners) {
-                listener.subscribed(this);
+                        listener.subscribed(this);
             }
             return updated;
         }
 
         if (reason.equals("routeSubscribed")) {
             for (Listener listener : listeners) {
-                listener.routeSubscribed(this);
+                        listener.routeSubscribed(this);
             }
             return updated;
         }
 
         if (reason.equals("unsubscribed")) {
             for (Listener listener : listeners) {
-                listener.unsubscribed(this);
+                        listener.unsubscribed(this);
             }
             return updated;
         }
 
         if (reason.equals("routeUnsubscribed")) {
             for (Listener listener : listeners) {
-                listener.routeUnsubscribed(this);
+                        listener.routeUnsubscribed(this);
             }
             return updated;
         }
 
         if (reason.equals("created")) {
             for (Listener listener : listeners) {
-                listener.created(this);
+                        listener.created(this);
             }
             return updated;
         }
 
         if (reason.equals("deleted")) {
             for (Listener listener : listeners) {
-                this.setConnected(false);
-                listener.deleted(this);
+                        this.setConnected(false);
+                        listener.deleted(this);
             }
             return updated;
         }
 
         if (reason.equals("error") && value != null) {
-            logger.log(Level.WARNING, "Error received: " + json);
+                    logger.log(Level.WARNING, "Error received: " + json);
             for (Listener listener : listeners) {
-                listener.error(value.get("reason").getAsString());
+                        listener.error(value.get("reason").getAsString());
             }
             return updated;
         }
 
-        logger.log(Level.WARNING, "Invalid message type: " + reason + "\nJson: " + json);
+                logger.log(Level.WARNING, "Invalid message type: " + reason + "\nJson: " + json);
         return updated;
     }
 
     /**
      * {@inheritDoc}
-     */
+    */
     @Override
     @SuppressWarnings("unchecked")
     protected boolean notifyUpdate(String reason, JsonObject json) {
         if (!json.has("model") || !json.get("model").getAsString().equals(this.getModel())) {
-            logger.log(Level.WARNING, "Invalid model type: " + json);
+                    logger.log(Level.WARNING, "Invalid model type: " + json);
             return false;
         }
 
@@ -216,9 +223,9 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
             return this.updateType(reason, json);
         } else {
             if (this.updateFields(json)) {
-                List<E> listeners = this.getListeners();
+                        List<E> listeners = this.getListeners();
                 for (Listener listener : listeners) {
-                    listener.updated(this);
+                            listener.updated(this);
                 }
                 return true;
             }
@@ -240,8 +247,19 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
      */
     protected abstract JsonObject createValueJson();
 
+    /**
+     * Updates the fields of the model.
+     *
+     * @param json of the model.
+     * @return <tt>true</tt> if model changed in any way, <tt>false</tt> otherwise.
+     */
     protected abstract boolean updateFields(JsonObject json);
 
+    /**
+     * Updates the models routes.
+     * @param json of the model.
+     * @param services pathfinder services object.
+     */
     protected abstract void route(JsonObject json, PathfinderServices services);
 
 }

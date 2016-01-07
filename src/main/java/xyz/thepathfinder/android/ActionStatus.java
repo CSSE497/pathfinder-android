@@ -1,7 +1,7 @@
 package xyz.thepathfinder.android;
 
 /**
- * An enum for the possible status of an {@link Action}.
+ * An enum for the possible statuses of an {@link Action}.
  *
  * @author David Robinson
  */
