@@ -87,13 +87,13 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * a cluster with that path already created, it will return that cluster object.
      * If there isn't a cluster with that path already created, it will create a new
      * cluster object. If the path is associated with a different model type it will
-     * throw a <tt>ClassCastException</tt>.
+     * throw a <tt>IllegalArgumentException</tt>.
      *
      * @param path     The full path to pathfinder model
      * @param services The pathfinder services object.
      * @return A cluster with the specified path. If path is an empty string it returns
      * <tt>null</tt>.
-     * @throws ClassCastException if the requested path is already associated with a
+     * @throws IllegalArgumentException if the requested path is already associated with a
      *                            different {@link Model} type.
      */
     protected static Cluster getInstance(String path, PathfinderServices services) {
@@ -112,12 +112,12 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * If there isn't a cluster with that path already created, it will create a new
      * cluster object and update the fields. If the path is associated with a different model type or
      * the json will not parse to a cluster object's required fields it will throw a
-     * <tt>ClassCastException</tt>.
+     * <tt>IllegalArgumentException</tt>.
      *
      * @param clusterJson A json object that parses to a cluster.
      * @param services    The pathfinder services object.
      * @return A cluster with the specified path.
-     * @throws ClassCastException if the requested path is already associated with a
+     * @throws IllegalArgumentException if the requested path is already associated with a
      *                            different {@link Model} type. Also, if the json object doesn't parse to
      *                            a cluster object.
      */
@@ -125,7 +125,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         boolean canParseToCluster = Cluster.checkClusterFields(clusterJson);
 
         if (!canParseToCluster) {
-            throw new ClassCastException("JSON could not be parsed to a cluster");
+            throw new IllegalArgumentException("JSON could not be parsed to a cluster");
         }
 
         String path = Cluster.getPath(clusterJson);

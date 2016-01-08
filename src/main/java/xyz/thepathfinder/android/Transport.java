@@ -58,7 +58,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
     protected static Transport getInstance(JsonObject transportJson, PathfinderServices services) {
         if (!Transport.checkTransportFields(transportJson)) {
-            throw new ClassCastException("Invalid JSON cannot be parsed to a Transport");
+            throw new IllegalArgumentException("Invalid JSON cannot be parsed to a Transport");
         }
 
         String path = Transport.getPath(transportJson);

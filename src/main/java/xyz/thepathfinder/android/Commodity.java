@@ -137,7 +137,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @param path     the path to model on the pathfinder server
      * @param services a pathfinder services object.
      * @return the commodity object created with the path specified.
-     * @throws ClassCastException if the path requested is already used by a different model type.
+     * @throws IllegalArgumentException if the path requested is already used by a different model type.
      */
     protected static Commodity getInstance(String path, PathfinderServices services) {
         Commodity commodity = (Commodity) services.getRegistry().getModel(path);
@@ -157,11 +157,11 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @param commodityJson a JSON object that represents a commodity.
      * @param services      a pathfinder services object.
      * @return the commodity object created with the path specified.
-     * @throws ClassCastException if the path requested is already used by a different model type.
+     * @throws IllegalArgumentException if the path requested is already used by a different model type.
      */
     protected static Commodity getInstance(JsonObject commodityJson, PathfinderServices services) {
         if (!Commodity.checkCommodityFields(commodityJson)) {
-            throw new ClassCastException("JSON could not be parsed to a commodity");
+            throw new IllegalArgumentException("JSON could not be parsed to a commodity");
         }
 
         String path = Commodity.getPath(commodityJson);
