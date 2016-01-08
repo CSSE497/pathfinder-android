@@ -33,7 +33,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         this.latitude = 0;
         this.longitude = 0;
         this.status = TransportStatus.OFFLINE;
-        this.metadata = null;
+        this.metadata = new JsonObject();
         this.route = null;
     }
 
@@ -42,8 +42,20 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
         this.latitude = latitude;
         this.longitude = longitude;
-        this.status = status;
-        this.metadata = metadata;
+
+        if(status == null) {
+            this.status = TransportStatus.OFFLINE;
+        } else {
+            this.status = status;
+        }
+
+        if(metadata == null) {
+            this.metadata = new JsonObject();
+        } else {
+            this.metadata = metadata;
+        }
+
+        this.route = null;
     }
 
     public static Transport getInstance(String path, PathfinderServices services) {
@@ -143,7 +155,11 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     }
 
     private void setMetadata(JsonObject metadata) {
-        this.metadata = metadata;
+        if(metadata == null) {
+            this.metadata = new JsonObject();
+        } else {
+            this.metadata = metadata;
+        }
     }
 
     public void updateMetadata(JsonObject metadata) {

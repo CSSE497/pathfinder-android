@@ -42,16 +42,6 @@ public enum TransportStatus {
     }
 
     /**
-     * Checks if this status is the same as the provided status.
-     *
-     * @param status of the transport
-     * @return <tt>true</tt> if the status are the same, <tt>false</tt> otherwise.
-     */
-    public boolean equals(TransportStatus status) {
-        return this.status.equals(status.toString());
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
