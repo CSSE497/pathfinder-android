@@ -5,7 +5,7 @@ package xyz.thepathfinder.android;
  *
  * @author David Robinson
  */
-public class Path {
+class Path {
 
     /**
      * Separator for path names.

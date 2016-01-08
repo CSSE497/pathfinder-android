@@ -11,7 +11,7 @@ import java.util.logging.Logger;
  *
  * @author David Robinson
  */
-public class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
+class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
 
     /**
      * Holds access to all the models.

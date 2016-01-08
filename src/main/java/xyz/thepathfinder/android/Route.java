@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * @author David Robinson
  */
-public class Route {
+class Route {
 
     private final Transport transport;
     private final List<Action> actions;

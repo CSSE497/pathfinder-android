@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  *
  * @author David Robinson
  */
-public class Connection extends Endpoint {
+class Connection extends Endpoint {
 
     /**
      * The application identifier sent to the Pathfinder server.

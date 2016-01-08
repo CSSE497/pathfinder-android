@@ -9,7 +9,7 @@ import java.util.Map;
  *
  * @author David Robinson
  */
-public class ModelRegistry {
+class ModelRegistry {
 
     /**
      * Map to all the {@link Model}s created by the SDK. The keys are the string
