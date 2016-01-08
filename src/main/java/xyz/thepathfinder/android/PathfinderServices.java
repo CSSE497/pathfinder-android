@@ -1,6 +1,9 @@
 package xyz.thepathfinder.android;
 
-public class PathfinderServices {
+/**
+ * @author David Robinson
+ */
+class PathfinderServices {
 
     private ModelRegistry registry;
     private Connection connection;

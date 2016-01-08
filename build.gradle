@@ -2,7 +2,11 @@
 apply plugin: 'java'
 apply plugin: 'jacoco'
 apply plugin: 'com.github.kt3k.coveralls'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
+group = "xyz.thepathfinder"
+archivesBaseName = "pathfinder-android"
 version = '0.0.1'
 
 repositories {
@@ -19,19 +23,19 @@ buildscript {
     }
 }
 
-jacocoTestReport {
-    reports {
-        xml.enabled = true // coveralls plugin depends on xml format report
-        html.enabled = true
-    }
-}
-
 configure(allprojects) {
     ext.javadocLinks = [
             "http://docs.oracle.com/javase/7/docs/api/",
             "http://docs.oracle.com/javaee/7/api/",
             "http://google.github.io/gson/apidocs/"
     ] as String[]
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled = true // coveralls plugin depends on xml format report
+        html.enabled = true
+    }
 }
 
 task javadocs(type: Javadoc) {
@@ -43,16 +47,87 @@ task javadocs(type: Javadoc) {
 
 task developerJavadocs(type: Javadoc) {
     source = sourceSets.main.allJava
+    destinationDir = new File("${project.docsDir}", "developerJavadoc")
     classpath = configurations.compile
     options.memberLevel = JavadocMemberLevel.PRIVATE
     options.links(project.ext.javadocLinks)
+}
+
+task all(dependsOn: ['clean', 'build', 'test', 'javadocs', 'developerJavadocs', 'jar']) {
+    compileJava.dependsOn clean
+}
+
+if(project.hasProperty("ossrhUsername") && project.hasProperty("ossrhPassword")) {
+    task javadocJar(type: Jar) {
+        classifier = 'javadoc'
+        from developerJavadocs
+    }
+
+    task sourcesJar(type: Jar) {
+        classifier =  'sources'
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives javadocJar, sourcesJar
+    }
+
+    signing {
+        sign configurations.archives
+    }
+
+    uploadArchives {
+        repositories {
+            mavenDeployer {
+                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+
+                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                }
+
+                pom.project {
+                    name 'Pathfinder Android'
+                    packaging 'jar'
+                    description 'Android/Java client library for the Pathfinder service'
+                    url 'http://thepathfinder.xyz'
+
+                    scm {
+                        connection 'scm:git:git@github.com:CSSE497/pathfinder-android.git'
+                        developerConnection 'scm:git:git@github.com:CSSE497/pathfinder-android.git'
+                        url 'https://github.com/CSSE497/pathfinder-android'
+                    }
+
+                    licenses {
+                        license {
+                            name 'MIT License'
+                            url 'http://www.opensource.org/licenses/mit-license.php'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id 'robinsdm'
+                            name 'David Robinson'
+                            organization 'Pathfinder'
+                            organizationUrl = 'https://github.com/CSSE497/pathfinder'
+                            email 'robinsdm@rose-hulman.edu'
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 dependencies {
     compile 'javax.websocket:javax.websocket-client-api:1.1'
     compile 'org.glassfish.tyrus.bundles:tyrus-standalone-client:1.12'
     compile 'com.google.code.gson:gson:2.5'
-    testCompile group: 'junit', name: 'junit', version: '4.+'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
     testCompile 'org.glassfish.tyrus:tyrus-container-grizzly-server:1.12'
     testCompile 'org.glassfish.tyrus:tyrus-server:1.12'
 }

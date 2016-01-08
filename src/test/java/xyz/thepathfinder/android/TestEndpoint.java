@@ -1,4 +1,4 @@
-package xyz.thepathfinder.android.test;
+package xyz.thepathfinder.android;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -45,6 +45,7 @@ public class TestEndpoint {
             logger.info("Json incorrect");
             TestEndpoint.getMessenger().setCorrect(false);
         }
+        TestEndpoint.getMessenger().messagesReceived++;
     }
 
     @OnClose

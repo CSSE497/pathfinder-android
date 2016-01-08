@@ -1,4 +1,4 @@
-package xyz.thepathfinder.android.test;
+package xyz.thepathfinder.android;
 
 import java.util.logging.Logger;
 
@@ -9,6 +9,7 @@ public class TestMessager {
     public String receive;
     public String send;
     public boolean correct;
+    public int messagesReceived = 0;
 
     public void setReceive(String message) {
         this.receive = message;

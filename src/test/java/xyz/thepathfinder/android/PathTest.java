@@ -1,8 +1,7 @@
-package xyz.thepathfinder.android.test;
+package xyz.thepathfinder.android;
 
 import org.junit.Assert;
 import org.junit.Test;
-import xyz.thepathfinder.android.Path;
 
 public class PathTest {
     @Test

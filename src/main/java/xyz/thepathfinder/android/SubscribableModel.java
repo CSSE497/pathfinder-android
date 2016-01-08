@@ -2,7 +2,11 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
-public abstract class SubscribableModel<E extends Listener> extends Listenable<E> {
+/**
+ * @param <E> Listener type
+ * @author David Robinson
+ */
+public abstract class SubscribableModel<E extends Listener<? extends Model>> extends Model<E> {
 
     public SubscribableModel(String path, PathfinderServices services) {
         super(path, services);
@@ -11,7 +15,7 @@ public abstract class SubscribableModel<E extends Listener> extends Listenable<E
     public JsonObject getMessageHeader(String type) {
         JsonObject json = new JsonObject();
 
-        json.addProperty("type", type);
+        json.addProperty("message", type);
         json.addProperty("path", this.getPath());
         json.addProperty("model", this.getModel());
 
@@ -19,7 +23,7 @@ public abstract class SubscribableModel<E extends Listener> extends Listenable<E
     }
 
     public void subscribe() {
-        if(!this.isConnected()) {
+        if (!this.isConnected()) {
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 
@@ -33,7 +37,7 @@ public abstract class SubscribableModel<E extends Listener> extends Listenable<E
     }
 
     public void routeSubscribe() {
-        if(!this.isConnected()) {
+        if (!this.isConnected()) {
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 

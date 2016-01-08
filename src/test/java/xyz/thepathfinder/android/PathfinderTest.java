@@ -1,4 +1,4 @@
-package xyz.thepathfinder.android.test;
+package xyz.thepathfinder.android;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -6,8 +6,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import xyz.thepathfinder.android.Cluster;
-import xyz.thepathfinder.android.Pathfinder;
 
 import java.io.IOException;
 import java.net.URI;
@@ -38,6 +36,13 @@ public class PathfinderTest {
             Thread.sleep(10);
         }
     }
+
+    public void waitForMessages(TestMessager messager, int messageCount) throws InterruptedException {
+        while(messager.messagesReceived != messageCount) {
+            Thread.sleep(10);
+        }
+    }
+
 
     @Test(timeout = 10000)
     public void testConnection() throws URISyntaxException, IOException, InterruptedException {
@@ -85,12 +90,12 @@ public class PathfinderTest {
         JsonObject receive = new JsonObject();
         receive.addProperty("model", "Cluster");
         receive.addProperty("path", "/default");
-        receive.addProperty("type", "read");
+        receive.addProperty("message", "read");
 
         this.messager.setReceive(receive.toString());
 
         JsonObject send = new JsonObject();
-        send.addProperty("type", "model");
+        send.addProperty("message", "model");
         send.addProperty("path", "/default");
         send.addProperty("model", "Cluster");
 
@@ -111,8 +116,10 @@ public class PathfinderTest {
         cluster.connect();
         Assert.assertEquals(1, pathfinder.getSentMessageCount());
         Assert.assertEquals(0, pathfinder.getReceivedMessageCount());
+        this.waitForMessages(this.messager, 1);
         this.messager.send(send.toString());
         this.waitForMessages(pathfinder, 1);
+        System.out.println(this.messager.getCorrect());
         Assert.assertTrue(this.messager.getCorrect());
         //this.waitForMessages(pathfinder, 3);
         //SubscribableCrudModel transport = cluster.createTransport("hi", 32.32,42, TransportStatus.OFFLINE,null);
