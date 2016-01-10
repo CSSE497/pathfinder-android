@@ -1,27 +1,29 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.4'
+        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.4.0'
+    }
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
 
 apply plugin: 'java'
 apply plugin: 'jacoco'
 apply plugin: 'com.github.kt3k.coveralls'
 apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'com.jfrog.bintray'
 apply plugin: 'signing'
 
 group = "xyz.thepathfinder"
-archivesBaseName = "pathfinder-android"
 version = '0.0.1'
-
-repositories {
-    mavenCentral()
-}
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.0.1'
-    }
-}
 
 configure(allprojects) {
     ext.javadocLinks = [
@@ -57,71 +59,95 @@ task all(dependsOn: ['clean', 'build', 'test', 'javadocs', 'developerJavadocs', 
     compileJava.dependsOn clean
 }
 
-if(project.hasProperty("ossrhUsername") && project.hasProperty("ossrhPassword")) {
-    task javadocJar(type: Jar) {
-        classifier = 'javadoc'
-        from developerJavadocs
-    }
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from developerJavadocs
+}
 
-    task sourcesJar(type: Jar) {
-        classifier =  'sources'
-        from sourceSets.main.allSource
-    }
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
 
-    artifacts {
-        archives javadocJar, sourcesJar
-    }
+artifacts {
+    archives javadocJar, sourcesJar
+}
 
-    signing {
-        sign configurations.archives
-    }
+if(project.hasProperty('publishToJcenter')) {
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
 
-    uploadArchives {
-        repositories {
-            mavenDeployer {
-                beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-                repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                pom.withXml {
+                    asNode().appendNode("name", project.name)
+                    asNode().appendNode("description", "Android/Java client library for the Pathfinder service")
+                    asNode().appendNode("url", "http://thepathfinder.xyz")
+                    Node parent = asNode().appendNode("scm", "")
+                    new Node(parent, "connection", "scm:git:git@github.com:CSSE497/pathfinder-android.git")
+                    new Node(parent, "developerConnection", "scm:git:git@github.com:CSSE497/pathfinder-android.git")
+                    new Node(parent, "url", "https://github.com/CSSE497/pathfinder-android")
+                    parent = asNode().appendNode("licenses", "")
+                    parent = new Node(parent, "license", "")
+                    new Node(parent, "name", "MIT License")
+                    new Node(parent, "url", "http://www.opensource.org/licenses/mit-license.php")
+                    parent = asNode().appendNode("developers", "")
+                    parent = new Node(parent, "developer", "")
+                    new Node(parent, "id", property('id'))
+                    new Node(parent, "name", property('username'))
+                    new Node(parent, "organization", property('organization'))
+                    new Node(parent, "organizationUrl", property('organizationUrl'))
+                    new Node(parent, "email", property('email'))
                 }
 
-                snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                    authentication(userName: ossrhUsername, password: ossrhPassword)
+                artifact sourcesJar
+                artifact javadocJar
+            }
+        }
+    }
+
+    bintray {
+        user = property('bintrayUser')
+        key = property('bintrayKey')
+
+        publications = ['mavenJava']
+
+        dryRun = false
+        publish = true
+        pkg {
+            repo = 'thepathfinder'
+            userOrg = 'csse497'
+            name = 'pathfinder-android'
+            desc = 'Android/Java client library for the Pathfinder service'
+            websiteUrl = 'http://thepathfinder.xyz'
+            issueTrackerUrl = 'https://github.com/CSSE497/pathfinder-android/issues'
+            vcsUrl = 'https://github.com/CSSE497/pathfinder-android.git'
+            licenses = ['MIT']
+            labels = ['path finding']
+            publicDownloadNumbers = true
+
+            version {
+                name = project.version
+                desc = 'Initial release'
+                released = new Date()
+                vcsTag = project.version
+
+                gpg {
+                    sign = true
+                    passphrase = property('signing.password')
                 }
 
-                pom.project {
-                    name 'Pathfinder Android'
-                    packaging 'jar'
-                    description 'Android/Java client library for the Pathfinder service'
-                    url 'http://thepathfinder.xyz'
-
-                    scm {
-                        connection 'scm:git:git@github.com:CSSE497/pathfinder-android.git'
-                        developerConnection 'scm:git:git@github.com:CSSE497/pathfinder-android.git'
-                        url 'https://github.com/CSSE497/pathfinder-android'
-                    }
-
-                    licenses {
-                        license {
-                            name 'MIT License'
-                            url 'http://www.opensource.org/licenses/mit-license.php'
-                        }
-                    }
-
-                    developers {
-                        developer {
-                            id 'robinsdm'
-                            name 'David Robinson'
-                            organization 'Pathfinder'
-                            organizationUrl = 'https://github.com/CSSE497/pathfinder'
-                            email 'robinsdm@rose-hulman.edu'
-                        }
-                    }
+                mavenCentralSync {
+                    sync = true
+                    user = property('ossrhUsername')
+                    password = property('ossrhPassword')
+                    close = '1'
                 }
             }
         }
     }
 }
+
 
 dependencies {
     compile 'javax.websocket:javax.websocket-client-api:1.1'
