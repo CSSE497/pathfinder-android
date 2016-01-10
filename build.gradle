@@ -73,7 +73,7 @@ artifacts {
     archives javadocJar, sourcesJar
 }
 
-if(project.hasProperty('publish')) {
+if(project.hasProperty('bintrayUser')) {
     publishing {
         publications {
             mavenJava(MavenPublication) {
