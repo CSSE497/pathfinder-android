@@ -188,11 +188,10 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * Creates a commodity with a values specified in the JSON object.
      *
      * @param commodityJson a JSON object that represents a commodity
-     * @param services      a pathfinder services object
      * @return A commodity with the values in the JSON object
      */
-    private Commodity createCommodity(JsonObject commodityJson, PathfinderServices services) {
-        return Commodity.getInstance(commodityJson, services);
+    private Commodity createCommodity(JsonObject commodityJson) {
+        return Commodity.getInstance(commodityJson, this.getServices());
     }
 
     /**
@@ -398,8 +397,8 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      *
      * @return A collection of routes.
      */
-    public List<Route> getRoutes() {
-        return this.routes;
+    public Collection<Route> getRoutes() {
+        return Collections.<Route>unmodifiableCollection(this.routes);
     }
 
     /**
@@ -616,7 +615,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         this.setRoutes(routes);
 
         for (ClusterListener listener : this.getListeners()) {
-            listener.routed(this.getRoutes());
+            listener.routed(new ArrayList<Route>(this.getRoutes()));
         }
     }
 }

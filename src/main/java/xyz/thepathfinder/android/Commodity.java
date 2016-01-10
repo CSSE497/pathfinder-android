@@ -8,18 +8,19 @@ import java.util.logging.Logger;
 
 /**
  * Interface to the Pathfinder server's commodity API. A commodity may be create
- * by a {@link Cluster} object with the {@link Cluster#createCommodity(JsonObject, PathfinderServices)}
+ * by a {@link Cluster} object with the {@link Cluster#createCommodity(String, double, double, double, double, CommodityStatus, JsonObject)}
  * method.
  *
  * <p>
  * Be careful with the update methods, they do not update the object immediately.
- * They send the updates to the pathfinder server. If server responds the commodity's
+ * They send the updates to the pathfinder server. If the server responds the commodity's
  * fields will then be updated. To listen for updates add a {@link CommodityListener}.
  * </p>
  *
  * @author David Robinson
  * @see Cluster
  * @see CommodityListener
+ * @see CommodityStatus
  * @see Transport
  */
 public class Commodity extends SubscribableCrudModel<CommodityListener> {
@@ -536,6 +537,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected boolean updateFields(JsonObject json) {
         double prevStartLatitude;
         double prevStartLongitude;
@@ -640,6 +642,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected void route(JsonObject json, PathfinderServices services) {
         JsonObject route = json.getAsJsonObject("value");
         this.setRoute(new Route(route, services));

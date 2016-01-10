@@ -30,8 +30,7 @@ import java.util.logging.Logger;
  * Pathfinder service is opened.
  * </p>
  *
- * <pre><code>   URI pathfinderURL = new URI("ws://api.thepathfinder.xyz:9000/socket");
- *   Pathfinder pathfinder = new Pathfinder("myAppId", "UserJWT", pathfinderURL);
+ * <pre><code>   Pathfinder pathfinder = new Pathfinder("myAppId", "UserJWT");
  *   pathfinder.connect();
  *   Cluster cluster = pathfinder.getCluster("/default/cluster1/subcluster2");
  *   MyClusterListener clusterListener = new MyClusterListener();
