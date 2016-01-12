@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
  *
  * @author David Robinson
  */
-class Action {
+public class Action {
 
     /**
      * Represents the type of action to occur at that location.

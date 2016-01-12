@@ -12,7 +12,7 @@ import java.util.List;
  *
  * @author David Robinson
  */
-class Route {
+public class Route {
 
     /**
      * Transport used for the route.
