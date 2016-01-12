@@ -405,7 +405,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("clusterId", this.getPath());
+        json.addProperty("clusterId", Long.parseLong(this.getPath()));
         //TODO revert after path update
         //json.addProperty("path", this.getPath());
         json.addProperty("model", this.getModel());

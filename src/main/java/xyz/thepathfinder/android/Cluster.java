@@ -427,7 +427,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("parentId", this.getPath());
+        json.addProperty("parentId", Long.parseLong(this.getPath()));
         //TODO revert after path update
         //json.addProperty("path", this.getPath());
         json.addProperty("model", this.getModel());
