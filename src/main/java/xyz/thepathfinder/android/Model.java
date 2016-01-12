@@ -19,7 +19,10 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
     /**
      * The path of the model.
      */
-    private final Path path;
+
+    private Path path;
+    //TODO revert after path update
+    //private final Path path;
 
     /**
      * A pathfinder services object to have access to the model registry
@@ -146,49 +149,49 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
             return true;
         }
 
-        if (reason.equals("model")) {
+        if (reason.equals("Model")) {
             for (Listener listener : listeners) {
                 listener.connected(this);
             }
             return updated;
         }
 
-        if (reason.equals("subscribed")) {
+        if (reason.equals("Subscribed")) {
             for (Listener listener : listeners) {
                 listener.subscribed(this);
             }
             return updated;
         }
 
-        if (reason.equals("routeSubscribed")) {
+        if (reason.equals("RouteSubscribed")) {
             for (Listener listener : listeners) {
                 listener.routeSubscribed(this);
             }
             return updated;
         }
 
-        if (reason.equals("unsubscribed")) {
+        if (reason.equals("Unsubscribed")) {
             for (Listener listener : listeners) {
                 listener.unsubscribed(this);
             }
             return updated;
         }
 
-        if (reason.equals("routeUnsubscribed")) {
+        if (reason.equals("RouteUnsubscribed")) {
             for (Listener listener : listeners) {
                 listener.routeUnsubscribed(this);
             }
             return updated;
         }
 
-        if (reason.equals("created")) {
+        if (reason.equals("Created")) {
             for (Listener listener : listeners) {
                 listener.created(this);
             }
             return updated;
         }
 
-        if (reason.equals("deleted")) {
+        if (reason.equals("Deleted")) {
             for (Listener listener : listeners) {
                 this.setConnected(false);
                 listener.deleted(this);
@@ -196,7 +199,7 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
             return updated;
         }
 
-        if (reason.equals("error") && value != null) {
+        if (reason.equals("Error") && value != null) {
             logger.log(Level.WARNING, "Error received: " + json);
             for (Listener listener : listeners) {
                 listener.error(value.get("reason").getAsString());
@@ -263,4 +266,10 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
      */
     protected abstract void route(JsonObject json, PathfinderServices services);
 
+    //TODO remove after path update
+    protected void setPath(String path) {
+        this.getServices().getRegistry().unregisterModel(this.path.getPath());
+        this.path = new Path(path);
+        this.getServices().getRegistry().registerModel(this);
+    }
 }

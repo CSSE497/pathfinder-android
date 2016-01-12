@@ -143,13 +143,21 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @return Whether the json can be parsed to a cluster.
      */
     private static boolean checkClusterFields(JsonObject clusterJson) {
-        return clusterJson.has("path") &&
+        return clusterJson.has("id") &&
                 clusterJson.has("transports") &&
                 clusterJson.get("transports").isJsonArray() &&
                 clusterJson.has("commodities") &&
                 clusterJson.get("commodities").isJsonArray() &&
                 clusterJson.has("subClusters") &&
                 clusterJson.get("subClusters").isJsonArray();
+        //TODO revert after path update
+        /*return clusterJson.has("path") &&
+                clusterJson.has("transports") &&
+                clusterJson.get("transports").isJsonArray() &&
+                clusterJson.has("commodities") &&
+                clusterJson.get("commodities").isJsonArray() &&
+                clusterJson.has("subClusters") &&
+                clusterJson.get("subClusters").isJsonArray();*/
     }
 
     /**
@@ -159,7 +167,9 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @return The path of the cluster
      */
     private static String getPath(JsonObject clusterJson) {
-        return clusterJson.get("path").getAsString();
+        return clusterJson.get("id").getAsString();
+        //TODO revert after path update
+        //return clusterJson.get("path").getAsString();
     }
 
     /**
@@ -416,7 +426,9 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("path", this.getPath());
+        json.addProperty("parentId", this.getPath());
+        //TODO revert after path update
+        //json.addProperty("path", this.getPath());
         json.addProperty("model", this.getModel());
 
         return json;
@@ -441,7 +453,9 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
             JsonArray commodities = json.getAsJsonArray("commodities");
 
             for (JsonElement commodityJson : commodities) {
-                String path = ((JsonObject) commodityJson).get("path").getAsString();
+                String path = ((JsonObject) commodityJson).get("id").getAsString();
+                //TODO revert after path update
+                //String path = ((JsonObject) commodityJson).get("path").getAsString();
                 Commodity commodity = Commodity.getInstance(path, this.getServices());
 
                 if (commodity.notifyUpdate(null, (JsonObject) commodityJson)) {
@@ -458,7 +472,9 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
             JsonArray clusters = json.getAsJsonArray("subClusters");
 
             for (JsonElement clusterJson : clusters) {
-                String path = ((JsonObject) clusterJson).get("path").getAsString();
+                String path = ((JsonObject) clusterJson).get("id").getAsString();
+                //TODO revert after path update
+                //String path = ((JsonObject) clusterJson).get("path").getAsString();
                 Cluster cluster = Cluster.getInstance(path, this.getServices());
 
                 if (cluster.notifyUpdate(null, (JsonObject) clusterJson)) {
@@ -475,7 +491,9 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
             JsonArray transports = json.getAsJsonArray("transports");
 
             for (JsonElement transportJson : transports) {
-                String path = ((JsonObject) transportJson).get("path").getAsString();
+                String path = ((JsonObject) transportJson).get("id").getAsString();
+                //TODO revert after path update
+                //String path = ((JsonObject) transportJson).get("path").getAsString();
                 Transport transport = Transport.getInstance(path, this.getServices());
 
                 if (transport.notifyUpdate(null, (JsonObject) transportJson)) {
@@ -585,7 +603,8 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
             }
         }
 
-        String parentPath = this.getParentPath();
+        //TODO revert after path update
+        /*String parentPath = this.getParentPath();
         Cluster parentCluster = Cluster.getInstance(parentPath, this.getServices());
         if (updated && parentCluster != null) {
 
@@ -596,7 +615,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
                 listener.subclusterUpdated(this);
                 listener.subclustersUpdated(clusters);
             }
-        }
+        }*/
 
         return updated;
     }
@@ -616,6 +635,18 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
         for (ClusterListener listener : this.getListeners()) {
             listener.routed(new ArrayList<Route>(this.getRoutes()));
+        }
+    }
+
+    //TODO remove after path update
+    public void connect() {
+        if(this.getPath().equals(Path.DEFAULT_PATH)) {
+            JsonObject message = new JsonObject();
+            message.addProperty("message", "GetApplicationCluster");
+            message.addProperty("id", this.getServices().getConnection().getApplictionIdentifier());
+            this.getServices().getConnection().sendMessage(message.toString());
+        } else {
+            super.connect();
         }
     }
 }

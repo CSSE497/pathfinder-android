@@ -48,16 +48,35 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
         logger.log(Level.INFO, "Received json: " + message);
         this.receivedMessageCount++;
         JsonObject json = new JsonParser().parse(message).getAsJsonObject();
-        if (!json.has("message") || !json.has("model") || !json.has("path")) {
+
+        if (!json.has("message") || !json.has("model")) {
             logger.log(Level.WARNING, "Ignoring invalid message: " + json.toString());
-        } else {
+        }
+        //TODO revert after path update
+        /*if (!json.has("message") || !json.has("model") || !json.has("path")) {
+            logger.log(Level.WARNING, "Ignoring invalid message: " + json.toString());
+        }*/ else {
             String type = json.get("message").getAsString();
-            String path = json.get("path").getAsString();
-            Model model = this.registry.getModel(path);
+
+            //TODO revert after path update
+            Model model;
+            if(type.equals("ApplicationCluster")) {
+                model = this.registry.getModel(Path.DEFAULT_PATH);
+                model.setPath(json.get("clusterId").getAsString());
+                ((SubscribableCrudModel) model).connect();
+            } else {
+                String path = json.getAsJsonObject("value").get("id").getAsString();
+                model = this.registry.getModel(path);
+                model.notifyUpdate(type, json);
+            }
+            //String path = json.get("path").getAsString();
+            //Model model = this.registry.getModel(path);
+
 
             logger.log(Level.INFO, "Notifying " + model.getPath() + " of message");
 
-            model.notifyUpdate(type, json);
+            //TODO revert after path update
+            //model.notifyUpdate(type, json);
         }
     }
 

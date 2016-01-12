@@ -2,7 +2,6 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -192,7 +191,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * <tt>false</tt> otherwise.
      */
     private static boolean checkCommodityFields(JsonObject commodityJson) {
-        return Commodity.checkCommodityField(commodityJson, "path") &&
+        return Commodity.checkCommodityField(commodityJson, "id") &&
                 Commodity.checkCommodityField(commodityJson, "startLatitude") &&
                 Commodity.checkCommodityField(commodityJson, "startLongitude") &&
                 Commodity.checkCommodityField(commodityJson, "endLatitude") &&
@@ -200,6 +199,15 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
                 Commodity.checkCommodityField(commodityJson, "status") &&
                 Commodity.checkCommodityField(commodityJson, "metadata") &&
                 commodityJson.get("metadata").isJsonObject();
+        //TODO revert after path update
+        /*return Commodity.checkCommodityField(commodityJson, "path") &&
+                Commodity.checkCommodityField(commodityJson, "startLatitude") &&
+                Commodity.checkCommodityField(commodityJson, "startLongitude") &&
+                Commodity.checkCommodityField(commodityJson, "endLatitude") &&
+                Commodity.checkCommodityField(commodityJson, "endLongitude") &&
+                Commodity.checkCommodityField(commodityJson, "status") &&
+                Commodity.checkCommodityField(commodityJson, "metadata") &&
+                commodityJson.get("metadata").isJsonObject();*/
     }
 
     /**
@@ -209,7 +217,9 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @return the path of the object.
      */
     private static String getPath(JsonObject commodityJson) {
-        return commodityJson.get("path").getAsString();
+        return commodityJson.get("id").getAsString();
+        //TODO revert after path update
+        //return commodityJson.get("path").getAsString();
     }
 
     /**
@@ -522,7 +532,9 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("path", this.getPath());
+        json.addProperty("clusterId", this.getPath());
+        //TODO revert after path update
+        //json.addProperty("path", this.getPath());
         json.addProperty("model", this.getModel());
         json.addProperty("startLatitude", this.getStartLatitude());
         json.addProperty("startLongitude", this.getStartLongitude());
@@ -623,7 +635,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
             updated = true;
         }
 
-        if (updated) {
+        //TODO revert after path update
+        /*if (updated) {
             String parentPath = this.getParentPath();
             Cluster parentCluster = Cluster.getInstance(parentPath, this.getServices());
 
@@ -634,7 +647,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
                 listener.commodityUpdated(this);
                 listener.commoditiesUpdated(commodities);
             }
-        }
+        }*/
 
         return updated;
     }

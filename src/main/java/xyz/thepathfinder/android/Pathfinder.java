@@ -60,7 +60,10 @@ public class Pathfinder {
     /**
      * Transport model name used in requests to the Pathfinder server.
      */
-    protected static String TRANSPORT = "Transport";
+    protected static String TRANSPORT = "Vehicle";
+
+    //TODO revert after path update
+    //protected static String TRANSPORT = "Transport";
 
     /**
      * Keeps track of all the Pathfinder models and connection to the server.

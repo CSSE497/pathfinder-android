@@ -138,4 +138,9 @@ class Connection extends Endpoint {
     public void close(CloseReason reason) throws IOException {
         this.session.close(reason);
     }
+
+    //TODO remove after path update
+    public String getApplictionIdentifier() {
+        return this.applictionIdentifier;
+    }
 }

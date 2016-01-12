@@ -2,9 +2,7 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Interface to the Pathfinder server's transport API. A transport may be create
@@ -166,12 +164,19 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @return <tt>true</tt> if the JSON can be parsed to a transport. <tt>false</tt> otherwise.
      */
     private static boolean checkTransportFields(JsonObject transportJson) {
-        return Transport.checkTransportField(transportJson, "path") &&
+        return Transport.checkTransportField(transportJson, "id") &&
                 Transport.checkTransportField(transportJson, "latitude") &&
                 Transport.checkTransportField(transportJson, "longitude") &&
                 Transport.checkTransportField(transportJson, "status") &&
                 Transport.checkTransportField(transportJson, "metadata") &&
                 !transportJson.get("metadata").isJsonObject();
+        //TODO revert after path update
+        /*return Transport.checkTransportField(transportJson, "path") &&
+                Transport.checkTransportField(transportJson, "latitude") &&
+                Transport.checkTransportField(transportJson, "longitude") &&
+                Transport.checkTransportField(transportJson, "status") &&
+                Transport.checkTransportField(transportJson, "metadata") &&
+                !transportJson.get("metadata").isJsonObject();*/
     }
 
     /**
@@ -181,7 +186,9 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @return the path.
      */
     private static String getPath(JsonObject transportJson) {
-        return transportJson.get("path").getAsString();
+        return transportJson.get("id").getAsString();
+        //TODO revert after path update
+        //return transportJson.get("path").getAsString();
     }
 
     /**
@@ -397,7 +404,9 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("path", this.getPath());
+        json.addProperty("clusterId", this.getPath());
+        //TODO revert after path update
+        //json.addProperty("path", this.getPath());
         json.addProperty("model", this.getModel());
         json.addProperty("latitude", this.getLatitude());
         json.addProperty("longitude", this.getLongitude());
@@ -469,7 +478,8 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
             updated = true;
         }
 
-        if (updated) {
+        //TODO revert after path update
+        /*if (updated) {
             String parentPath = this.getParentPath();
             Cluster parentCluster = Cluster.getInstance(parentPath, this.getServices());
 
@@ -480,7 +490,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
                 listener.transportUpdated(this);
                 listener.transportsUpdated(transports);
             }
-        }
+        }*/
 
         return updated;
     }

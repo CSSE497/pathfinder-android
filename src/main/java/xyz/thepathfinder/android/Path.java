@@ -70,11 +70,13 @@ class Path {
      * @throws IllegalArgumentException if the name is invalid, see {@link Path#isValidName(String)}.
      */
     public String getChildPath(String name) {
-        if (Path.isValidName(name)) {
+        return this.getPath();
+        //TODO revert after path update
+        /*if (Path.isValidName(name)) {
             return this.path + Path.PATH_SEPARATOR + name;
         } else {
             throw new IllegalArgumentException("Invalid path name: " + name);
-        }
+        }*/
     }
 
     /**
