@@ -31,7 +31,7 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
     /**
      * Creates the model at the path specified on the server.
      */
-    protected void create() {
+    public void create() {
         if (this.isConnected()) {
             throw new IllegalStateException("Already created");
         }
