@@ -24,7 +24,7 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
      * Reads the model specified by the path from the server.
      */
     public void connect() {
-        JsonObject json = this.getMessageHeader("read");
+        JsonObject json = this.getMessageHeader("Read");
         this.getServices().getConnection().sendMessage(json.toString());
     }
 
@@ -36,7 +36,7 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
             throw new IllegalStateException("Already created");
         }
 
-        JsonObject json = this.getMessageHeader("create");
+        JsonObject json = this.getMessageHeader("Create");
         json.add("value", this.createValueJson());
 
         this.getServices().getConnection().sendMessage(json.toString());
@@ -50,7 +50,7 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 
-        JsonObject json = this.getMessageHeader("delete");
+        JsonObject json = this.getMessageHeader("Delete");
         this.getServices().getConnection().sendMessage(json.toString());
     }
 
@@ -64,7 +64,7 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 
-        JsonObject json = this.getMessageHeader("update");
+        JsonObject json = this.getMessageHeader("Update");
         json.add("value", value);
 
         this.getServices().getConnection().sendMessage(json.toString());
