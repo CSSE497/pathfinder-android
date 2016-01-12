@@ -49,7 +49,7 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
         this.receivedMessageCount++;
         JsonObject json = new JsonParser().parse(message).getAsJsonObject();
 
-        if (!json.has("message") || !json.has("model")) {
+        if (!json.has("message")) {
             logger.log(Level.WARNING, "Ignoring invalid message: " + json.toString());
         }
         //TODO revert after path update
