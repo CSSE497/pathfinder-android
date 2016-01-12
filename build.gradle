@@ -23,7 +23,11 @@ apply plugin: 'com.jfrog.bintray'
 apply plugin: 'signing'
 
 group = "xyz.thepathfinder"
-version = '0.0.1'
+version = '0.0.2'
+
+apply plugin: 'java'
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
 
 configure(allprojects) {
     ext.javadocLinks = [
@@ -55,10 +59,6 @@ task developerJavadocs(type: Javadoc) {
     options.links(project.ext.javadocLinks)
 }
 
-task all(dependsOn: ['clean', 'build', 'test', 'javadocs', 'developerJavadocs', 'jar']) {
-    compileJava.dependsOn clean
-}
-
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from developerJavadocs
@@ -67,6 +67,10 @@ task javadocJar(type: Jar) {
 task sourcesJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allSource
+}
+
+task all(dependsOn: ['clean', 'build', 'test', 'javadocs', 'developerJavadocs', 'jar', 'javadocJar', 'sourcesJar']) {
+    compileJava.dependsOn clean
 }
 
 artifacts {
