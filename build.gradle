@@ -21,9 +21,12 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'signing'
+apply plugin: 'java'
 
 group = "xyz.thepathfinder"
-version = '0.0.1'
+version = '0.0.3'
+
+
 
 configure(allprojects) {
     ext.javadocLinks = [
@@ -55,10 +58,6 @@ task developerJavadocs(type: Javadoc) {
     options.links(project.ext.javadocLinks)
 }
 
-task all(dependsOn: ['clean', 'build', 'test', 'javadocs', 'developerJavadocs', 'jar']) {
-    compileJava.dependsOn clean
-}
-
 task javadocJar(type: Jar) {
     classifier = 'javadoc'
     from developerJavadocs
@@ -67,6 +66,10 @@ task javadocJar(type: Jar) {
 task sourcesJar(type: Jar) {
     classifier = 'sources'
     from sourceSets.main.allSource
+}
+
+task all(dependsOn: ['clean', 'build', 'test', 'javadocs', 'developerJavadocs', 'jar', 'javadocJar', 'sourcesJar']) {
+    compileJava.dependsOn clean
 }
 
 artifacts {
