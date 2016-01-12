@@ -48,6 +48,11 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
         }
 
         JsonObject json = this.getMessageHeader("Subscribe");
+        //TODO revert after path update
+        if(this.getModel().equals(Pathfinder.CLUSTER)) {
+            json.remove("id");
+            json.addProperty("clusterId", Long.parseLong(this.getPath()));
+        }
         this.getServices().getConnection().sendMessage(json.toString());
     }
 
@@ -68,6 +73,11 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
         }
 
         JsonObject json = this.getMessageHeader("RouteSubscribe");
+        //TODO revert after path update
+        if(this.getModel().equals(Pathfinder.CLUSTER)) {
+            json.remove("id");
+            json.addProperty("clusterId", Long.parseLong(this.getPath()));
+        }
         this.getServices().getConnection().sendMessage(json.toString());
     }
 

@@ -37,6 +37,10 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
         }
 
         JsonObject json = this.getMessageHeader("Create");
+
+        //TODO revert after path update
+        json.remove("id");
+
         json.add("value", this.createValueJson());
 
         this.getServices().getConnection().sendMessage(json.toString());
