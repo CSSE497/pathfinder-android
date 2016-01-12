@@ -80,7 +80,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
         if (isRegistered) {
-            throw new IllegalArgumentException("Commodity path already exists: " + path);
+            //TODO revert after path update
+            //throw new IllegalArgumentException("Commodity path already exists: " + path);
         } else {
             this.getServices().getRegistry().registerModel(this);
         }

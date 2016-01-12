@@ -69,17 +69,18 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     private Cluster(String path, PathfinderServices services) {
         super(path, services);
 
+        boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
+        if (isRegistered) {
+            //TODO revert after path update
+            //throw new IllegalArgumentException("Cluster path already exists: " + path);
+        } else {
+            this.getServices().getRegistry().registerModel(this);
+        }
+
         this.transports = new HashMap<String, Transport>();
         this.commodities = new HashMap<String, Commodity>();
         this.subclusters = new HashMap<String, Cluster>();
         this.routes = new ArrayList<Route>();
-
-        boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
-        if (isRegistered) {
-            throw new IllegalArgumentException("Cluster path already exists: " + path);
-        } else {
-            this.getServices().getRegistry().registerModel(this);
-        }
     }
 
     /**

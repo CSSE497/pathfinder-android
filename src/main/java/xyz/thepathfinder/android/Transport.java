@@ -65,7 +65,8 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
         if (isRegistered) {
-            throw new IllegalArgumentException("Transport path already exists: " + path);
+            //TODO revert after path update
+            //throw new IllegalArgumentException("Transport path already exists: " + path);
         } else {
             this.getServices().getRegistry().registerModel(this);
         }
