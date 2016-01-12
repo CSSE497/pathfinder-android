@@ -21,13 +21,12 @@ apply plugin: 'maven'
 apply plugin: 'maven-publish'
 apply plugin: 'com.jfrog.bintray'
 apply plugin: 'signing'
+apply plugin: 'java'
 
 group = "xyz.thepathfinder"
 version = '0.0.2'
 
-apply plugin: 'java'
-sourceCompatibility = JavaVersion.VERSION_1_7
-targetCompatibility = JavaVersion.VERSION_1_7
+
 
 configure(allprojects) {
     ext.javadocLinks = [
