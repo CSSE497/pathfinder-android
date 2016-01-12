@@ -222,6 +222,7 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
             return false;
         }
 
+        this.setConnected(true);
         if (reason != null) {
             return this.updateType(reason, json);
         } else {
