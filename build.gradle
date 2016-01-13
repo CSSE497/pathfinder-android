@@ -24,9 +24,6 @@ apply plugin: 'signing'
 apply plugin: 'java'
 
 group = "xyz.thepathfinder"
-version = '0.0.5'
-
-
 
 configure(allprojects) {
     ext.javadocLinks = [
@@ -131,10 +128,28 @@ if(project.hasProperty('publishToJcenter')) {
             publicDownloadNumbers = true
 
             version {
-                name = project.version
-                desc = 'Initial release'
-                released = new Date()
-                vcsTag = project.version
+                def versionPropsFile = file('version.properties')
+
+                if (versionPropsFile.canRead()) {
+                    def Properties versionProps = new Properties()
+
+                    versionProps.load(new FileInputStream(versionPropsFile))
+
+                    def code = versionProps['VERSION_CODE'].toInteger() + 1
+
+                    versionProps['VERSION_CODE'] = code.toString()
+                    versionProps.store(versionPropsFile.newWriter(), null)
+
+                    name = code
+                    desc = 'Initial release'
+                    released = new Date()
+                    vcsTag = code
+                }
+
+                gpg {
+                    sign = true
+                    passphrase = property('signing.password')
+                }
 
                 mavenCentralSync {
                     sync = true

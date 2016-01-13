@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * <p>
@@ -31,6 +32,8 @@ import java.util.Map;
  * @see Transport
  */
 public class Cluster extends SubscribableCrudModel<ClusterListener> {
+
+    private static final Logger logger = Logger.getLogger(Cluster.class.getName());
 
     /**
      * String used in the model field of the pathfinder requests.
@@ -628,12 +631,15 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         JsonArray routesJson = json.getAsJsonArray("route");
         List<Route> routes = new ArrayList<Route>();
 
+        logger.info("Adding routes to: " + this.getPath());
         for (JsonElement route : routesJson) {
             routes.add(new Route((JsonObject) route, services));
         }
 
+        logger.info("Set routes at: " + this.getPath());
         this.setRoutes(routes);
 
+        logger.info("Updating cluster listeners: " + this.getPath());
         for (ClusterListener listener : this.getListeners()) {
             listener.routed(new ArrayList<Route>(this.getRoutes()));
         }

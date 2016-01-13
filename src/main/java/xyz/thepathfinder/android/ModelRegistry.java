@@ -2,6 +2,7 @@ package xyz.thepathfinder.android;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * The <tt>ModelRegistry</tt> keeps track of all {@link Model}s created by
@@ -10,6 +11,8 @@ import java.util.Map;
  * @author David Robinson
  */
 class ModelRegistry {
+
+    private static final Logger logger = Logger.getLogger(ModelRegistry.class.getName());
 
     /**
      * Map to all the {@link Model}s created by the SDK. The keys are the string
@@ -68,6 +71,7 @@ class ModelRegistry {
      * with a path it returns <tt>null</tt>.
      */
     protected Model getModel(String path) {
+        logger.info("Model requested: " + path);
         return this.models.get(path);
     }
 }

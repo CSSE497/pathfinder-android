@@ -41,7 +41,11 @@ public class Action {
         this.status = Action.getStatus(actionJson);
         this.latitude = Action.getLatitude(actionJson);
         this.longitude = Action.getLongitude(actionJson);
-        this.model = Action.getModel(actionJson, services);
+        if(!this.status.equals(ActionStatus.START)) {
+            this.model = Action.getModel(actionJson, services);
+        } else {
+            this.model = null;
+        }
     }
 
     /**

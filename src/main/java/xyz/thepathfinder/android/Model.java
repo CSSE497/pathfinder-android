@@ -131,20 +131,20 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
 
         List<E> listeners = this.getListeners();
 
-        if (updated && !reason.equals("updated")) {
+        if (updated && !reason.equals("Updated")) {
             for (Listener listener : listeners) {
                 listener.updated(this);
             }
         }
 
-        if (reason.equals("updated")) {
+        if (reason.equals("Updated")) {
             for (Listener listener : listeners) {
                 listener.updated(this);
             }
             return updated;
         }
 
-        if (reason.equals("routed")) {
+        if (reason.equals("Routed")) {
             this.route(json, this.getServices());
             return true;
         }
