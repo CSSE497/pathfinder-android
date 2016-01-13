@@ -24,6 +24,7 @@ apply plugin: 'signing'
 apply plugin: 'java'
 
 group = "xyz.thepathfinder"
+version = 0.0
 
 configure(allprojects) {
     ext.javadocLinks = [
@@ -140,10 +141,10 @@ if(project.hasProperty('publishToJcenter')) {
                     versionProps['VERSION_CODE'] = code.toString()
                     versionProps.store(versionPropsFile.newWriter(), null)
 
-                    name = code
+                    name = project.version + "." + code
                     desc = 'Initial release'
                     released = new Date()
-                    vcsTag = code
+                    vcsTag = project.version + "." + code
                 }
 
                 gpg {
@@ -155,13 +156,12 @@ if(project.hasProperty('publishToJcenter')) {
                     sync = true
                     user = property('ossrhUsername')
                     password = property('ossrhPassword')
-                    close = '1'
+                    close = '0'
                 }
             }
         }
     }
 }
-
 
 dependencies {
     compile 'org.glassfish.tyrus.bundles:tyrus-standalone-client:1.12'
