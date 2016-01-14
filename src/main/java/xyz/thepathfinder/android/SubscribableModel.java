@@ -2,6 +2,8 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
+import java.util.logging.Logger;
+
 /**
  * Access to subscribe operations on models.
  *
@@ -9,6 +11,8 @@ import com.google.gson.JsonObject;
  * @author David Robinson
  */
 public abstract class SubscribableModel<E extends Listener<? extends Model>> extends Model<E> {
+
+    private static final Logger logger = Logger.getLogger(SubscribableModel.class.getName());
 
     /**
      * Constructs a subcribable model.
@@ -30,6 +34,7 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
         JsonObject json = new JsonObject();
 
         json.addProperty("message", type);
+
         json.addProperty("path", this.getPath());
         json.addProperty("model", this.getModel());
 
@@ -41,10 +46,11 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
      */
     public void subscribe() {
         if (!this.isConnected()) {
+            logger.warning("Cannot subscribe to a model you are not connected to");
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 
-        JsonObject json = this.getMessageHeader("subscribe");
+        JsonObject json = this.getMessageHeader("Subscribe");
         this.getServices().getConnection().sendMessage(json.toString());
     }
 
@@ -61,10 +67,11 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
      */
     public void routeSubscribe() {
         if (!this.isConnected()) {
+            logger.warning("Cannot route subscribe to a model you are not connected to");
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 
-        JsonObject json = this.getMessageHeader("routeSubscribe");
+        JsonObject json = this.getMessageHeader("RouteSubscribe");
         this.getServices().getConnection().sendMessage(json.toString());
     }
 

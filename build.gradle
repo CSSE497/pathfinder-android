@@ -24,9 +24,7 @@ apply plugin: 'signing'
 apply plugin: 'java'
 
 group = "xyz.thepathfinder"
-version = '0.0.3'
-
-
+version = 0.0
 
 configure(allprojects) {
     ext.javadocLinks = [
@@ -34,6 +32,23 @@ configure(allprojects) {
             "http://docs.oracle.com/javaee/7/api/",
             "http://google.github.io/gson/apidocs/"
     ] as String[]
+}
+
+task incrementVersion << {
+    def versionPropsFile = file('version.properties')
+
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        def code = versionProps['VERSION_CODE'].toInteger() + 1
+
+        versionProps['VERSION_CODE'] = code.toString()
+        versionProps.store(versionPropsFile.newWriter(), null)
+
+        project.version = project.version + "." + code
+    }
 }
 
 jacocoTestReport {
@@ -70,6 +85,11 @@ task sourcesJar(type: Jar) {
 
 task all(dependsOn: ['clean', 'build', 'test', 'javadocs', 'developerJavadocs', 'jar', 'javadocJar', 'sourcesJar']) {
     compileJava.dependsOn clean
+}
+
+task upload(dependsOn: ['build', 'bintrayUpload', 'incrementVersion']) {
+    bintrayUpload.dependsOn build
+    incrementVersion.dependsOn bintrayUpload
 }
 
 artifacts {
@@ -131,25 +151,28 @@ if(project.hasProperty('publishToJcenter')) {
             publicDownloadNumbers = true
 
             version {
-                name = project.version
-                desc = 'Initial release'
-                released = new Date()
-                vcsTag = project.version
+                    name = project.version
+                    desc = 'Initial release'
+                    released = new Date()
+                    vcsTag = project.version
+
+                gpg {
+                    sign = true
+                    passphrase = property('signing.password')
+                }
 
                 mavenCentralSync {
                     sync = true
                     user = property('ossrhUsername')
                     password = property('ossrhPassword')
-                    close = '1'
+                    close = '0'
                 }
             }
         }
     }
 }
 
-
 dependencies {
-    compile 'javax.websocket:javax.websocket-client-api:1.1'
     compile 'org.glassfish.tyrus.bundles:tyrus-standalone-client:1.12'
     compile 'com.google.code.gson:gson:2.5'
     testCompile group: 'junit', name: 'junit', version: '4.12'

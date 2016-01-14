@@ -1,11 +1,15 @@
 package xyz.thepathfinder.android;
 
+import java.util.logging.Logger;
+
 /**
  * Class is used to ease the manipulation of paths to models on the Pathfinder server.
  *
  * @author David Robinson
  */
 class Path {
+
+    private static final Logger logger = Logger.getLogger(Path.class.getName());
 
     /**
      * Separator for path names.
@@ -73,7 +77,8 @@ class Path {
         if (Path.isValidName(name)) {
             return this.path + Path.PATH_SEPARATOR + name;
         } else {
-            throw new IllegalArgumentException("Invalid path name: " + name);
+            logger.warning("Illegal Argument Exception: Illegal path name " + name);
+            throw new IllegalArgumentException("Illegal path name: " + name);
         }
     }
 

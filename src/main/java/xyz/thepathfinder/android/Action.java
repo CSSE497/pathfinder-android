@@ -2,6 +2,8 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
+import java.util.logging.Logger;
+
 /**
  * Actions represent transport and commodity actions, such as picking up a commodity,
  * dropping off a commodity, or a transport start location. Actions occur at specific
@@ -9,7 +11,9 @@ import com.google.gson.JsonObject;
  *
  * @author David Robinson
  */
-class Action {
+public class Action {
+
+    private static final Logger logger = Logger.getLogger(Action.class.getName());
 
     /**
      * Represents the type of action to occur at that location.
@@ -38,10 +42,18 @@ class Action {
      * @param services   a pathfinder services object.
      */
     protected Action(JsonObject actionJson, PathfinderServices services) {
+        logger.finest("Constructing action: " + actionJson.toString());
+
         this.status = Action.getStatus(actionJson);
         this.latitude = Action.getLatitude(actionJson);
         this.longitude = Action.getLongitude(actionJson);
-        this.model = Action.getModel(actionJson, services);
+        if(!this.status.equals(ActionStatus.START)) {
+            this.model = Action.getModel(actionJson, services);
+        } else {
+            this.model = null;
+        }
+
+        logger.finest("Done constructing action: " + this.toString());
     }
 
     /**
@@ -147,5 +159,20 @@ class Action {
         }
 
         throw new IllegalArgumentException("Illegal model type in action creation: " + type);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        JsonObject json = new JsonObject();
+
+        json.addProperty("latitude", this.getLatitude());
+        json.addProperty("longitude", this.getLongitude());
+        json.addProperty("status", this.getStatus().toString());
+        json.addProperty("model", this.getModel().getPath());
+
+        return json.toString();
     }
 }

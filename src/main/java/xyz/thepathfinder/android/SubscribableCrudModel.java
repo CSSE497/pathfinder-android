@@ -2,6 +2,8 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
+import java.util.logging.Logger;
+
 /**
  * Access to CRUD and subscribe operations.
  *
@@ -9,6 +11,8 @@ import com.google.gson.JsonObject;
  * @author David Robinson
  */
 public abstract class SubscribableCrudModel<E extends Listener<? extends Model>> extends SubscribableModel<E> {
+
+    private static final Logger logger = Logger.getLogger(SubscribableCrudModel.class.getName());
 
     /**
      * Constructs a subscribable CRUD model.
@@ -24,19 +28,21 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
      * Reads the model specified by the path from the server.
      */
     public void connect() {
-        JsonObject json = this.getMessageHeader("read");
+        JsonObject json = this.getMessageHeader("Read");
         this.getServices().getConnection().sendMessage(json.toString());
     }
 
     /**
      * Creates the model at the path specified on the server.
      */
-    protected void create() {
+    public void create() {
         if (this.isConnected()) {
+            logger.warning("Cannot create a connected model: " + this.getPath());
             throw new IllegalStateException("Already created");
         }
 
-        JsonObject json = this.getMessageHeader("create");
+        JsonObject json = this.getMessageHeader("Create");
+
         json.add("value", this.createValueJson());
 
         this.getServices().getConnection().sendMessage(json.toString());
@@ -47,10 +53,11 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
      */
     public void delete() {
         if (!this.isConnected()) {
+            logger.warning("Cannot delete a model not connected: " + this.getPath());
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 
-        JsonObject json = this.getMessageHeader("delete");
+        JsonObject json = this.getMessageHeader("Delete");
         this.getServices().getConnection().sendMessage(json.toString());
     }
 
@@ -61,10 +68,11 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
      */
     protected void update(JsonObject value) {
         if (!this.isConnected()) {
+            logger.warning("Cannot update a model not connected: " + this.getPath());
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 
-        JsonObject json = this.getMessageHeader("update");
+        JsonObject json = this.getMessageHeader("Update");
         json.add("value", value);
 
         this.getServices().getConnection().sendMessage(json.toString());

@@ -6,20 +6,21 @@ package xyz.thepathfinder.android;
  * @author David Robinson
  */
 public enum ActionStatus {
+
     /**
      * The start of a transports route.
      */
-    START("start"),
+    START("Start"),
 
     /**
      * A commodity pickup will occur at this location.
      */
-    PICK_UP("pickup"),
+    PICK_UP("PickUp"),
 
     /**
      * A commodity drop off will occur at this location.
      */
-    DROP_OFF("dropoff");
+    DROP_OFF("DropOff");
 
     /**
      * The string representation of the status.

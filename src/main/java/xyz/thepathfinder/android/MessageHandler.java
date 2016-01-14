@@ -21,7 +21,7 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
     /**
      * Logs all messages
      */
-    private static Logger logger = Logger.getLogger(MessageHandler.class.getName());
+    private static final Logger logger = Logger.getLogger(MessageHandler.class.getName());
 
     /**
      * Number of messages received, helps with testing.
@@ -48,14 +48,16 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
         logger.log(Level.INFO, "Received json: " + message);
         this.receivedMessageCount++;
         JsonObject json = new JsonParser().parse(message).getAsJsonObject();
+
         if (!json.has("message") || !json.has("model") || !json.has("path")) {
-            logger.log(Level.WARNING, "Ignoring invalid message: " + json.toString());
+            logger.warning("Ignoring invalid message: " + json.toString());
         } else {
             String type = json.get("message").getAsString();
+
             String path = json.get("path").getAsString();
             Model model = this.registry.getModel(path);
 
-            logger.log(Level.INFO, "Notifying " + model.getPath() + " of message");
+            logger.finest("Notifying " + model.getPath() + " of message");
 
             model.notifyUpdate(type, json);
         }
