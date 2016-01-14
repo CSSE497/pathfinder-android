@@ -24,7 +24,6 @@ apply plugin: 'signing'
 apply plugin: 'java'
 
 group = "xyz.thepathfinder"
-version = 0.0
 
 configure(allprojects) {
     ext.javadocLinks = [
@@ -32,6 +31,22 @@ configure(allprojects) {
             "http://docs.oracle.com/javaee/7/api/",
             "http://google.github.io/gson/apidocs/"
     ] as String[]
+}
+
+def getVersion() {
+    def versionPropsFile = file('version.properties')
+
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        def patch = versionProps['VERSION_PATCH'].toInteger()
+        def minor = versionProps['VERSION_MINOR'].toInteger()
+        def major = versionProps['VERSION_MAJOR'].toInteger()
+
+        return major + "." + minor + "." + patch
+    }
 }
 
 task incrementVersion << {
@@ -42,12 +57,10 @@ task incrementVersion << {
 
         versionProps.load(new FileInputStream(versionPropsFile))
 
-        def code = versionProps['VERSION_CODE'].toInteger() + 1
+        def code = versionProps['VERSION_PATCH'].toInteger() + 1
 
-        versionProps['VERSION_CODE'] = code.toString()
+        versionProps['VERSION_PATCH'] = code.toString()
         versionProps.store(versionPropsFile.newWriter(), null)
-
-        project.version = project.version + "." + code
     }
 }
 
@@ -63,6 +76,7 @@ task javadocs(type: Javadoc) {
     classpath = configurations.compile
     options.memberLevel = JavadocMemberLevel.PUBLIC
     options.links(project.ext.javadocLinks)
+    version = getVersion()
 }
 
 task developerJavadocs(type: Javadoc) {
@@ -71,6 +85,7 @@ task developerJavadocs(type: Javadoc) {
     classpath = configurations.compile
     options.memberLevel = JavadocMemberLevel.PRIVATE
     options.links(project.ext.javadocLinks)
+    version = getVersion()
 }
 
 task javadocJar(type: Jar) {
@@ -87,7 +102,8 @@ task all(dependsOn: ['clean', 'build', 'test', 'javadocs', 'developerJavadocs', 
     compileJava.dependsOn clean
 }
 
-task upload(dependsOn: ['build', 'bintrayUpload', 'incrementVersion']) {
+task upload(dependsOn: ['clean', 'build', 'bintrayUpload', 'incrementVersion']) {
+    compileJava.dependsOn clean
     bintrayUpload.dependsOn build
     incrementVersion.dependsOn bintrayUpload
 }
@@ -151,10 +167,10 @@ if(project.hasProperty('publishToJcenter')) {
             publicDownloadNumbers = true
 
             version {
-                    name = project.version
+                    name = getVersion()
                     desc = 'Initial release'
                     released = new Date()
-                    vcsTag = project.version
+                    vcsTag = getVersion()
 
                 gpg {
                     sign = true
