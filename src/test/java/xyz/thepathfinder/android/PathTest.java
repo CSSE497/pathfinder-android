@@ -3,7 +3,7 @@ package xyz.thepathfinder.android;
 import org.junit.Assert;
 import org.junit.Test;
 
-/*public class PathTest {
+public class PathTest {
     @Test
     public void testChildPath() {
         Path path = new Path("/grand/parent/child");
@@ -61,4 +61,4 @@ import org.junit.Test;
         Assert.assertTrue(p1.equals(p3));
         Assert.assertFalse(p1.equals(s));
     }
-}*/
+}

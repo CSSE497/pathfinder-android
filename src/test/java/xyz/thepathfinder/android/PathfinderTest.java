@@ -79,7 +79,7 @@ public class PathfinderTest {
         cluster.connect();
     }
 
-/*    @Test(timeout = 10000)
+    @Test(timeout = 10000)
     public void testGetDefaultCluster() throws URISyntaxException, IOException, InterruptedException {
         URI url = new URI("ws://localhost:8025/socket");
         Pathfinder pathfinder = new Pathfinder("", "", url);
@@ -90,12 +90,12 @@ public class PathfinderTest {
         JsonObject receive = new JsonObject();
         receive.addProperty("model", "Cluster");
         receive.addProperty("path", "/default");
-        receive.addProperty("message", "read");
+        receive.addProperty("message", "Read");
 
         this.messager.setReceive(receive.toString());
 
         JsonObject send = new JsonObject();
-        send.addProperty("message", "model");
+        send.addProperty("message", "Model");
         send.addProperty("path", "/default");
         send.addProperty("model", "Cluster");
 
@@ -126,5 +126,5 @@ public class PathfinderTest {
         //this.waitForMessages(pathfinder, 5);
 
         pathfinder.close();
-    }*/
+    }
 }
