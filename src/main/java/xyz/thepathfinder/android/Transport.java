@@ -2,7 +2,9 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * Interface to the Pathfinder server's transport API. A transport may be create
@@ -21,6 +23,8 @@ import java.util.List;
  * @see TransportStatus
  */
 public class Transport extends SubscribableCrudModel<TransportListener> {
+
+    private static final Logger logger = Logger.getLogger(Transport.class.getName());
 
     /**
      * String used in the model field of the pathfinder requests.
@@ -63,10 +67,12 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     protected Transport(String path, PathfinderServices services) {
         super(path, services);
 
+        logger.finest("Constructing transport by parameters: " + path);
+
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
         if (isRegistered) {
-            //TODO revert after path update
-            //throw new IllegalArgumentException("Transport path already exists: " + path);
+            logger.warning("Illegal Argument Exception: Transport path already exists: " + path);
+            throw new IllegalArgumentException("Transport path already exists: " + path);
         } else {
             this.getServices().getRegistry().registerModel(this);
         }
@@ -124,6 +130,8 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
             return new Transport(path, services);
         }
 
+        logger.finest("Getting transport instance: " + transport);
+
         return transport;
     }
 
@@ -138,12 +146,14 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      */
     protected static Transport getInstance(JsonObject transportJson, PathfinderServices services) {
         if (!Transport.checkTransportFields(transportJson)) {
-            throw new IllegalArgumentException("Invalid JSON cannot be parsed to a Transport");
+            logger.warning("Illegal Argument Exception: Invalid JSON cannot be parsed to a transport " + transportJson);
+            throw new IllegalArgumentException("Invalid JSON cannot be parsed to a transport " + transportJson);
         }
 
         String path = Transport.getPath(transportJson);
         Transport transport = Transport.getInstance(path, services);
 
+        logger.finest("Notifying transport of update: \nCurrent transport: " + transport + "\nNew JSON: " + transportJson);
         transport.notifyUpdate(null, transportJson);
 
         return transport;
@@ -165,19 +175,12 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @return <tt>true</tt> if the JSON can be parsed to a transport. <tt>false</tt> otherwise.
      */
     private static boolean checkTransportFields(JsonObject transportJson) {
-        return Transport.checkTransportField(transportJson, "id") &&
+        return Transport.checkTransportField(transportJson, "path") &&
                 Transport.checkTransportField(transportJson, "latitude") &&
                 Transport.checkTransportField(transportJson, "longitude") &&
                 Transport.checkTransportField(transportJson, "status") &&
                 Transport.checkTransportField(transportJson, "metadata") &&
                 !transportJson.get("metadata").isJsonObject();
-        //TODO revert after path update
-        /*return Transport.checkTransportField(transportJson, "path") &&
-                Transport.checkTransportField(transportJson, "latitude") &&
-                Transport.checkTransportField(transportJson, "longitude") &&
-                Transport.checkTransportField(transportJson, "status") &&
-                Transport.checkTransportField(transportJson, "metadata") &&
-                !transportJson.get("metadata").isJsonObject();*/
     }
 
     /**
@@ -187,9 +190,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @return the path.
      */
     private static String getPath(JsonObject transportJson) {
-        return transportJson.get("id").getAsString();
-        //TODO revert after path update
-        //return transportJson.get("path").getAsString();
+        return transportJson.get("path").getAsString();
     }
 
     /**
@@ -405,9 +406,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("clusterId", Long.parseLong(this.getPath()));
-        //TODO revert after path update
-        //json.addProperty("path", this.getPath());
+        json.addProperty("path", this.getPath());
         json.addProperty("model", this.getModel());
         json.addProperty("latitude", this.getLatitude());
         json.addProperty("longitude", this.getLongitude());
@@ -452,6 +451,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         List<TransportListener> listeners = this.getListeners();
 
         if (this.getLatitude() != prevLatitude) {
+            logger.finest("Transport " + this.getPath() + " latitude updated: " + this.getMetadata());
             for (TransportListener listener : listeners) {
                 listener.latitudeUpdated(this.getLatitude());
             }
@@ -459,6 +459,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         }
 
         if (this.getLongitude() != prevLongitude) {
+            logger.finest("Transport " + this.getPath() + " longitude updated: " + this.getMetadata());
             for (TransportListener listener : listeners) {
                 listener.longitudeUpdated(this.getLongitude());
             }
@@ -466,6 +467,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         }
 
         if (this.getStatus().equals(prevStatus)) {
+            logger.finest("Transport " + this.getPath() + " status updated: " + this.getMetadata());
             for (TransportListener listener : listeners) {
                 listener.statusUpdated(this.getStatus());
             }
@@ -473,25 +475,26 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         }
 
         if (this.getMetadata().equals(prevMetadata)) {
+            logger.finest("Transport " + this.getPath() + " metadata updated: " + this.getMetadata());
             for (TransportListener listener : listeners) {
                 listener.metadataUpdated(this.getMetadata());
             }
             updated = true;
         }
 
-        //TODO revert after path update
-        /*if (updated) {
-            String parentPath = this.getParentPath();
+        String parentPath = this.getParentPath();
+        if (updated && this.getServices().getRegistry().isModelRegistered(parentPath)) {
             Cluster parentCluster = Cluster.getInstance(parentPath, this.getServices());
-
             Collection<Transport> transports = parentCluster.getTransports();
+
+            logger.finest("Transport " + this.getPath() + " calling parent cluster's update");
 
             List<ClusterListener> clusterListeners = parentCluster.getListeners();
             for (ClusterListener listener : clusterListeners) {
                 listener.transportUpdated(this);
                 listener.transportsUpdated(transports);
             }
-        }*/
+        }
 
         return updated;
     }
@@ -502,9 +505,27 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     @Override
     protected void route(JsonObject json, PathfinderServices services) {
         JsonObject route = json.getAsJsonObject("value");
+
+        logger.finest("Transport setting route: " + this.getPath());
         this.route = new Route(route, services);
+
+        logger.finest("Transport updating route: " + this.getPath());
         for (TransportListener listener : this.getListeners()) {
             listener.routed(this.getRoute());
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        JsonObject json = this.createValueJson();
+
+        if(route != null) {
+            json.addProperty("route", this.route.toString());
+        }
+
+        return json.toString();
     }
 }

@@ -6,6 +6,7 @@ package xyz.thepathfinder.android;
  * @author David Robinson
  */
 public enum ActionStatus {
+
     /**
      * The start of a transports route.
      */

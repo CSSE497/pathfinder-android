@@ -34,7 +34,7 @@ public class Route {
      * @param services a pathfinder services object.
      */
     protected Route(JsonObject routeJson, PathfinderServices services) {
-        logger.info("Starting route parsing: " + routeJson.toString());
+        logger.finest("Parsing route: " + routeJson.toString());
         this.transport = Route.getTransport(routeJson, services);
         this.actions = Route.getActions(routeJson, services);
     }
@@ -65,10 +65,8 @@ public class Route {
      * @return a transport
      */
     private static Transport getTransport(JsonObject json, PathfinderServices services) {
-        logger.info("route getting transport: " + json.toString());
-        return Transport.getInstance(json.getAsJsonObject("vehicle").get("id").getAsString(), services);
-        //TODO revert after path update
-        //return Transport.getInstance(json.getAsJsonObject("model"), services);
+        logger.finest("Route getting transport: " + json.toString());
+        return Transport.getInstance(json.getAsJsonObject("model"), services);
     }
 
     /**
@@ -79,15 +77,28 @@ public class Route {
      * @return a list actions for the transport to perform.
      */
     private static List<Action> getActions(JsonObject json, PathfinderServices services) {
-        logger.info("route getting actions: " + json.toString());
+        logger.finest("route getting actions: " + json.toString());
         JsonArray actions = json.getAsJsonArray("actions");
         List<Action> list = new ArrayList<Action>();
 
         for (JsonElement element : actions) {
-            logger.info("route adding action: " + element.toString());
+            logger.finest("route adding action: " + element.toString());
             list.add(new Action(element.getAsJsonObject(), services));
         }
 
         return list;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        JsonObject json = new JsonObject();
+
+        json.addProperty("transport", this.getTransport().getPath());
+        json.addProperty("actions", this.getActions().toString());
+
+        return json.toString();
     }
 }

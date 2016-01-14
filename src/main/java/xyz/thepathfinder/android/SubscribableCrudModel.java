@@ -2,6 +2,8 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
+import java.util.logging.Logger;
+
 /**
  * Access to CRUD and subscribe operations.
  *
@@ -9,6 +11,8 @@ import com.google.gson.JsonObject;
  * @author David Robinson
  */
 public abstract class SubscribableCrudModel<E extends Listener<? extends Model>> extends SubscribableModel<E> {
+
+    private static final Logger logger = Logger.getLogger(SubscribableCrudModel.class.getName());
 
     /**
      * Constructs a subscribable CRUD model.
@@ -33,13 +37,11 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
      */
     public void create() {
         if (this.isConnected()) {
+            logger.warning("Cannot create a connected model: " + this.getPath());
             throw new IllegalStateException("Already created");
         }
 
         JsonObject json = this.getMessageHeader("Create");
-
-        //TODO revert after path update
-        json.remove("id");
 
         json.add("value", this.createValueJson());
 
@@ -51,6 +53,7 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
      */
     public void delete() {
         if (!this.isConnected()) {
+            logger.warning("Cannot delete a model not connected: " + this.getPath());
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 
@@ -65,6 +68,7 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
      */
     protected void update(JsonObject value) {
         if (!this.isConnected()) {
+            logger.warning("Cannot update a model not connected: " + this.getPath());
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 

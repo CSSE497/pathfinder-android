@@ -21,7 +21,7 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
     /**
      * Logs all messages
      */
-    private static Logger logger = Logger.getLogger(MessageHandler.class.getName());
+    private static final Logger logger = Logger.getLogger(MessageHandler.class.getName());
 
     /**
      * Number of messages received, helps with testing.
@@ -49,34 +49,17 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
         this.receivedMessageCount++;
         JsonObject json = new JsonParser().parse(message).getAsJsonObject();
 
-        if (!json.has("message")) {
-            logger.log(Level.WARNING, "Ignoring invalid message: " + json.toString());
-        }
-        //TODO revert after path update
-        /*if (!json.has("message") || !json.has("model") || !json.has("path")) {
-            logger.log(Level.WARNING, "Ignoring invalid message: " + json.toString());
-        }*/ else {
+        if (!json.has("message") || !json.has("model") || !json.has("path")) {
+            logger.warning("Ignoring invalid message: " + json.toString());
+        } else {
             String type = json.get("message").getAsString();
 
-            //TODO revert after path update
-            Model model;
-            if(type.equals("ApplicationCluster")) {
-                model = this.registry.getModel(Path.DEFAULT_PATH);
-                model.setPath(json.get("clusterId").getAsString());
-                ((SubscribableCrudModel) model).connect();
-            } else {
-                String path = json.getAsJsonObject("value").get("id").getAsString();
-                model = this.registry.getModel(path);
-                model.notifyUpdate(type, json);
-            }
-            //String path = json.get("path").getAsString();
-            //Model model = this.registry.getModel(path);
+            String path = json.get("path").getAsString();
+            Model model = this.registry.getModel(path);
 
+            logger.finest("Notifying " + model.getPath() + " of message");
 
-            logger.log(Level.INFO, "Notifying " + model.getPath() + " of message");
-
-            //TODO revert after path update
-            //model.notifyUpdate(type, json);
+            model.notifyUpdate(type, json);
         }
     }
 

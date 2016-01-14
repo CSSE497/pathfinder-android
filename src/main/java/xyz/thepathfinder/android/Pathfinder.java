@@ -62,7 +62,7 @@ public class Pathfinder {
      */
     protected static String TRANSPORT = "Vehicle";
 
-    //TODO revert after path update
+    //TODO revert after transport update on pathfinder-server
     //protected static String TRANSPORT = "Transport";
 
     /**
@@ -90,7 +90,7 @@ public class Pathfinder {
         try {
             this.webSocketUrl = new URI("ws://api.thepathfinder.xyz/socket");
         } catch(URISyntaxException e) {
-            logger.log(Level.SEVERE, e.getMessage());
+            logger.severe(e.getMessage());
         }
 
         ModelRegistry registry = new ModelRegistry();
@@ -128,7 +128,10 @@ public class Pathfinder {
                 // blocks until connection is established, JSR 356
                 container.connectToServer(this.services.getConnection(), this.webSocketUrl);
             } catch (DeploymentException e) {
-                e.printStackTrace(); // Invalid annotated connection object
+               logger.severe(e.getMessage()); // Invalid annotated connection object
+            } catch (IOException e) {
+                logger.severe(e.getMessage());
+                throw e;
             }
         }
     }
@@ -217,6 +220,7 @@ public class Pathfinder {
      */
     public void close(CloseReason reason) throws IOException {
         if (this.isConnected()) {
+            logger.finest("Connection closed");
             this.services.getConnection().close(reason);
         }
     }

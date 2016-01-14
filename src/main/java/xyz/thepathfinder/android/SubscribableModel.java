@@ -2,6 +2,8 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
+import java.util.logging.Logger;
+
 /**
  * Access to subscribe operations on models.
  *
@@ -9,6 +11,8 @@ import com.google.gson.JsonObject;
  * @author David Robinson
  */
 public abstract class SubscribableModel<E extends Listener<? extends Model>> extends Model<E> {
+
+    private static final Logger logger = Logger.getLogger(SubscribableModel.class.getName());
 
     /**
      * Constructs a subcribable model.
@@ -31,9 +35,7 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
 
         json.addProperty("message", type);
 
-        json.addProperty("id", Long.parseLong(this.getPath()));
-        //TODO revert after path update
-        //json.addProperty("path", this.getPath());
+        json.addProperty("path", this.getPath());
         json.addProperty("model", this.getModel());
 
         return json;
@@ -44,15 +46,11 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
      */
     public void subscribe() {
         if (!this.isConnected()) {
+            logger.warning("Cannot subscribe to a model you are not connected to");
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 
         JsonObject json = this.getMessageHeader("Subscribe");
-        //TODO revert after path update
-        if(this.getModel().equals(Pathfinder.CLUSTER)) {
-            json.remove("id");
-            json.addProperty("clusterId", Long.parseLong(this.getPath()));
-        }
         this.getServices().getConnection().sendMessage(json.toString());
     }
 
@@ -69,15 +67,11 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
      */
     public void routeSubscribe() {
         if (!this.isConnected()) {
+            logger.warning("Cannot route subscribe to a model you are not connected to");
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 
         JsonObject json = this.getMessageHeader("RouteSubscribe");
-        //TODO revert after path update
-        if(this.getModel().equals(Pathfinder.CLUSTER)) {
-            //json.remove("id");
-            //json.addProperty("clusterId", Long.parseLong(this.getPath()));
-        }
         this.getServices().getConnection().sendMessage(json.toString());
     }
 

@@ -36,6 +36,7 @@ class ModelRegistry {
      */
     protected void registerModel(Model model) {
         if (this.models.containsKey(model.getPath())) {
+            logger.warning("Illegal State Exception: path already exists" + model.getPath());
             throw new IllegalStateException("Path already exists: " + model.getPath());
         }
 

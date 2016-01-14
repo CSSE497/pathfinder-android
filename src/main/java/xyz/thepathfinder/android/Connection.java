@@ -49,7 +49,7 @@ class Connection extends Endpoint {
     /**
      * Logs all outgoing messages through the web socket.
      */
-    private Logger logger = Logger.getLogger(Connection.class.getName());
+    private static final Logger logger = Logger.getLogger(Connection.class.getName());
 
     /**
      * Constructs a connection object that controls access to the web socket connection
@@ -73,12 +73,13 @@ class Connection extends Endpoint {
      * @throws IllegalStateException the web socket is not connected.
      */
     public void sendMessage(String message) {
-        logger.log(Level.INFO, "Sending json: " + message);
+        logger.finest("Sending json to Pathfinder: " + message);
         if (this.isConnected()) {
             this.session.getAsyncRemote().sendText(message);
             this.sentMessageCount++;
         } else {
-            throw new IllegalStateException("The connection to Pathfinder was closed.");
+            logger.warning("Illegal State Exception: The connection to Pathfinder is not open.");
+            throw new IllegalStateException("The connection to Pathfinder is not open.");
         }
     }
 
@@ -87,7 +88,7 @@ class Connection extends Endpoint {
      */
     @Override
     public void onOpen(Session session, EndpointConfig config) {
-        logger.log(Level.INFO, "Connection opened");
+        logger.finest("Pathfinder connection opened");
         this.session = session;
         this.messageHandler = new MessageHandler(this.registry);
         this.session.addMessageHandler(this.messageHandler);
@@ -98,7 +99,7 @@ class Connection extends Endpoint {
      */
     @Override
     public void onClose(Session session, CloseReason closeReason) {
-        logger.log(Level.INFO, "Connection closed: " + closeReason);
+        logger.finest("Pathfinder connection closed: " + closeReason);
         this.session = session;
     }
 
@@ -137,10 +138,5 @@ class Connection extends Endpoint {
      */
     public void close(CloseReason reason) throws IOException {
         this.session.close(reason);
-    }
-
-    //TODO remove after path update
-    public String getApplictionIdentifier() {
-        return this.applictionIdentifier;
     }
 }

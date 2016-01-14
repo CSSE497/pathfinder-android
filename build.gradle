@@ -34,6 +34,23 @@ configure(allprojects) {
     ] as String[]
 }
 
+task incrementVersion << {
+    def versionPropsFile = file('version.properties')
+
+    if (versionPropsFile.canRead()) {
+        def Properties versionProps = new Properties()
+
+        versionProps.load(new FileInputStream(versionPropsFile))
+
+        def code = versionProps['VERSION_CODE'].toInteger() + 1
+
+        versionProps['VERSION_CODE'] = code.toString()
+        versionProps.store(versionPropsFile.newWriter(), null)
+
+        project.version = project.version + "." + code
+    }
+}
+
 jacocoTestReport {
     reports {
         xml.enabled = true // coveralls plugin depends on xml format report
@@ -68,6 +85,11 @@ task sourcesJar(type: Jar) {
 
 task all(dependsOn: ['clean', 'build', 'test', 'javadocs', 'developerJavadocs', 'jar', 'javadocJar', 'sourcesJar']) {
     compileJava.dependsOn clean
+}
+
+task upload(dependsOn: ['build', 'bintrayUpload', 'incrementVersion']) {
+    bintrayUpload.dependsOn build
+    incrementVersion.dependsOn bintrayUpload
 }
 
 artifacts {
@@ -129,23 +151,10 @@ if(project.hasProperty('publishToJcenter')) {
             publicDownloadNumbers = true
 
             version {
-                def versionPropsFile = file('version.properties')
-
-                if (versionPropsFile.canRead()) {
-                    def Properties versionProps = new Properties()
-
-                    versionProps.load(new FileInputStream(versionPropsFile))
-
-                    def code = versionProps['VERSION_CODE'].toInteger() + 1
-
-                    versionProps['VERSION_CODE'] = code.toString()
-                    versionProps.store(versionPropsFile.newWriter(), null)
-
-                    name = project.version + "." + code
+                    name = project.version
                     desc = 'Initial release'
                     released = new Date()
-                    vcsTag = project.version + "." + code
-                }
+                    vcsTag = project.version
 
                 gpg {
                     sign = true
