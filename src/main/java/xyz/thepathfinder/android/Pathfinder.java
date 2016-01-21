@@ -138,8 +138,8 @@ public class Pathfinder {
                 // blocks until connection is established, JSR 356
                 container.connectToServer(this.services.getConnection(), this.webSocketUrl);
             } catch (DeploymentException e) {
-               logger.severe("Deployment Exception: " + e.getMessage()); // Invalid annotated connection object
-                throw e;
+                logger.severe("Deployment Exception: " + e.getMessage()); // Invalid annotated connection object
+                // throw e;
             } catch (IOException e) {
                 logger.severe("IO Exception: " + e.getMessage());
                 throw e;
