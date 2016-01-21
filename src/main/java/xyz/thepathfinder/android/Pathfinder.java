@@ -129,7 +129,8 @@ public class Pathfinder {
      * Establishes a connection to the Pathfinder server, if the connection is not already open.
      * This method blocks until the connection is established.
      *
-     * @throws IOException problem connecting the Pathfinder server
+     * @throws IOException problem connecting to the Pathfinder server
+     * @throws DeploymentException problem connecting to the Pathfinder server
      */
     public void connect() throws IOException, DeploymentException {
         if (!this.isConnected()) {
@@ -138,8 +139,9 @@ public class Pathfinder {
                 // blocks until connection is established, JSR 356
                 container.connectToServer(this.services.getConnection(), this.webSocketUrl);
             } catch (DeploymentException e) {
-                logger.severe("Deployment Exception: " + e.getMessage()); // Invalid annotated connection object
-                // throw e;
+                // Invalid annotated connection object and connection problems
+                logger.severe("Deployment Exception: " + e.getMessage());
+                throw e;
             } catch (IOException e) {
                 logger.severe("IO Exception: " + e.getMessage());
                 throw e;
