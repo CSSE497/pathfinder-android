@@ -2,6 +2,7 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -13,6 +14,9 @@ import java.util.logging.Logger;
 public abstract class SubscribableCrudModel<E extends Listener<? extends Model>> extends SubscribableModel<E> {
 
     private static final Logger logger = Logger.getLogger(SubscribableCrudModel.class.getName());
+    static {
+        logger.setLevel(Level.INFO);
+    }
 
     /**
      * Constructs a subscribable CRUD model.

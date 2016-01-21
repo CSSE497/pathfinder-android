@@ -1,5 +1,6 @@
 package xyz.thepathfinder.android;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -10,16 +11,14 @@ import java.util.logging.Logger;
 class Path {
 
     private static final Logger logger = Logger.getLogger(Path.class.getName());
+    static {
+        logger.setLevel(Level.INFO);
+    }
 
     /**
      * Separator for path names.
      */
     private static final String PATH_SEPARATOR = "/";
-
-    /**
-     * Path to the default cluster.
-     */
-    public static final String DEFAULT_PATH = "/default";
 
     /**
      * A string representing the path.
@@ -28,22 +27,18 @@ class Path {
 
     /**
      * Constructs a path to a model. The path may not an empty string.
-     * Other requirements are subject to change. If the path is null it
-     * is set to the default pa
+     * Other requirements are subject to change.
      *
      * @param path a string representing the path
      * @throws IllegalArgumentException when the path is invalid.
      */
     protected Path(String path) {
         if (!Path.isValidPath(path)) {
-            throw new IllegalArgumentException("Path cannot be an empty string");
+            logger.warning("Illegal Argument Exception: Illegal path name " + path);
+            throw new IllegalArgumentException("Illegal path name " + path);
         }
 
-        if (path == null) {
-            this.path = Path.DEFAULT_PATH;
-        } else {
-            this.path = path;
-        }
+        this.path = path;
     }
 
     /**
@@ -53,7 +48,7 @@ class Path {
      * @return <tt>true</tt> if allowed, <tt>false</tt> otherwise.
      */
     public static boolean isValidPath(String path) {
-        return !(path != null && path.equals(""));
+        return !(path == null || path.equals(""));
     }
 
     /**
@@ -112,6 +107,11 @@ class Path {
      */
     public String getParentPath() {
         int lastSlashIndex = this.path.lastIndexOf(Path.PATH_SEPARATOR);
+
+        if(lastSlashIndex == -1) {
+            return "";
+        }
+
         return this.path.substring(0, lastSlashIndex);
     }
 

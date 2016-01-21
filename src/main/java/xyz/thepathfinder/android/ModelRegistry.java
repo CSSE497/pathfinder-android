@@ -2,6 +2,7 @@ package xyz.thepathfinder.android;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -13,6 +14,9 @@ import java.util.logging.Logger;
 class ModelRegistry {
 
     private static final Logger logger = Logger.getLogger(ModelRegistry.class.getName());
+    static {
+        logger.setLevel(Level.INFO);
+    }
 
     /**
      * Map to all the {@link Model}s created by the SDK. The keys are the string

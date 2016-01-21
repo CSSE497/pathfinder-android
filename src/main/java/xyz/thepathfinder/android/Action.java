@@ -2,6 +2,7 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -14,6 +15,9 @@ import java.util.logging.Logger;
 public class Action {
 
     private static final Logger logger = Logger.getLogger(Action.class.getName());
+    static {
+        logger.setLevel(Level.INFO);
+    }
 
     /**
      * Represents the type of action to occur at that location.
@@ -42,18 +46,19 @@ public class Action {
      * @param services   a pathfinder services object.
      */
     protected Action(JsonObject actionJson, PathfinderServices services) {
-        logger.finest("Constructing action: " + actionJson.toString());
+        logger.info("Constructing action: " + actionJson.toString());
 
         this.status = Action.getStatus(actionJson);
         this.latitude = Action.getLatitude(actionJson);
         this.longitude = Action.getLongitude(actionJson);
+
         if(!this.status.equals(ActionStatus.START)) {
             this.model = Action.getModel(actionJson, services);
         } else {
             this.model = null;
         }
 
-        logger.finest("Done constructing action: " + this.toString());
+        logger.info("Done constructing action: " + this.toString());
     }
 
     /**
@@ -149,16 +154,16 @@ public class Action {
      * @throws IllegalArgumentException when the model isn't a transport or commodity.
      */
     private static SubscribableCrudModel getModel(JsonObject json, PathfinderServices services) {
-        JsonObject model = json.getAsJsonObject("model");
-        String type = model.get("model").getAsString();
+        JsonObject model = json.getAsJsonObject("commodity");
+        //String type = model.get("commodity").getAsString();
 
-        if (type.equals(Pathfinder.TRANSPORT)) {
-            return Transport.getInstance(model, services);
-        } else if (type.equals(Pathfinder.COMMODITY)) {
-            return Commodity.getInstance(json, services);
-        }
+        //if (type.equals(Pathfinder.TRANSPORT)) {
+        //    return Transport.getInstance(model, services);
+        //} else if (type.equals(Pathfinder.COMMODITY)) {
+            return Commodity.getInstance(model, services);
+        //}
 
-        throw new IllegalArgumentException("Illegal model type in action creation: " + type);
+        //throw new IllegalArgumentException("Illegal model type in action creation: " + type);
     }
 
     /**
@@ -171,8 +176,9 @@ public class Action {
         json.addProperty("latitude", this.getLatitude());
         json.addProperty("longitude", this.getLongitude());
         json.addProperty("status", this.getStatus().toString());
-        json.addProperty("model", this.getModel().getPath());
-
+        if(this.getModel() != null) {
+            json.addProperty("model", this.getModel().getPath());
+        }
         return json.toString();
     }
 }

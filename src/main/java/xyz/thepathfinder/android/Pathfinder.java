@@ -50,20 +50,20 @@ public class Pathfinder {
     /**
      * Cluster model name used in requests to the Pathfinder server.
      */
-    protected static String CLUSTER = "Cluster";
+    protected static final String CLUSTER = "Cluster";
 
     /**
      * Commodity model name used in requests to the Pathfinder server.
      */
-    protected static String COMMODITY = "Commodity";
+    protected static final String COMMODITY = "Commodity";
 
     /**
      * Transport model name used in requests to the Pathfinder server.
      */
-    protected static String TRANSPORT = "Vehicle";
+    protected static final String TRANSPORT = "Vehicle";
 
     //TODO revert after transport update on pathfinder-server
-    //protected static String TRANSPORT = "Transport";
+    //protected static final String TRANSPORT = "Transport";
 
     /**
      * Keeps track of all the Pathfinder models and connection to the server.
@@ -76,9 +76,17 @@ public class Pathfinder {
     private URI webSocketUrl;
 
     /**
+     * Application identifier used to communicate with the pathfinder server.
+     */
+    private String applicationIdentifier;
+
+    /**
      * Logs all messages
      */
     private static Logger logger = Logger.getLogger(Pathfinder.class.getName());
+    static {
+        logger.setLevel(Level.INFO);
+    }
 
     /**
      * Constructs a Pathfinder object.
@@ -93,10 +101,7 @@ public class Pathfinder {
             logger.severe(e.getMessage());
         }
 
-        ModelRegistry registry = new ModelRegistry();
-        Connection connection = new Connection(applicationIdentifier, userCredentials, registry);
-
-        this.services = new PathfinderServices(registry, connection);
+        this.constructPathfinder(applicationIdentifier, userCredentials);
     }
 
     /**
@@ -108,6 +113,11 @@ public class Pathfinder {
      */
     protected Pathfinder(String applicationIdentifier, String userCredentials, URI webSocketUrl) {
         this.webSocketUrl = webSocketUrl;
+        this.constructPathfinder(applicationIdentifier, userCredentials);
+    }
+
+    private void constructPathfinder(String applicationIdentifier, String userCredentials) {
+        this.applicationIdentifier = applicationIdentifier;
 
         ModelRegistry registry = new ModelRegistry();
         Connection connection = new Connection(applicationIdentifier, userCredentials, registry);
@@ -121,16 +131,17 @@ public class Pathfinder {
      *
      * @throws IOException problem connecting the Pathfinder server
      */
-    public void connect() throws IOException {
+    public void connect() throws IOException, DeploymentException {
         if (!this.isConnected()) {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             try {
                 // blocks until connection is established, JSR 356
                 container.connectToServer(this.services.getConnection(), this.webSocketUrl);
             } catch (DeploymentException e) {
-               logger.severe(e.getMessage()); // Invalid annotated connection object
+               logger.severe("Deployment Exception: " + e.getMessage()); // Invalid annotated connection object
+                throw e;
             } catch (IOException e) {
-                logger.severe(e.getMessage());
+                logger.severe("IO Exception: " + e.getMessage());
                 throw e;
             }
         }
@@ -142,7 +153,7 @@ public class Pathfinder {
      * @return an unconnected cluster
      */
     public Cluster getDefaultCluster() {
-        return Cluster.getInstance(Path.DEFAULT_PATH, this.services);
+        return Cluster.getInstance(this.applicationIdentifier, this.services);
     }
 
     /**
@@ -220,7 +231,7 @@ public class Pathfinder {
      */
     public void close(CloseReason reason) throws IOException {
         if (this.isConnected()) {
-            logger.finest("Connection closed");
+            logger.info("Connection closed");
             this.services.getConnection().close(reason);
         }
     }

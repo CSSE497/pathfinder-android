@@ -46,6 +46,16 @@ public enum CommodityStatus {
     }
 
     /**
+     * Checks if this status is the same as the provided status.
+     *
+     * @param status a string of status
+     * @return <tt>true</tt> if the status are the same, <tt>false</tt> otherwise.
+     */
+    public boolean equals(String status) {
+        return this.status.equals(status);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public String toString() {
