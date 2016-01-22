@@ -18,18 +18,12 @@ public class TransportListener extends Listener<Transport> {
     public void routed(Route route) {}
 
     /**
-     * Invoked when the transport's latitude was updated by a message.
+     * Invoked when the transport's location was updated by a message.
      *
      * @param latitude that the transport updated to.
-     */
-    public void latitudeUpdated(double latitude) {}
-
-    /**
-     * Invoked when the transport's longitude was updated by a message.
-     *
      * @param longitude that the transport updated to.
      */
-    public void longitudeUpdated(double longitude) {}
+    public void locationUpdated(double latitude, double longitude) {}
 
     /**
      * Invoked when the transport's status was updated by a message.

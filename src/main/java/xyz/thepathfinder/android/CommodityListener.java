@@ -18,32 +18,21 @@ public class CommodityListener extends Listener<Commodity> {
     public void routed(Route route) {}
 
     /**
-     * Invoked when the commodity's start latitude was updated by a message.
+     * Invoked when the commodity's start location was updated by a message.
      *
      * @param latitude that the commodity updated to.
-     */
-    public void startLatitudeUpdated(double latitude) {}
-
-    /**
-     * Invoked when the commodity's start longitude was updated by a message.
-     *
      * @param longitude that the commodity updated to.
      */
-    public void startLongitudeUpdated(double longitude) {}
+    public void startLocationUpdated(double latitude, double longitude) {}
 
     /**
-     * Invoked when the commodity's end latitude was updated by a message.
+     * Invoked when the commodity's end location was updated by a message.
      *
      * @param latitude that the commodity updated to.
-     */
-    public void endLatitudeUpdated(double latitude) {}
-
-    /**
-     * Invoked when the commodity's end longitude was updated by a message.
-     *
      * @param longitude that the commodity updated to.
      */
-    public void endLongitudeUpdated(double longitude) {}
+    public void endLocationUpdated(double latitude, double longitude) {}
+
 
     /**
      * Invoked when the commodity's status was updated by a message.

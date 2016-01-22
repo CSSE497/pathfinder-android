@@ -76,6 +76,7 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
                 } else {
                     path += value.get("id").getAsString();
                 }
+
                 //String path = json.get("path").getAsString();
                 //End TODO
 

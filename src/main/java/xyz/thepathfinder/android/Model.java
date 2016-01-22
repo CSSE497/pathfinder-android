@@ -124,11 +124,11 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         boolean updated = false;
         JsonObject value = null;
 
-        logger.info("Reason for update is: " + reason);
+        logger.info("Reason for update is: " + reason + ", " + json);
 
         if (json.has("value")) {
             value = json.getAsJsonObject("value");
-        } else {
+        } else if(!json.has("route")){
             value = json;
         }
 

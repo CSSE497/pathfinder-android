@@ -226,7 +226,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      *
      * @return the latitude.
      */
-    public Double getLatitude() {
+    public double getLatitude() {
         return this.latitude;
     }
 
@@ -240,22 +240,11 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     }
 
     /**
-     * Updates the latitude of this transport to the specified latitude.
-     * This method updates the latitude of the transport on the pathfinder server.
-     * The latitude is not updated in this object by this method.
-     *
-     * @param latitude The latitude to change to.
-     */
-    public void updateLatitude(double latitude) {
-        this.update(latitude, null, null, null);
-    }
-
-    /**
      * Returns the longitude of this transport.
      *
      * @return the longitude.
      */
-    public Double getLongitude() {
+    public double getLongitude() {
         return this.longitude;
     }
 
@@ -266,17 +255,6 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      */
     private void setLongitude(double longitude) {
         this.longitude = longitude;
-    }
-
-    /**
-     * Updates the longitude of this transport to the specified longitude.
-     * This method updates the longitude of the transport on the pathfinder server.
-     * The longitude is not updated in this object by this method.
-     *
-     * @param longitude The longitude to change to.
-     */
-    public void updateLongitude(double longitude) {
-        this.update(null, longitude, null, null);
     }
 
     /**
@@ -468,24 +446,16 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
         List<TransportListener> listeners = this.getListeners();
 
-        if (this.getLatitude() != prevLatitude) {
-            logger.info("Transport " + this.getPath() + " latitude updated: " + this.getMetadata());
+        if (this.getLatitude() != prevLatitude || this.getLongitude() != prevLongitude) {
+            logger.info("Transport " + this.getPath() + " location updated: " + this.getLatitude() + "," + this.getLongitude());
             for (TransportListener listener : listeners) {
-                listener.latitudeUpdated(this.getLatitude());
-            }
-            updated = true;
-        }
-
-        if (this.getLongitude() != prevLongitude) {
-            logger.info("Transport " + this.getPath() + " longitude updated: " + this.getMetadata());
-            for (TransportListener listener : listeners) {
-                listener.longitudeUpdated(this.getLongitude());
+                listener.locationUpdated(this.getLatitude(), this.getLongitude());
             }
             updated = true;
         }
 
         if (this.getStatus().equals(prevStatus)) {
-            logger.info("Transport " + this.getPath() + " status updated: " + this.getMetadata());
+            logger.info("Transport " + this.getPath() + " status updated: " + this.getStatus());
             for (TransportListener listener : listeners) {
                 listener.statusUpdated(this.getStatus());
             }

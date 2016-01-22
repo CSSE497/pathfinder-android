@@ -269,17 +269,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     }
 
     /**
-     * Updates the start latitude of this commodity to the specified latitude.
-     * This method updates the start latitude of the commodity on the pathfinder server.
-     * The start latitude is not updated in this object by this method.
-     *
-     * @param startLatitude The start latitude to change to.
-     */
-    public void updateStartLatitude(double startLatitude) {
-        this.update(startLatitude, null, null, null, null, null);
-    }
-
-    /**
      * Returns the current start longitude of the commodity.
      *
      * @return The current start longitude of the commodity.
@@ -295,17 +284,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      */
     private void setStartLongitude(double longitude) {
         this.startLongitude = longitude;
-    }
-
-    /**
-     * Updates the start longitude of this commodity to the specified longitude.
-     * This method updates the start longitude of the commodity on the pathfinder server.
-     * The start longitude is not updated in this object by this method.
-     *
-     * @param startLongitude The start longitude to change to.
-     */
-    public void updateStartLongitude(double startLongitude) {
-        this.update(null, startLongitude, null, null, null, null);
     }
 
     /**
@@ -339,17 +317,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     }
 
     /**
-     * Updates the end latitude of this commodity to the specified latitude.
-     * This method updates the end latitude of the commodity on the pathfinder server.
-     * The end latitude is not updated in this object by this method.
-     *
-     * @param endLatitude The end latitude to change to.
-     */
-    public void updateEndLatitude(double endLatitude) {
-        this.update(null, null, endLatitude, null, null, null);
-    }
-
-    /**
      * Returns the current end longitude of the commodity.
      *
      * @return The current end longitude of the commodity.
@@ -365,17 +332,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      */
     private void setEndLongitude(double longitude) {
         this.endLongitude = longitude;
-    }
-
-    /**
-     * Updates the end longitude of this commodity to the specified longitude.
-     * This method updates the end longitude of the commodity on the pathfinder server.
-     * The end longitude is not updated in this object by this method.
-     *
-     * @param endLongitude The end longitude to change to.
-     */
-    public void updateEndLongitude(double endLongitude) {
-        this.update(null, null, null, endLongitude, null, null);
     }
 
     /**
@@ -609,35 +565,18 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
         List<CommodityListener> listeners = this.getListeners();
 
-        if (this.getStartLatitude() != prevStartLatitude) {
-            logger.info("Commodity " + this.getPath() + " start latitude updated: " + this.getStartLatitude());
+        if (this.getStartLatitude() != prevStartLatitude || this.getStartLongitude() != prevStartLongitude) {
+            logger.info("Commodity " + this.getPath() + " start location updated: " + this.getStartLatitude() + "," + this.getStartLongitude());
             for (CommodityListener listener : listeners) {
-                listener.startLatitudeUpdated(this.getStartLatitude());
+                listener.startLocationUpdated(this.getStartLatitude(), this.getStartLongitude());
             }
             updated = true;
         }
 
-        if (this.getEndLongitude() != prevStartLongitude) {
-            logger.info("Commodity " + this.getPath() + " start longitude updated: " + this.getStartLongitude());
+        if (this.getEndLatitude() != prevEndLatitude || this.getEndLongitude() != prevEndLongitude) {
+            logger.info("Commodity " + this.getPath() + " end location updated: " + this.getEndLatitude() + "," + this.getEndLongitude());
             for (CommodityListener listener : listeners) {
-                listener.startLongitudeUpdated(this.getStartLongitude());
-            }
-            updated = true;
-        }
-
-
-        if (this.getEndLatitude() != prevEndLatitude) {
-            logger.info("Commodity " + this.getPath() + " end latitude updated: " + this.getEndLatitude());
-            for (CommodityListener listener : listeners) {
-                listener.endLatitudeUpdated(this.getEndLatitude());
-            }
-            updated = true;
-        }
-
-        if (this.getEndLongitude() != prevEndLongitude) {
-            logger.info("Commodity " + this.getPath() + " end longitude updated: " + this.getEndLongitude());
-            for (CommodityListener listener : listeners) {
-                listener.endLongitudeUpdated(this.getEndLongitude());
+                listener.endLocationUpdated(this.getEndLatitude(), this.getEndLongitude());
             }
             updated = true;
         }
