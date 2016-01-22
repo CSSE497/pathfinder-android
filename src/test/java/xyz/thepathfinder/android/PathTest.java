@@ -15,10 +15,9 @@ public class PathTest {
         Path path = new Path("");
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void testNullPath(){
         Path path = new Path(null);
-        Assert.assertEquals("/default", path.getPath());
     }
 
     @Test(expected = IllegalArgumentException.class)

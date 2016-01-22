@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -25,6 +26,9 @@ import java.util.logging.Logger;
 public class Transport extends SubscribableCrudModel<TransportListener> {
 
     private static final Logger logger = Logger.getLogger(Transport.class.getName());
+    static {
+        logger.setLevel(Level.INFO);
+    }
 
     /**
      * String used in the model field of the pathfinder requests.
@@ -67,12 +71,13 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     protected Transport(String path, PathfinderServices services) {
         super(path, services);
 
-        logger.finest("Constructing transport by parameters: " + path);
+        logger.info("Constructing transport by parameters: " + path);
 
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
         if (isRegistered) {
             logger.warning("Illegal Argument Exception: Transport path already exists: " + path);
-            throw new IllegalArgumentException("Transport path already exists: " + path);
+            //TODO revert after path update
+            //throw new IllegalArgumentException("Transport path already exists: " + path);
         } else {
             this.getServices().getRegistry().registerModel(this);
         }
@@ -130,7 +135,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
             return new Transport(path, services);
         }
 
-        logger.finest("Getting transport instance: " + transport);
+        logger.info("Finished getting transport instance: " + transport);
 
         return transport;
     }
@@ -153,7 +158,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         String path = Transport.getPath(transportJson);
         Transport transport = Transport.getInstance(path, services);
 
-        logger.finest("Notifying transport of update: \nCurrent transport: " + transport + "\nNew JSON: " + transportJson);
+        logger.info("Notifying transport of update: \nCurrent transport: " + transport + "\nNew JSON: " + transportJson);
         transport.notifyUpdate(null, transportJson);
 
         return transport;
@@ -175,12 +180,20 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @return <tt>true</tt> if the JSON can be parsed to a transport. <tt>false</tt> otherwise.
      */
     private static boolean checkTransportFields(JsonObject transportJson) {
-        return Transport.checkTransportField(transportJson, "path") &&
+        return Transport.checkTransportField(transportJson, "id") &&
+                Transport.checkTransportField(transportJson, "clusterId") &&
                 Transport.checkTransportField(transportJson, "latitude") &&
                 Transport.checkTransportField(transportJson, "longitude") &&
                 Transport.checkTransportField(transportJson, "status") &&
                 Transport.checkTransportField(transportJson, "metadata") &&
-                !transportJson.get("metadata").isJsonObject();
+                transportJson.get("metadata").isJsonObject();
+        //TODO revert after path update
+        /*return Transport.checkTransportField(transportJson, "path") &&
+                Transport.checkTransportField(transportJson, "latitude") &&
+                Transport.checkTransportField(transportJson, "longitude") &&
+                Transport.checkTransportField(transportJson, "status") &&
+                Transport.checkTransportField(transportJson, "metadata") &&
+                transportJson.get("metadata").isJsonObject();*/
     }
 
     /**
@@ -190,7 +203,10 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @return the path.
      */
     private static String getPath(JsonObject transportJson) {
-        return transportJson.get("path").getAsString();
+        String path = transportJson.get("clusterId").getAsString();
+        return path + "/" + transportJson.get("id").getAsString();
+        //TODO revert after path update
+        //return transportJson.get("path").getAsString();
     }
 
     /**
@@ -210,7 +226,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      *
      * @return the latitude.
      */
-    public Double getLatitude() {
+    public double getLatitude() {
         return this.latitude;
     }
 
@@ -224,22 +240,11 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     }
 
     /**
-     * Updates the latitude of this transport to the specified latitude.
-     * This method updates the latitude of the transport on the pathfinder server.
-     * The latitude is not updated in this object by this method.
-     *
-     * @param latitude The latitude to change to.
-     */
-    public void updateLatitude(double latitude) {
-        this.update(latitude, null, null, null);
-    }
-
-    /**
      * Returns the longitude of this transport.
      *
      * @return the longitude.
      */
-    public Double getLongitude() {
+    public double getLongitude() {
         return this.longitude;
     }
 
@@ -250,17 +255,6 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      */
     private void setLongitude(double longitude) {
         this.longitude = longitude;
-    }
-
-    /**
-     * Updates the longitude of this transport to the specified longitude.
-     * This method updates the longitude of the transport on the pathfinder server.
-     * The longitude is not updated in this object by this method.
-     *
-     * @param longitude The longitude to change to.
-     */
-    public void updateLongitude(double longitude) {
-        this.update(null, longitude, null, null);
     }
 
     /**
@@ -356,7 +350,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      *
      * @param route the of the transport.
      */
-    private void setRoute(Route route) {
+    protected void setRoute(Route route) {
         this.route = route;
     }
 
@@ -406,7 +400,9 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("path", this.getPath());
+        json.addProperty("clusterId", this.getPath());
+        //TODO revert after path update
+        //json.addProperty("path", this.getPath());
         json.addProperty("model", this.getModel());
         json.addProperty("latitude", this.getLatitude());
         json.addProperty("longitude", this.getLongitude());
@@ -450,24 +446,16 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
         List<TransportListener> listeners = this.getListeners();
 
-        if (this.getLatitude() != prevLatitude) {
-            logger.finest("Transport " + this.getPath() + " latitude updated: " + this.getMetadata());
+        if (this.getLatitude() != prevLatitude || this.getLongitude() != prevLongitude) {
+            logger.info("Transport " + this.getPath() + " location updated: " + this.getLatitude() + "," + this.getLongitude());
             for (TransportListener listener : listeners) {
-                listener.latitudeUpdated(this.getLatitude());
-            }
-            updated = true;
-        }
-
-        if (this.getLongitude() != prevLongitude) {
-            logger.finest("Transport " + this.getPath() + " longitude updated: " + this.getMetadata());
-            for (TransportListener listener : listeners) {
-                listener.longitudeUpdated(this.getLongitude());
+                listener.locationUpdated(this.getLatitude(), this.getLongitude());
             }
             updated = true;
         }
 
         if (this.getStatus().equals(prevStatus)) {
-            logger.finest("Transport " + this.getPath() + " status updated: " + this.getMetadata());
+            logger.info("Transport " + this.getPath() + " status updated: " + this.getStatus());
             for (TransportListener listener : listeners) {
                 listener.statusUpdated(this.getStatus());
             }
@@ -475,7 +463,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         }
 
         if (this.getMetadata().equals(prevMetadata)) {
-            logger.finest("Transport " + this.getPath() + " metadata updated: " + this.getMetadata());
+            logger.info("Transport " + this.getPath() + " metadata updated: " + this.getMetadata());
             for (TransportListener listener : listeners) {
                 listener.metadataUpdated(this.getMetadata());
             }
@@ -485,12 +473,23 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         String parentPath = this.getParentPath();
         if (updated && this.getServices().getRegistry().isModelRegistered(parentPath)) {
             Cluster parentCluster = Cluster.getInstance(parentPath, this.getServices());
+
+            boolean added = !parentCluster.getTransportsMap().containsKey(this.getPath());
+
+            if(added) {
+                parentCluster.addTransport(this);
+            }
+
             Collection<Transport> transports = parentCluster.getTransports();
 
-            logger.finest("Transport " + this.getPath() + " calling parent cluster's update");
+            logger.info("Transport " + this.getPath() + " calling parent cluster's update");
 
             List<ClusterListener> clusterListeners = parentCluster.getListeners();
             for (ClusterListener listener : clusterListeners) {
+                if (added) {
+                    listener.transportAdded(this);
+                }
+
                 listener.transportUpdated(this);
                 listener.transportsUpdated(transports);
             }
@@ -506,10 +505,10 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     protected void route(JsonObject json, PathfinderServices services) {
         JsonObject route = json.getAsJsonObject("value");
 
-        logger.finest("Transport setting route: " + this.getPath());
+        logger.info("Transport setting route: " + this.getPath());
         this.route = new Route(route, services);
 
-        logger.finest("Transport updating route: " + this.getPath());
+        logger.info("Transport updating route: " + this.getPath());
         for (TransportListener listener : this.getListeners()) {
             listener.routed(this.getRoute());
         }

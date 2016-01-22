@@ -50,6 +50,9 @@ class Connection extends Endpoint {
      * Logs all outgoing messages through the web socket.
      */
     private static final Logger logger = Logger.getLogger(Connection.class.getName());
+    static {
+        logger.setLevel(Level.INFO);
+    }
 
     /**
      * Constructs a connection object that controls access to the web socket connection
@@ -73,7 +76,7 @@ class Connection extends Endpoint {
      * @throws IllegalStateException the web socket is not connected.
      */
     public void sendMessage(String message) {
-        logger.finest("Sending json to Pathfinder: " + message);
+        logger.info("Sending json to Pathfinder: " + message);
         if (this.isConnected()) {
             this.session.getAsyncRemote().sendText(message);
             this.sentMessageCount++;
@@ -88,7 +91,7 @@ class Connection extends Endpoint {
      */
     @Override
     public void onOpen(Session session, EndpointConfig config) {
-        logger.finest("Pathfinder connection opened");
+        logger.info("Pathfinder connection opened");
         this.session = session;
         this.messageHandler = new MessageHandler(this.registry);
         this.session.addMessageHandler(this.messageHandler);
@@ -99,7 +102,7 @@ class Connection extends Endpoint {
      */
     @Override
     public void onClose(Session session, CloseReason closeReason) {
-        logger.finest("Pathfinder connection closed: " + closeReason);
+        logger.info("Pathfinder connection closed: " + closeReason);
         this.session = session;
     }
 

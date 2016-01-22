@@ -15,6 +15,9 @@ import java.util.logging.Logger;
 public abstract class Model<E extends Listener<? extends Model>> extends Listenable<E> {
 
     private static final Logger logger = Logger.getLogger(Model.class.getName());
+    static {
+        logger.setLevel(Level.INFO);
+    }
 
     /**
      * The path of the model.
@@ -121,22 +124,39 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         boolean updated = false;
         JsonObject value = null;
 
+        logger.info("Reason for update is: " + reason + ", " + json);
+
         if (json.has("value")) {
             value = json.getAsJsonObject("value");
+        } else if(!json.has("route")){
+            value = json;
+        }
+
+        logger.info("Value is: " + value);
+
+        if(value != null) {
             updated = this.updateFields(value);
         }
 
+        logger.info("Finished updating " + this.getPath() + "'s fields.");
         List<E> listeners = this.getListeners();
 
-        if (updated && !reason.equals("Updated")) {
-            logger.finest("Model " + this.getPath() + " updated");
+        if (updated && !"Updated".equals(reason)) {
+            logger.info("Model " + this.getPath() + " updated");
             for (Listener listener : listeners) {
+                logger.info("Calling updated");
                 listener.updated(this);
+                logger.info("Finished Calling updated");
             }
         }
 
+        logger.info("Reason: " + reason);
+        if(reason == null) {
+            return updated;
+        }
+
         if (reason.equals("Updated")) {
-            logger.finest("Model " + this.getPath() + " updated");
+            logger.info("Model " + this.getPath() + " updated");
             for (Listener listener : listeners) {
                 listener.updated(this);
             }
@@ -144,13 +164,13 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         }
 
         if (reason.equals("Routed")) {
-            logger.finest("Model " + this.getPath() + " routed");
+            logger.info("Model " + this.getPath() + " routed");
             this.route(json, this.getServices());
             return true;
         }
 
         if (reason.equals("Model")) {
-            logger.finest("Model " + this.getPath() + " connected");
+            logger.info("Model " + this.getPath() + " connected");
             for (Listener listener : listeners) {
                 listener.connected(this);
             }
@@ -158,7 +178,7 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         }
 
         if (reason.equals("Subscribed")) {
-            logger.finest("Model " + this.getPath() + " subscribed");
+            logger.info("Model " + this.getPath() + " subscribed");
             for (Listener listener : listeners) {
                 listener.subscribed(this);
             }
@@ -166,7 +186,7 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         }
 
         if (reason.equals("RouteSubscribed")) {
-            logger.finest("Model " + this.getPath() + " route subscribed");
+            logger.info("Model " + this.getPath() + " route subscribed");
             for (Listener listener : listeners) {
                 listener.routeSubscribed(this);
             }
@@ -174,7 +194,7 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         }
 
         if (reason.equals("Unsubscribed")) {
-            logger.finest("Model " + this.getPath() + " unsubscribed");
+            logger.info("Model " + this.getPath() + " unsubscribed");
             for (Listener listener : listeners) {
                 listener.unsubscribed(this);
             }
@@ -182,7 +202,7 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         }
 
         if (reason.equals("RouteUnsubscribed")) {
-            logger.finest("Model " + this.getPath() + " route unsubscribed");
+            logger.info("Model " + this.getPath() + " route unsubscribed");
             for (Listener listener : listeners) {
                 listener.routeUnsubscribed(this);
             }
@@ -190,7 +210,7 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         }
 
         if (reason.equals("Created")) {
-            logger.finest("Model " + this.getPath() + " created");
+            logger.info("Model " + this.getPath() + " created");
             for (Listener listener : listeners) {
                 listener.created(this);
             }
@@ -198,7 +218,7 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         }
 
         if (reason.equals("Deleted")) {
-            logger.finest("Model " + this.getPath() + " deleted");
+            logger.info("Model " + this.getPath() + " deleted");
             for (Listener listener : listeners) {
                 this.setConnected(false);
                 listener.deleted(this);
@@ -224,24 +244,13 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
     @Override
     @SuppressWarnings("unchecked")
     protected boolean notifyUpdate(String reason, JsonObject json) {
-        if (!json.has("model") || !json.get("model").getAsString().equals(this.getModel())) {
+/*        if (!json.has("model") || !json.get("model").getAsString().equals(this.getModel())) {
             logger.warning("Invalid model type: " + json + " given to a " + this.getModel());
             return false;
-        }
+        }*/
 
         this.setConnected(true);
-        if (reason != null) {
-            return this.updateType(reason, json);
-        } else {
-            if (this.updateFields(json)) {
-                List<E> listeners = this.getListeners();
-                for (Listener listener : listeners) {
-                    listener.updated(this);
-                }
-                return true;
-            }
-        }
-        return false;
+        return this.updateType(reason, json);
     }
 
     /**

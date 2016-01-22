@@ -4,10 +4,16 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.4'
         classpath 'org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.4.0'
     }
 }
+
+plugins {
+    id "com.jfrog.bintray" version "1.5"
+}
+
+version = "0.0.10"
+group = "xyz.thepathfinder"
 
 repositories {
     mavenCentral()
@@ -19,11 +25,8 @@ apply plugin: 'jacoco'
 apply plugin: 'com.github.kt3k.coveralls'
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
-apply plugin: 'com.jfrog.bintray'
 apply plugin: 'signing'
-apply plugin: 'java'
-
-group = "xyz.thepathfinder"
+apply plugin: 'idea'
 
 configure(allprojects) {
     ext.javadocLinks = [
@@ -31,37 +34,6 @@ configure(allprojects) {
             "http://docs.oracle.com/javaee/7/api/",
             "http://google.github.io/gson/apidocs/"
     ] as String[]
-}
-
-def getVersion() {
-    def versionPropsFile = file('version.properties')
-
-    if (versionPropsFile.canRead()) {
-        def Properties versionProps = new Properties()
-
-        versionProps.load(new FileInputStream(versionPropsFile))
-
-        def patch = versionProps['VERSION_PATCH'].toInteger()
-        def minor = versionProps['VERSION_MINOR'].toInteger()
-        def major = versionProps['VERSION_MAJOR'].toInteger()
-
-        return major + "." + minor + "." + patch
-    }
-}
-
-task incrementVersion << {
-    def versionPropsFile = file('version.properties')
-
-    if (versionPropsFile.canRead()) {
-        def Properties versionProps = new Properties()
-
-        versionProps.load(new FileInputStream(versionPropsFile))
-
-        def code = versionProps['VERSION_PATCH'].toInteger() + 1
-
-        versionProps['VERSION_PATCH'] = code.toString()
-        versionProps.store(versionPropsFile.newWriter(), null)
-    }
 }
 
 jacocoTestReport {
@@ -76,7 +48,6 @@ task javadocs(type: Javadoc) {
     classpath = configurations.compile
     options.memberLevel = JavadocMemberLevel.PUBLIC
     options.links(project.ext.javadocLinks)
-    version = getVersion()
 }
 
 task developerJavadocs(type: Javadoc) {
@@ -85,7 +56,6 @@ task developerJavadocs(type: Javadoc) {
     classpath = configurations.compile
     options.memberLevel = JavadocMemberLevel.PRIVATE
     options.links(project.ext.javadocLinks)
-    version = getVersion()
 }
 
 task javadocJar(type: Jar) {
@@ -102,10 +72,8 @@ task all(dependsOn: ['clean', 'build', 'test', 'javadocs', 'developerJavadocs', 
     compileJava.dependsOn clean
 }
 
-task upload(dependsOn: ['clean', 'build', 'bintrayUpload', 'incrementVersion']) {
+task upload(dependsOn: ['clean', 'bintrayUpload']) {
     compileJava.dependsOn clean
-    bintrayUpload.dependsOn build
-    incrementVersion.dependsOn bintrayUpload
 }
 
 artifacts {
@@ -163,14 +131,13 @@ if(project.hasProperty('publishToJcenter')) {
             issueTrackerUrl = 'https://github.com/CSSE497/pathfinder-android/issues'
             vcsUrl = 'https://github.com/CSSE497/pathfinder-android.git'
             licenses = ['MIT']
-            labels = ['path finding']
+            labels = ['pathfinding']
             publicDownloadNumbers = true
 
             version {
-                    name = getVersion()
-                    desc = 'Initial release'
-                    released = new Date()
-                    vcsTag = getVersion()
+                name = project.version
+                desc = 'Initial release'
+                released = new Date()
 
                 gpg {
                     sign = true

@@ -2,6 +2,7 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -13,6 +14,9 @@ import java.util.logging.Logger;
 public abstract class SubscribableModel<E extends Listener<? extends Model>> extends Model<E> {
 
     private static final Logger logger = Logger.getLogger(SubscribableModel.class.getName());
+    static {
+        logger.setLevel(Level.INFO);
+    }
 
     /**
      * Constructs a subcribable model.
@@ -35,7 +39,7 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
 
         json.addProperty("message", type);
 
-        json.addProperty("path", this.getPath());
+        json.addProperty("id", this.getPath());
         json.addProperty("model", this.getModel());
 
         return json;
@@ -51,6 +55,15 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
         }
 
         JsonObject json = this.getMessageHeader("Subscribe");
+
+        if(this.getModel().equals(Pathfinder.CLUSTER)) {
+            json.remove("id");
+            json.addProperty("model", "Vehicle");
+            json.addProperty("clusterId", this.getPath());
+            this.getServices().getConnection().sendMessage(json.toString());
+            json.addProperty("model", "Commodity");
+        }
+
         this.getServices().getConnection().sendMessage(json.toString());
     }
 

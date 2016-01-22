@@ -22,6 +22,9 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
      * Logs all messages
      */
     private static final Logger logger = Logger.getLogger(MessageHandler.class.getName());
+    static {
+        logger.setLevel(Level.INFO);
+    }
 
     /**
      * Number of messages received, helps with testing.
@@ -45,21 +48,48 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
      */
     @Override
     public void onMessage(String message) {
-        logger.log(Level.INFO, "Received json: " + message);
-        this.receivedMessageCount++;
-        JsonObject json = new JsonParser().parse(message).getAsJsonObject();
+        try {
+            logger.info("Received json: " + message);
+            this.receivedMessageCount++;
+            JsonObject json = new JsonParser().parse(message).getAsJsonObject();
 
-        if (!json.has("message") || !json.has("model") || !json.has("path")) {
+            if (!json.has("message") || !json.has("model")) {
+                logger.warning("Ignoring invalid message: " + json.toString());
+            }
+            //TODO revert after path update
+        /*if (!json.has("message") || !json.has("model") || !json.has("path")) {
             logger.warning("Ignoring invalid message: " + json.toString());
-        } else {
-            String type = json.get("message").getAsString();
+        }*/
+            else {
+                String type = json.get("message").getAsString();
 
-            String path = json.get("path").getAsString();
-            Model model = this.registry.getModel(path);
+                //TODO revert after path update
+                JsonObject value = json.getAsJsonObject("value");
+                String path = "";
+                if (json.has("id")) {
+                    path += json.get("id").getAsString();
+                } else if (json.has("clusterId")) {
+                    path += json.get("clusterId").getAsString();
+                } else if (!json.get("model").getAsString().equals(Pathfinder.CLUSTER)) {
+                    path += value.get("clusterId").getAsString();
+                    path += "/" + value.get("id").getAsString();
+                } else {
+                    path += value.get("id").getAsString();
+                }
 
-            logger.finest("Notifying " + model.getPath() + " of message");
+                //String path = json.get("path").getAsString();
+                //End TODO
 
-            model.notifyUpdate(type, json);
+                Model model = this.registry.getModel(path);
+
+                if(model != null) {
+                    logger.info("Notifying " + model.getPath() + " of message");
+
+                    model.notifyUpdate(type, json);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
