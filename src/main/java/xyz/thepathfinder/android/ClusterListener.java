@@ -10,7 +10,7 @@ import java.util.List;
  *
  * @author David Robinson
  */
-public class ClusterListener extends Listener<Cluster> {
+public abstract class ClusterListener extends Listener<Cluster> {
 
     /**
      * Invoked when the cluster receives a routed message.

@@ -21,11 +21,12 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
     /**
      * Constructs a subscribable CRUD model.
      *
-     * @param path of the model
+     * @param path of the model.
+     * @param type of the model.
      * @param services a pathfinder services object.
      */
-    public SubscribableCrudModel(String path, PathfinderServices services) {
-        super(path, services);
+    public SubscribableCrudModel(String path, ModelType type, PathfinderServices services) {
+        super(path, type, services);
     }
 
     /**
@@ -41,7 +42,7 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
      */
     public void create() {
         if (this.isConnected()) {
-            logger.warning("Cannot create a connected model: " + this.getPath());
+            logger.warning("Cannot create a connected model: " + this.getPathName());
             throw new IllegalStateException("Already created");
         }
 
@@ -57,7 +58,7 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
      */
     public void delete() {
         if (!this.isConnected()) {
-            logger.warning("Cannot delete a model not connected: " + this.getPath());
+            logger.warning("Cannot delete a model not connected: " + this.getPathName());
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 
@@ -72,7 +73,7 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
      */
     protected void update(JsonObject value) {
         if (!this.isConnected()) {
-            logger.warning("Cannot update a model not connected: " + this.getPath());
+            logger.warning("Cannot update a model not connected: " + this.getPathName());
             throw new IllegalStateException("Not connected to object on Pathfinder server");
         }
 

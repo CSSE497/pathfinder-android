@@ -70,7 +70,7 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
                     path += json.get("id").getAsString();
                 } else if (json.has("clusterId")) {
                     path += json.get("clusterId").getAsString();
-                } else if (!json.get("model").getAsString().equals(Pathfinder.CLUSTER)) {
+                } else if (!json.get("model").getAsString().equals(ModelType.CLUSTER.toString())) {
                     path += value.get("clusterId").getAsString();
                     path += "/" + value.get("id").getAsString();
                 } else {
@@ -80,12 +80,16 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
                 //String path = json.get("path").getAsString();
                 //End TODO
 
-                Model model = this.registry.getModel(path);
+                ModelType modelType = ModelType.getModelType(json.get("model").getAsString());
+                logger.info("Model Type : " + modelType);
+                Model model = this.registry.getModel(new Path(path, modelType));
 
                 if(model != null) {
                     logger.info("Notifying " + model.getPath() + " of message");
 
                     model.notifyUpdate(type, json);
+                } else  {
+                    logger.warning("Received message that couldn't be routed to a model: " + message);
                 }
             }
         } catch (Exception e) {

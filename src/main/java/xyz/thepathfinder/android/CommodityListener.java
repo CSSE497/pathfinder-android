@@ -8,7 +8,7 @@ import com.google.gson.JsonObject;
  *
  * @author David Robinson
  */
-public class CommodityListener extends Listener<Commodity> {
+public abstract class CommodityListener extends Listener<Commodity> {
 
     /**
      * Invoked when the commodity receives a routed message.

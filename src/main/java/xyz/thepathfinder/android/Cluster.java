@@ -40,11 +40,6 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     /**
-     * String used in the model field of the pathfinder requests.
-     */
-    private static final String MODEL = Pathfinder.CLUSTER;
-
-    /**
      * Maps a path in the form of a string to the commodities directly under this cluster
      */
     private Map<String, Commodity> commodities;
@@ -73,12 +68,13 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param services A service object to send messages to the server and keep track of all
      *                 {@link Model} objects.
      */
-    private Cluster(String path, PathfinderServices services) {
-        super(path, services);
+    //TODO revert back to private
+    public Cluster(String path, PathfinderServices services) {
+        super(path, ModelType.CLUSTER, services);
 
         logger.info("Constructing cluster by path: " + path);
 
-        boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
+        boolean isRegistered = this.getServices().getRegistry().isModelRegistered(new Path(path, ModelType.CLUSTER));
         if (isRegistered) {
             logger.warning("Illegal Argument Exception: Constructing cluster with path that already exists: " + path);
             throw new IllegalArgumentException("Cluster path already exists: " + path);
@@ -109,13 +105,13 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      *                            different {@link Model} type.
      */
     protected static Cluster getInstance(String path, PathfinderServices services) {
-        Cluster cluster = (Cluster) services.getRegistry().getModel(path);
+        Cluster cluster = (Cluster) services.getRegistry().getModel(new Path(path, ModelType.CLUSTER));
 
         if (cluster == null && !path.equals("")) {
             cluster = new Cluster(path, services);
         }
 
-        logger.info("Finished getting cluster instance: " + cluster.toString());
+        logger.info("Finished getting cluster instance: " + cluster);
 
         return cluster;
     }
@@ -206,7 +202,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
             throw new IllegalStateException("Not connected to cluster, cannot create commodity");
         }
 
-        String path = this.getPath();
+        String path = this.getPathName();
         //TODO revert after path update
         //String path = this.getChildPath(name);
 
@@ -219,7 +215,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param commodity to be added.
      */
     protected void addCommodity(Commodity commodity) {
-        this.commodities.put(commodity.getPath(), commodity);
+        this.commodities.put(commodity.getPathName(), commodity);
     }
 
     /**
@@ -239,7 +235,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @return A commodity associated with that name if one exists, <tt>null</tt> if it doesn't exist.
      */
     public Commodity getCommodity(String name) {
-        return this.commodities.get(this.getChildPath(name));
+        return this.commodities.get(this.getChildPath(name, ModelType.COMMODITY).getPathName());
     }
 
     /**
@@ -267,7 +263,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      */
     private void setCommodities(Iterable<Commodity> commodities) {
         for (Commodity commodity : commodities) {
-            this.commodities.put(commodity.getPath(), commodity);
+            this.commodities.put(commodity.getPathName(), commodity);
         }
     }
 
@@ -293,7 +289,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
             throw new IllegalStateException("The cluster is not connected on the Pathfinder server");
         }
 
-        return Cluster.getInstance(this.getChildPath(name), this.getServices());
+        return Cluster.getInstance(this.getChildPath(name, ModelType.CLUSTER).getPathName(), this.getServices());
     }
 
     /**
@@ -303,7 +299,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @return A subcluster associated with the provided name if exists, <tt>null</tt> if it doesn't exist.
      */
     public Cluster getSubcluster(String name) {
-        return this.subclusters.get(this.getChildPath(name));
+        return this.subclusters.get(this.getChildPath(name, ModelType.CLUSTER).getPathName());
     }
 
     /**
@@ -331,7 +327,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      */
     private void setSubclusters(Iterable<Cluster> subclusters) {
         for (Cluster cluster : subclusters) {
-            this.subclusters.put(cluster.getPath(), cluster);
+            this.subclusters.put(cluster.getPathName(), cluster);
         }
     }
 
@@ -350,7 +346,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param transport to be added.
      */
     protected void addTransport(Transport transport) {
-        this.transports.put(transport.getPath(), transport);
+        this.transports.put(transport.getPathName(), transport);
     }
 
     /**
@@ -370,7 +366,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
             throw new IllegalStateException("Not connected to cluster, cannot create transport");
         }
 
-        String path = this.getPath();
+        String path = this.getPathName();
         //TODO revert after path update
         //String path = this.getChildPath(name);
         return new Transport(path, latitude, longitude, status, metadata, this.getServices());
@@ -393,7 +389,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @return A transport associated with the provided name if exists, <tt>null</tt> if it doesn't exist.
      */
     public Transport getTransport(String name) {
-        return this.transports.get(this.getChildPath(name));
+        return this.transports.get(this.getChildPath(name, ModelType.TRANSPORT).getPathName());
     }
 
     /**
@@ -421,7 +417,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      */
     private void setTransports(Iterable<Transport> transports) {
         for (Transport transport : transports) {
-            this.transports.put(transport.getPath(), transport);
+            this.transports.put(transport.getPathName(), transport);
         }
     }
 
@@ -456,8 +452,8 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * {@inheritDoc}
      */
     @Override
-    protected String getModel() {
-        return Cluster.MODEL;
+    protected ModelType getModelType() {
+        return ModelType.CLUSTER;
     }
 
     /**
@@ -467,8 +463,8 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("path", this.getPath());
-        json.addProperty("model", this.getModel());
+        json.addProperty("path", this.getPathName());
+        json.addProperty("model", this.getModelType().toString());
 
         return json;
     }
@@ -489,14 +485,13 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         List<Cluster> updatedClusters = new ArrayList<Cluster>();
         List<Transport> updatedTransports = new ArrayList<Transport>();
 
-        logger.info("Updating Cluster " + this.getPath() + " with: " + json.toString());
+        logger.info("Updating Cluster " + this.getPathName() + " with: " + json.toString());
 
         boolean updated = false;
 
         prevCommodities = this.getCommoditiesMap();
         Map<String, Commodity> commodityMap = new HashMap<String, Commodity>();
         if (json.has("commodities")) {
-            logger.info("Has commodities");
             JsonArray commodities = json.getAsJsonArray("commodities");
 
             for (JsonElement commodityJson : commodities) {
@@ -508,7 +503,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
                     updatedCommodities.add(commodity);
                 }
 
-                commodityMap.put(commodity.getPath(), commodity);
+                commodityMap.put(commodity.getPathName(), commodity);
             }
         }
         logger.info("Finished has commodities");
@@ -516,7 +511,6 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         prevTransports = this.getTransportsMap();
         Map<String, Transport> transportMap = new HashMap<String, Transport>();
         if (json.has("vehicles")) {
-            logger.info("Has vehicles");
             JsonArray transports = json.getAsJsonArray("vehicles");
 
             for (JsonElement transportJson : transports) {
@@ -527,7 +521,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
                     updatedTransports.add(transport);
                 }
 
-                transportMap.put(transport.getPath(), transport);
+                transportMap.put(transport.getPathName(), transport);
             }
         }
 
@@ -544,7 +538,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
                     updatedClusters.add(cluster);
                 }
 
-                clusterMap.put(cluster.getPath(), cluster);
+                clusterMap.put(cluster.getPathName(), cluster);
             }
         }
 
@@ -557,7 +551,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         for (String path : clusterMap.keySet()) {
             if (!prevSubclusters.containsKey(path)) {
                 Cluster cluster = clusterMap.get(path);
-                logger.info("Cluster " + this.getPath() + " subcluster added: " + cluster.getPath());
+                logger.info("Cluster " + this.getPathName() + " subcluster added: " + cluster.getPathName());
 
                 for (ClusterListener listener : listeners) {
                     listener.subclusterAdded(cluster);
@@ -569,7 +563,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         for (String path : commodityMap.keySet()) {
             if (!prevCommodities.containsKey(path)) {
                 Commodity commodity = commodityMap.get(path);
-                logger.info("Cluster " + this.getPath() + " commodity added: " + commodity.getPath());
+                logger.info("Cluster " + this.getPathName() + " commodity added: " + commodity.getPathName());
 
                 for (ClusterListener listener : listeners) {
                     listener.commodityAdded(commodity);
@@ -581,7 +575,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         for (String path : transportMap.keySet()) {
             if (!prevTransports.containsKey(path)) {
                 Transport transport = transportMap.get(path);
-                logger.info("Cluster " + this.getPath() + " transport added: " + transport.getPath());
+                logger.info("Cluster " + this.getPathName() + " transport added: " + transport.getPathName());
 
                 for (ClusterListener listener : listeners) {
                     listener.transportAdded(transport);
@@ -593,7 +587,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         for (String path : prevCommodities.keySet()) {
             if (!commodityMap.containsKey(path)) {
                 Commodity commodity = prevCommodities.get(path);
-                logger.info("Cluster " + this.getPath() + " commodity removed: " + commodity.getPath());
+                logger.info("Cluster " + this.getPathName() + " commodity removed: " + commodity.getPathName());
 
                 for (ClusterListener listener : listeners) {
                     listener.commodityRemoved(commodity);
@@ -605,7 +599,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         for (String path : prevSubclusters.keySet()) {
             if (!clusterMap.containsKey(path)) {
                 Cluster cluster = prevSubclusters.get(path);
-                logger.info("Cluster " + this.getPath() + " subcluster removed: " + cluster.getPath());
+                logger.info("Cluster " + this.getPathName() + " subcluster removed: " + cluster.getPathName());
 
                 for (ClusterListener listener : listeners) {
                     listener.subclusterRemoved(cluster);
@@ -617,7 +611,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         for (String path : prevTransports.keySet()) {
             if (!transportMap.containsKey(path)) {
                 Transport transport = prevTransports.get(path);
-                logger.info("Cluster " + this.getPath() + " transport removed: " + transport.getPath());
+                logger.info("Cluster " + this.getPathName() + " transport removed: " + transport.getPathName());
 
                 for (ClusterListener listener : listeners) {
                     listener.transportRemoved(transport);
@@ -627,7 +621,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
 
         for (Cluster cluster : updatedClusters) {
-            logger.info("Cluster " + this.getPath() + " subcluster updated: " + cluster.getPath());
+            logger.info("Cluster " + this.getPathName() + " subcluster updated: " + cluster.getPathName());
             for (ClusterListener listener : listeners) {
                 listener.subclusterUpdated(cluster);
             }
@@ -635,7 +629,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
 
         for (Commodity commodity : updatedCommodities) {
-            logger.info("Cluster " + this.getPath() + " commodity updated: " + commodity.getPath());
+            logger.info("Cluster " + this.getPathName() + " commodity updated: " + commodity.getPathName());
             for (ClusterListener listener : listeners) {
                 listener.commodityUpdated(commodity);
             }
@@ -643,7 +637,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
 
         for (Transport transport : updatedTransports) {
-            logger.info("Cluster " + this.getPath() + " transport updated: " + transport.getPath());
+            logger.info("Cluster " + this.getPathName() + " transport updated: " + transport.getPathName());
             for (ClusterListener listener : listeners) {
                 listener.transportUpdated(transport);
             }
@@ -651,34 +645,34 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
 
         if (!updatedCommodities.isEmpty()) {
-            logger.info("Cluster " + this.getPath() +  " commodities updated " + this.getCommodities());
+            logger.info("Cluster " + this.getPathName() +  " commodities updated " + this.getCommodities());
             for (ClusterListener listener : listeners) {
                 listener.commoditiesUpdated(this.getCommodities());
             }
         }
 
         if (!updatedClusters.isEmpty()) {
-            logger.info("Cluster " + this.getPath() +  " subclusters updated " + this.getSubclusters());
+            logger.info("Cluster " + this.getPathName() +  " subclusters updated " + this.getSubclusters());
             for (ClusterListener listener : listeners) {
                 listener.subclustersUpdated(this.getSubclusters());
             }
         }
 
         if (!updatedTransports.isEmpty()) {
-            logger.info("Cluster " + this.getPath() +  " transports updated " + this.getTransports());
+            logger.info("Cluster " + this.getPathName() +  " transports updated " + this.getTransports());
             for (ClusterListener listener : listeners) {
                 listener.transportsUpdated(this.getTransports());
             }
         }
 
-        String parentPath = this.getParentPath();
+        Path parentPath = this.getParentPath();
 
         if (updated && this.getServices().getRegistry().isModelRegistered(parentPath)) {
-            Cluster parentCluster = Cluster.getInstance(parentPath, this.getServices());
+            Cluster parentCluster = Cluster.getInstance(parentPath.getPathName(), this.getServices());
 
             Collection<Cluster> clusters = parentCluster.getSubclusters();
             List<ClusterListener> clusterListeners = parentCluster.getListeners();
-            logger.info("Cluster " + this.getPath() + " calling parent cluster's update");
+            logger.info("Cluster " + this.getPathName() + " calling parent cluster's update");
             for (ClusterListener listener : clusterListeners) {
                 listener.subclusterUpdated(this);
                 listener.subclustersUpdated(clusters);
@@ -695,7 +689,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         JsonArray routesJson = json.getAsJsonArray("route");
         List<Route> routes = new ArrayList<Route>();
 
-        logger.info("Cluster adding routes: " + this.getPath());
+        logger.info("Cluster adding routes: " + this.getPathName());
         for (JsonElement route : routesJson) {
             routes.add(new Route((JsonObject) route, services));
         }
@@ -712,7 +706,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
             }
         }
 
-        logger.info("Cluster updating routes: " + this.getPath());
+        logger.info("Cluster updating routes: " + this.getPathName());
         for (ClusterListener listener : this.getListeners()) {
             listener.routed(new ArrayList<Route>(this.getRoutes()));
 
@@ -725,7 +719,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     public String toString() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("path", this.getPath());
+        json.addProperty("path", this.getPathName());
         json.addProperty("commodities", this.getCommodities().toString());
         json.addProperty("subclusters", this.getSubclusters().toString());
         json.addProperty("transports", this.getTransports().toString());

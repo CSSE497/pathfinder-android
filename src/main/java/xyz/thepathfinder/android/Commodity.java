@@ -32,11 +32,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     }
 
     /**
-     * String used in the model field of the pathfinder requests.
-     */
-    private static final String MODEL = Pathfinder.COMMODITY;
-
-    /**
      * The pickup latitude of the commodity.
      */
     private double startLatitude;
@@ -81,11 +76,11 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @param services a pathfinder services objects
      */
     protected Commodity(String path, PathfinderServices services) {
-        super(path, services);
+        super(path, ModelType.COMMODITY, services);
 
         logger.info("Constructing commodity by path: " + path);
 
-        boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
+        boolean isRegistered = this.getServices().getRegistry().isModelRegistered(new Path(path, ModelType.COMMODITY));
         if (isRegistered) {
             logger.warning("Illegal Argument Exception: Commodity path already exists " + path);
             //TODO revert after path update
@@ -151,7 +146,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @throws IllegalArgumentException if the path requested is already used by a different model type.
      */
     protected static Commodity getInstance(String path, PathfinderServices services) {
-        Commodity commodity = (Commodity) services.getRegistry().getModel(path);
+        Commodity commodity = (Commodity) services.getRegistry().getModel(new Path(path, ModelType.COMMODITY));
 
         if (commodity == null) {
             return new Commodity(path, services);
@@ -494,8 +489,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * {@inheritDoc}
      */
     @Override
-    protected String getModel() {
-        return Commodity.MODEL;
+    protected ModelType getModelType() {
+        return ModelType.COMMODITY;
     }
 
     /**
@@ -505,10 +500,10 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("clusterId", this.getPath());
+        json.addProperty("clusterId", this.getPathName());
         //TODO revert after path update
         //json.addProperty("path", this.getPath());
-        json.addProperty("model", this.getModel());
+        json.addProperty("model", this.getModelType().toString());
         json.addProperty("startLatitude", this.getStartLatitude());
         json.addProperty("startLongitude", this.getStartLongitude());
         json.addProperty("endLatitude", this.getEndLatitude());
@@ -597,11 +592,11 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
             updated = true;
         }
 
-        String parentPath = this.getParentPath();
+        Path parentPath = this.getParentPath();
         if (updated && this.getServices().getRegistry().isModelRegistered(parentPath)) {
-            Cluster parentCluster = Cluster.getInstance(parentPath, this.getServices());
+            Cluster parentCluster = Cluster.getInstance(parentPath.getPathName(), this.getServices());
 
-            boolean added = !parentCluster.getCommoditiesMap().containsKey(this.getPath());
+            boolean added = !parentCluster.getCommoditiesMap().containsKey(this.getPathName());
 
             if(added) {
                 parentCluster.addCommodity(this);
