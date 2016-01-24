@@ -68,8 +68,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param services A service object to send messages to the server and keep track of all
      *                 {@link Model} objects.
      */
-    //TODO revert back to private
-    public Cluster(String path, PathfinderServices services) {
+    private Cluster(String path, PathfinderServices services) {
         super(path, ModelType.CLUSTER, services);
 
         logger.info("Constructing cluster by path: " + path);
