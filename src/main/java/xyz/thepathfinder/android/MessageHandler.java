@@ -85,7 +85,7 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
                 Model model = this.registry.getModel(new Path(path, modelType));
 
                 if(model != null) {
-                    logger.info("Notifying " + model.getPath() + " of message");
+                    logger.info("Notifying " + model.getPathName() + " Type: " + model.getModelType() + " of message");
 
                     model.notifyUpdate(type, json);
                 } else  {

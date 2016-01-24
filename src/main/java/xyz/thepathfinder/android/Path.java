@@ -143,7 +143,7 @@ class Path {
     public boolean equals(Object o) {
         if (o instanceof Path) {
             Path otherPath = (Path) o;
-            return this.modelType.equals(otherPath.modelType) && this.path.equals(otherPath.path);
+            return this.modelType == otherPath.modelType && this.path.equals(otherPath.path);
         }
         return false;
     }

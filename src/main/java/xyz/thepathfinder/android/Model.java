@@ -137,9 +137,9 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
 
         logger.info("Reason for update is: " + reason + ", " + json);
 
-        if (json.has("value")) {
+        if (json.has("value") && !json.has("route")) {
             value = json.getAsJsonObject("value");
-        } else if(!json.has("route")){
+        } else if(reason == null){
             value = json;
         }
 
