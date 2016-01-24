@@ -31,11 +31,6 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     }
 
     /**
-     * String used in the model field of the pathfinder requests.
-     */
-    private static final String MODEL = Pathfinder.TRANSPORT;
-
-    /**
      * Latitude of the transport.
      */
     private double latitude;
@@ -69,11 +64,11 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @param services a pathfinder services object.
      */
     protected Transport(String path, PathfinderServices services) {
-        super(path, services);
+        super(path, ModelType.TRANSPORT, services);
 
         logger.info("Constructing transport by parameters: " + path);
 
-        boolean isRegistered = this.getServices().getRegistry().isModelRegistered(path);
+        boolean isRegistered = this.getServices().getRegistry().isModelRegistered(new Path(path, ModelType.TRANSPORT));
         if (isRegistered) {
             logger.warning("Illegal Argument Exception: Transport path already exists: " + path);
             //TODO revert after path update
@@ -129,7 +124,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @return a transport.
      */
     public static Transport getInstance(String path, PathfinderServices services) {
-        Transport transport = (Transport) services.getRegistry().getModel(path);
+        Transport transport = (Transport) services.getRegistry().getModel(new Path(path, ModelType.TRANSPORT));
 
         if (transport == null) {
             return new Transport(path, services);
@@ -389,8 +384,8 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * {@inheritDoc}
      */
     @Override
-    protected String getModel() {
-        return Transport.MODEL;
+    protected ModelType getModelType() {
+        return ModelType.TRANSPORT;
     }
 
     /**
@@ -400,10 +395,10 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("clusterId", this.getPath());
+        json.addProperty("clusterId", this.getPathName());
         //TODO revert after path update
         //json.addProperty("path", this.getPath());
-        json.addProperty("model", this.getModel());
+        json.addProperty("model", this.getModelType().toString());
         json.addProperty("latitude", this.getLatitude());
         json.addProperty("longitude", this.getLongitude());
         json.addProperty("status", this.getStatus().toString());
@@ -470,11 +465,11 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
             updated = true;
         }
 
-        String parentPath = this.getParentPath();
+        Path parentPath = this.getParentPath();
         if (updated && this.getServices().getRegistry().isModelRegistered(parentPath)) {
-            Cluster parentCluster = Cluster.getInstance(parentPath, this.getServices());
+            Cluster parentCluster = Cluster.getInstance(parentPath.getPathName(), this.getServices());
 
-            boolean added = !parentCluster.getTransportsMap().containsKey(this.getPath());
+            boolean added = !parentCluster.getTransportsMap().containsKey(this.getPathName());
 
             if(added) {
                 parentCluster.addTransport(this);

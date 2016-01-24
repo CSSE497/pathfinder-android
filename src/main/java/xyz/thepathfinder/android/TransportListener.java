@@ -8,7 +8,7 @@ import com.google.gson.JsonObject;
  *
  * @author David Robinson
  */
-public class TransportListener extends Listener<Transport> {
+public abstract class TransportListener extends Listener<Transport> {
 
     /**
      * Invoked when the transport receives a routed message.

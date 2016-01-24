@@ -26,19 +26,26 @@ class Path {
     private String path;
 
     /**
+     * Type of the model.
+     */
+    private ModelType modelType;
+
+    /**
      * Constructs a path to a model. The path may not an empty string.
      * Other requirements are subject to change.
      *
-     * @param path a string representing the path
+     * @param path a string representing the path.
+     * @param modelType type of the model.
      * @throws IllegalArgumentException when the path is invalid.
      */
-    protected Path(String path) {
+    protected Path(String path, ModelType modelType) {
         if (!Path.isValidPath(path)) {
             logger.warning("Illegal Argument Exception: Illegal path name " + path);
             throw new IllegalArgumentException("Illegal path name " + path);
         }
 
         this.path = path;
+        this.modelType = modelType;
     }
 
     /**
@@ -48,7 +55,7 @@ class Path {
      * @return <tt>true</tt> if allowed, <tt>false</tt> otherwise.
      */
     public static boolean isValidPath(String path) {
-        return !(path == null || path.equals(""));
+        return !(path == null || path.equals("") || path.contains(" "));
     }
 
     /**
@@ -58,19 +65,24 @@ class Path {
      * @return <tt>true</tt> if allowed, <tt>false</tt> otherwise.
      */
     public static boolean isValidName(String name) {
-        return !name.contains(Path.PATH_SEPARATOR);
+        return !name.contains(Path.PATH_SEPARATOR) && !name.contains(" ");
     }
 
     /**
      * Returns the child path of this path plus the name provided.
      *
      * @param name to add.
+     * @param type of the model.
      * @return the child's path.
      * @throws IllegalArgumentException if the name is invalid, see {@link Path#isValidName(String)}.
+     * @throws IllegalStateException if the model type isn't a cluster.
      */
-    public String getChildPath(String name) {
-        if (Path.isValidName(name)) {
-            return this.path + Path.PATH_SEPARATOR + name;
+    protected Path getChildPath(String name, ModelType type) {
+        if(!this.getModelType().equals(ModelType.CLUSTER)) {
+            logger.warning("Illegal State Exception: Cannot get a child path name on a non-cluster type");
+            throw new IllegalStateException("Cannot get a child path name on a non-cluster type");
+        } else if (Path.isValidName(name)) {
+            return new Path(this.path + Path.PATH_SEPARATOR + name, type);
         } else {
             logger.warning("Illegal Argument Exception: Illegal path name " + name);
             throw new IllegalArgumentException("Illegal path name: " + name);
@@ -94,7 +106,7 @@ class Path {
      *
      * @return the path of the model.
      */
-    public String getPath() {
+    public String getPathName() {
         return path;
     }
 
@@ -105,14 +117,23 @@ class Path {
      *
      * @return the path of the parent of this path.
      */
-    public String getParentPath() {
+    public Path getParentPath() {
         int lastSlashIndex = this.path.lastIndexOf(Path.PATH_SEPARATOR);
 
         if(lastSlashIndex == -1) {
-            return "";
+            return null;
         }
 
-        return this.path.substring(0, lastSlashIndex);
+        return new Path(this.path.substring(0, lastSlashIndex), ModelType.CLUSTER);
+    }
+
+    /**
+     * Returns the type of the model.
+     *
+     * @return the type of the model.
+     */
+    public ModelType getModelType() {
+        return this.modelType;
     }
 
     /**
@@ -122,8 +143,16 @@ class Path {
     public boolean equals(Object o) {
         if (o instanceof Path) {
             Path otherPath = (Path) o;
-            return this.path.equals(otherPath.path);
+            return this.modelType == otherPath.modelType && this.path.equals(otherPath.path);
         }
         return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        return this.path.hashCode();
     }
 }

@@ -22,10 +22,11 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
      * Constructs a subcribable model.
      *
      * @param path of the model to subscribe to.
+     * @param type of the model.
      * @param services a pathfinder services object.
      */
-    public SubscribableModel(String path, PathfinderServices services) {
-        super(path, services);
+    public SubscribableModel(String path, ModelType type, PathfinderServices services) {
+        super(path, type, services);
     }
 
     /**
@@ -39,8 +40,8 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
 
         json.addProperty("message", type);
 
-        json.addProperty("id", this.getPath());
-        json.addProperty("model", this.getModel());
+        json.addProperty("id", this.getPathName());
+        json.addProperty("model", this.getModelType().toString());
 
         return json;
     }
@@ -56,10 +57,10 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
 
         JsonObject json = this.getMessageHeader("Subscribe");
 
-        if(this.getModel().equals(Pathfinder.CLUSTER)) {
+        if(this.getModelType().equals(ModelType.CLUSTER)) {
             json.remove("id");
             json.addProperty("model", "Vehicle");
-            json.addProperty("clusterId", this.getPath());
+            json.addProperty("clusterId", this.getPathName());
             this.getServices().getConnection().sendMessage(json.toString());
             json.addProperty("model", "Commodity");
         }

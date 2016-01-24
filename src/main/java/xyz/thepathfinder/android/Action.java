@@ -177,7 +177,7 @@ public class Action {
         json.addProperty("longitude", this.getLongitude());
         json.addProperty("status", this.getStatus().toString());
         if(this.getModel() != null) {
-            json.addProperty("model", this.getModel().getPath());
+            json.addProperty("model", this.getModel().getPathName());
         }
         return json.toString();
     }

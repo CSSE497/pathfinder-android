@@ -131,7 +131,7 @@ if(project.hasProperty('publishToJcenter')) {
             issueTrackerUrl = 'https://github.com/CSSE497/pathfinder-android/issues'
             vcsUrl = 'https://github.com/CSSE497/pathfinder-android.git'
             licenses = ['MIT']
-            labels = ['pathfinding']
+            labels = ['pathfinding', 'logistics', 'navigation']
             publicDownloadNumbers = true
 
             version {

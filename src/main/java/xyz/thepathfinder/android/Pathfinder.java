@@ -48,24 +48,6 @@ import java.util.logging.Logger;
 public class Pathfinder {
 
     /**
-     * Cluster model name used in requests to the Pathfinder server.
-     */
-    protected static final String CLUSTER = "Cluster";
-
-    /**
-     * Commodity model name used in requests to the Pathfinder server.
-     */
-    protected static final String COMMODITY = "Commodity";
-
-    /**
-     * Transport model name used in requests to the Pathfinder server.
-     */
-    protected static final String TRANSPORT = "Vehicle";
-
-    //TODO revert after transport update on pathfinder-server
-    //protected static final String TRANSPORT = "Transport";
-
-    /**
      * Keeps track of all the Pathfinder models and connection to the server.
      */
     private PathfinderServices services;

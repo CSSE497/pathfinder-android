@@ -100,7 +100,7 @@ public class Route {
     public String toString() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("transport", this.getTransport().getPath());
+        json.addProperty("transport", this.getTransport().getPathName());
         json.addProperty("actions", this.getActions().toString());
 
         return json.toString();
