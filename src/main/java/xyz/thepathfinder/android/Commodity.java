@@ -489,14 +489,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * {@inheritDoc}
      */
     @Override
-    protected ModelType getModelType() {
-        return ModelType.COMMODITY;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 

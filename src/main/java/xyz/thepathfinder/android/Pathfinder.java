@@ -1,5 +1,6 @@
 package xyz.thepathfinder.android;
 
+import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
 import javax.websocket.DeploymentException;
@@ -58,9 +59,9 @@ public class Pathfinder {
     private URI webSocketUrl;
 
     /**
-     * Application identifier used to communicate with the pathfinder server.
+     * Configures the opening connection header.
      */
-    private String applicationIdentifier;
+    private ConnectionConfiguration connectionConfiguration;
 
     /**
      * Logs all messages
@@ -99,10 +100,11 @@ public class Pathfinder {
     }
 
     private void constructPathfinder(String applicationIdentifier, String userCredentials) {
-        this.applicationIdentifier = applicationIdentifier;
+
+        this.connectionConfiguration = new ConnectionConfiguration(applicationIdentifier);
 
         ModelRegistry registry = new ModelRegistry();
-        Connection connection = new Connection(applicationIdentifier, userCredentials, registry);
+        Connection connection = new Connection(userCredentials, registry);
 
         this.services = new PathfinderServices(registry, connection);
     }
@@ -116,10 +118,13 @@ public class Pathfinder {
      */
     public void connect() throws IOException, DeploymentException {
         if (!this.isConnected()) {
+
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+            ClientEndpointConfig configuration = ClientEndpointConfig.Builder.create().configurator(this.connectionConfiguration).build();
+
             try {
                 // blocks until connection is established, JSR 356
-                container.connectToServer(this.services.getConnection(), this.webSocketUrl);
+                container.connectToServer(this.services.getConnection(), configuration, this.webSocketUrl);
             } catch (DeploymentException e) {
                 // Invalid annotated connection object and connection problems
                 logger.severe("Deployment Exception: " + e.getMessage());
@@ -137,7 +142,7 @@ public class Pathfinder {
      * @return an unconnected cluster
      */
     public Cluster getDefaultCluster() {
-        return Cluster.getInstance(this.applicationIdentifier, this.services);
+        return Cluster.getInstance(Path.DEFAULT_PATH, this.services);
     }
 
     /**

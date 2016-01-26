@@ -384,14 +384,6 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * {@inheritDoc}
      */
     @Override
-    protected ModelType getModelType() {
-        return ModelType.TRANSPORT;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 

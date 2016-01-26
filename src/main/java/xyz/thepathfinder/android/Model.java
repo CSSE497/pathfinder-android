@@ -97,6 +97,15 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
     }
 
     /**
+     * Returns the type of the model
+     *
+     * @return type of model
+     */
+    protected ModelType getModelType() {
+        return this.path.getModelType();
+    }
+
+    /**
      * Returns the pathfinder services object.
      *
      * @return a pathfinder services object.
@@ -263,13 +272,6 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         this.setConnected(true);
         return this.updateType(reason, json);
     }
-
-    /**
-     * Returns the type of the model
-     *
-     * @return type of model
-     */
-    protected abstract ModelType getModelType();
 
     /**
      * Returns the value used in create request to the Pathfinder server
