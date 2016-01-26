@@ -21,6 +21,11 @@ class Path {
     private static final String PATH_SEPARATOR = "/";
 
     /**
+     * Default cluster path.
+     */
+    protected static final String DEFAULT_PATH = "/root";
+
+    /**
      * A string representing the path.
      */
     private String path;
@@ -120,7 +125,7 @@ class Path {
     public Path getParentPath() {
         int lastSlashIndex = this.path.lastIndexOf(Path.PATH_SEPARATOR);
 
-        if(lastSlashIndex == -1) {
+        if(lastSlashIndex == 0) {
             return null;
         }
 

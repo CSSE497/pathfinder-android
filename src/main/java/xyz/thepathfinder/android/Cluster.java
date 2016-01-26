@@ -451,14 +451,6 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * {@inheritDoc}
      */
     @Override
-    protected ModelType getModelType() {
-        return ModelType.CLUSTER;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 

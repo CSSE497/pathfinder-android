@@ -17,11 +17,6 @@ import java.util.logging.Logger;
 class Connection extends Endpoint {
 
     /**
-     * The application identifier sent to the Pathfinder server.
-     */
-    private final String applictionIdentifier;
-
-    /**
      * The user's credentials to the Pathfinder server.
      */
     private final String userCredentials;
@@ -58,12 +53,10 @@ class Connection extends Endpoint {
      * Constructs a connection object that controls access to the web socket connection
      * with the Pathfinder Server.
      *
-     * @param applictionIdentifier the application identifier provided by the Pathfinder server for the application
      * @param userCredentials      the user's credentials for this application
      * @param registry             a model registry
      */
-    protected Connection(String applictionIdentifier, String userCredentials, ModelRegistry registry) {
-        this.applictionIdentifier = applictionIdentifier;
+    protected Connection(String userCredentials, ModelRegistry registry) {
         this.userCredentials = userCredentials;
         this.registry = registry;
         this.sentMessageCount = 0L;
