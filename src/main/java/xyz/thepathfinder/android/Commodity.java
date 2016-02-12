@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 
 /**
  * Interface to the Pathfinder server's commodity API. A commodity may be create
- * by a {@link Cluster} object with the {@link Cluster#createCommodity(String, double, double, double, double, CommodityStatus, JsonObject)}
+ * by a {@link Cluster} object with the {@link Cluster#createCommodity(double, double, double, double, CommodityStatus, JsonObject)}
  * method.
  *
  * <p>
@@ -74,6 +74,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      *
      * @param path     the path to commodity
      * @param services a pathfinder services objects
+     * @throws IllegalArgumentException occurs if the path has already been used to create a commodity.
      */
     protected Commodity(String path, PathfinderServices services) {
         super(path, ModelType.COMMODITY, services);
@@ -82,9 +83,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(new Path(path, ModelType.COMMODITY));
         if (isRegistered) {
-            logger.warning("Illegal Argument Exception: Commodity path already exists " + path);
-            //TODO revert after path update
-            //throw new IllegalArgumentException("Commodity path already exists: " + path);
+            logger.severe("Illegal Argument Exception: Commodity path already exists " + path);
+            throw new IllegalArgumentException("Commodity path already exists: " + path);
         } else {
             this.getServices().getRegistry().registerModel(this);
         }
@@ -143,12 +143,11 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @param path     the path to model on the pathfinder server
      * @param services a pathfinder services object.
      * @return the commodity object created with the path specified.
-     * @throws IllegalArgumentException if the path requested is already used by a different model type.
      */
     protected static Commodity getInstance(String path, PathfinderServices services) {
         Commodity commodity = (Commodity) services.getRegistry().getModel(new Path(path, ModelType.COMMODITY));
 
-        if (commodity == null) {
+        if (commodity == null && Path.isValidPath(path)) {
             return new Commodity(path, services);
         }
 
@@ -165,11 +164,11 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @param commodityJson a JSON object that represents a commodity.
      * @param services      a pathfinder services object.
      * @return the commodity object created with the path specified.
-     * @throws IllegalArgumentException if the path requested is already used by a different model type.
+     * @throws IllegalArgumentException occurs when the commodity JSON cannot parse to a commodity
      */
     protected static Commodity getInstance(JsonObject commodityJson, PathfinderServices services) {
         if (!Commodity.checkCommodityFields(commodityJson)) {
-            logger.warning("Illegal Argument Exception: JSON could not be parse to a commodity " + commodityJson);
+            logger.severe("Illegal Argument Exception: JSON could not be parse to a commodity " + commodityJson);
             throw new IllegalArgumentException("JSON could not be parsed to a commodity " + commodityJson);
         }
 
@@ -347,9 +346,9 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      */
     private static CommodityStatus getStatus(String status) {
         CommodityStatus[] values = CommodityStatus.values();
-        for (int k = 0; k < values.length; k++) {
-            if (values[k].equals(status)) {
-                return values[k];
+        for(CommodityStatus possibleStatus : CommodityStatus.values()) {
+            if (possibleStatus.equals(status)) {
+                return possibleStatus;
             }
         }
 
@@ -366,8 +365,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         if (status != null) {
             this.status = status;
         } else {
-            logger.warning("Illegal Argument Exception illegal commodity status: " + status);
-            throw new IllegalArgumentException("Illegal status");
+            logger.severe("Illegal Argument Exception illegal commodity status: " + status);
+            throw new IllegalArgumentException("Illegal commodity status: " + status);
         }
     }
 
@@ -446,7 +445,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
     /**
      * Sends update requests to the Pathfinder server. If a parameter is null it will
-     * not be updated. This method does not update this commodities fields.
+     * not be updated. This method does not update this commodities fields, it updates
+     * the commodity on the pathfinder server.
      *
      * @param startLatitude  The start latitude to change to.
      * @param startLongitude The start longitude to change to.

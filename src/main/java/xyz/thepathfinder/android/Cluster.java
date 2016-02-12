@@ -67,6 +67,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param path     The path name of the cluster.
      * @param services A service object to send messages to the server and keep track of all
      *                 {@link Model} objects.
+     * @throws IllegalArgumentException occurs when a cluster has already been registered with the same path.
      */
     private Cluster(String path, PathfinderServices services) {
         super(path, ModelType.CLUSTER, services);
@@ -75,7 +76,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(new Path(path, ModelType.CLUSTER));
         if (isRegistered) {
-            logger.warning("Illegal Argument Exception: Constructing cluster with path that already exists: " + path);
+            logger.severe("Illegal Argument Exception: Constructing cluster with path that already exists: " + path);
             throw new IllegalArgumentException("Cluster path already exists: " + path);
         } else {
             this.getServices().getRegistry().registerModel(this);
@@ -93,20 +94,17 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * Returns an instance of cluster object based on the path parameter. If there is
      * a cluster with that path already created, it will return that cluster object.
      * If there isn't a cluster with that path already created, it will create a new
-     * cluster object. If the path is associated with a different model type it will
-     * throw a <tt>IllegalArgumentException</tt>.
+     * cluster object.
      *
      * @param path     The full path to pathfinder model
      * @param services The pathfinder services object.
      * @return A cluster with the specified path. If path is an empty string it returns
      * <tt>null</tt>.
-     * @throws IllegalArgumentException if the requested path is already associated with a
-     *                            different {@link Model} type.
      */
     protected static Cluster getInstance(String path, PathfinderServices services) {
         Cluster cluster = (Cluster) services.getRegistry().getModel(new Path(path, ModelType.CLUSTER));
 
-        if (cluster == null && !path.equals("")) {
+        if (cluster == null && Path.isValidPath(path)) {
             cluster = new Cluster(path, services);
         }
 
@@ -126,15 +124,14 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param clusterJson A json object that parses to a cluster.
      * @param services    The pathfinder services object.
      * @return A cluster with the specified path.
-     * @throws IllegalArgumentException if the requested path is already associated with a
-     *                            different {@link Model} type. Also, if the json object doesn't parse to
+     * @throws IllegalArgumentException occurs if the json object doesn't parse to
      *                            a cluster object.
      */
     protected static Cluster getInstance(JsonObject clusterJson, PathfinderServices services) {
         boolean canParseToCluster = Cluster.checkClusterFields(clusterJson);
 
         if (!canParseToCluster) {
-            logger.warning("Illegal Argument Exception: JSON could not be parsed to a cluster: " + clusterJson);
+            logger.severe("Illegal Argument Exception: JSON could not be parsed to a cluster: " + clusterJson);
             throw new IllegalArgumentException("JSON could not be parsed to a cluster");
         }
 
@@ -179,33 +176,36 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @return The path of the cluster
      */
     private static String getPath(JsonObject clusterJson) {
-        return clusterJson.get("path").getAsString();
+        return clusterJson.get("id").getAsString();
     }
 
     /**
-     * Creates an unconnected commodity under this cluster.
+     * Creates a commodity under this cluster on the pathfinder server.
      *
-     * @param name           Name of the commodity, it must form a unique identifier when concatenated with this cluster's path.
      * @param startLatitude  The pick up latitude of the commodity.
      * @param startLongitude The pick up longitude of the commodity.
      * @param endLatitude    The drop off latitude of the commodity.
      * @param endLongitude   The drop off longitude of the commodity.
      * @param status         The current status of the commodity. If <tt>null</tt> it will default to <tt>CommodityStatus.OFFLINE</tt>.
      * @param metadata       A JsonObject representing the metadata field of the commodity. If <tt>null</tt> it will default to an empty JsonObject.
-     * @return An unconnected commodity.
-     * @throws IllegalStateException when this cluster is not connected.
      */
-    public Commodity createCommodity(String name, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata) {
+    public void createCommodity(double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata) {
         if (!this.isConnected()) {
-            logger.warning("Illegal State Exception: Not connected to cluster, cannot create commodity");
-            throw new IllegalStateException("Not connected to cluster, cannot create commodity");
+            logger.warning("Attempting to create a commodity on an unconnected cluster, request will fail if " + this.getPathName() + " is not found.");
         }
 
-        String path = this.getPathName();
-        //TODO revert after path update
-        //String path = this.getChildPath(name);
+        JsonObject json = new JsonObject();
 
-        return new Commodity(path, startLatitude, startLongitude, endLatitude, endLongitude, status, metadata, this.getServices());
+        json.addProperty("clusterId", this.getPathName());
+        json.addProperty("model", ModelType.COMMODITY.toString());
+        json.addProperty("startLatitude", startLatitude);
+        json.addProperty("startLongitude", startLongitude);
+        json.addProperty("endLatitude", endLatitude);
+        json.addProperty("endLongitude", endLongitude);
+        json.addProperty("status", status.toString());
+        json.add("metadata", metadata);
+
+        this.create(json);
     }
 
     /**
@@ -276,19 +276,21 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     /**
-     * Creates an unconnected subcluster under this cluster.
+     * Creates a subcluster under this cluster on the pathfinder server.
      *
      * @param name Name of the subcluster, it must form a unique identifier when concatenated with this cluster's path.
-     * @return An unconnected subcluster.
-     * @throws IllegalStateException when this cluster is not connected.
      */
-    public Cluster createSubcluster(String name) {
+    public void createSubcluster(String name) {
         if (!this.isConnected()) {
-            logger.warning("Illegal State Exception: Not connected to cluster cannot create subcluster");
-            throw new IllegalStateException("The cluster is not connected on the Pathfinder server");
+            logger.warning("Attempting to create a subcluster on an unconnected cluster, request will fail if " + this.getPathName() + " is not found.");
         }
 
-        return Cluster.getInstance(this.getChildPath(name, ModelType.CLUSTER).getPathName(), this.getServices());
+        JsonObject json = new JsonObject();
+
+        json.addProperty("id", this.getChildPath(name, ModelType.CLUSTER).getPathName());
+        json.addProperty("model", ModelType.CLUSTER.toString());
+
+        this.create(json);
     }
 
     /**
@@ -349,26 +351,29 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     /**
-     * Creates an unconnected transport under this cluster.
+     * Creates a transport under this cluster on the pathfinder server.
      *
      * @param name      Name of the transport, it must form a unique identifier when concatenated with this cluster's path.
      * @param latitude  The current latitude of the transport.
      * @param longitude The current longitude of the transport.
      * @param status    The current status of the transport. If <tt>null</tt> it defaults to <tt>TransportStatus.OFFLINE</tt>
      * @param metadata  The transports's metadata field. If <tt>null</tt> it defaults to an empty JSON object.
-     * @return An unconnected transport
-     * @throws IllegalStateException when this cluster has not been connected.
      */
-    public Transport createTransport(String name, double latitude, double longitude, TransportStatus status, JsonObject metadata) {
+    public void createTransport(String name, double latitude, double longitude, TransportStatus status, JsonObject metadata) {
         if (!this.isConnected()) {
-            logger.warning("Illegal State Exception: Not connected to cluster cannot create transport");
-            throw new IllegalStateException("Not connected to cluster, cannot create transport");
+            logger.warning("Attempting to create a transport on an unconnected cluster, request will fail if " + this.getPathName() + " is not found.");
         }
 
-        String path = this.getPathName();
-        //TODO revert after path update
-        //String path = this.getChildPath(name);
-        return new Transport(path, latitude, longitude, status, metadata, this.getServices());
+        JsonObject json = new JsonObject();
+
+        json.addProperty("clusterId", this.getPathName());
+        json.addProperty("model", ModelType.TRANSPORT.toString());
+        json.addProperty("latitude", latitude);
+        json.addProperty("longitude", longitude);
+        json.addProperty("status", status.toString());
+        json.add("metadata", metadata);
+
+        this.create(json);
     }
 
     /**
@@ -454,7 +459,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("path", this.getPathName());
+        json.addProperty("id", this.getPathName());
         json.addProperty("model", this.getModelType().toString());
 
         return json;

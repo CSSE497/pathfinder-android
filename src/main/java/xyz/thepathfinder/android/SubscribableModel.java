@@ -50,11 +50,6 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
      * Subscribes to the models updates from the server.
      */
     public void subscribe() {
-        if (!this.isConnected()) {
-            logger.warning("Cannot subscribe to a model you are not connected to");
-            throw new IllegalStateException("Not connected to object on Pathfinder server");
-        }
-
         JsonObject json = this.getMessageHeader("Subscribe");
 
         if(this.getModelType().equals(ModelType.CLUSTER)) {
@@ -80,11 +75,6 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
      * Subscribes to route updates from the server.
      */
     public void routeSubscribe() {
-        if (!this.isConnected()) {
-            logger.warning("Cannot route subscribe to a model you are not connected to");
-            throw new IllegalStateException("Not connected to object on Pathfinder server");
-        }
-
         JsonObject json = this.getMessageHeader("RouteSubscribe");
         this.getServices().getConnection().sendMessage(json.toString());
     }

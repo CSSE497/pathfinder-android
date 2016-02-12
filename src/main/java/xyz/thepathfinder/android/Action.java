@@ -151,19 +151,10 @@ public class Action {
      * @param json     a JSON object that represents an action.
      * @param services a pathfinder services object.
      * @return the model of the action.
-     * @throws IllegalArgumentException when the model isn't a transport or commodity.
      */
     private static SubscribableCrudModel getModel(JsonObject json, PathfinderServices services) {
         JsonObject model = json.getAsJsonObject("commodity");
-        //String type = model.get("commodity").getAsString();
-
-        //if (type.equals(Pathfinder.TRANSPORT)) {
-        //    return Transport.getInstance(model, services);
-        //} else if (type.equals(Pathfinder.COMMODITY)) {
-            return Commodity.getInstance(model, services);
-        //}
-
-        //throw new IllegalArgumentException("Illegal model type in action creation: " + type);
+        return Commodity.getInstance(model, services);
     }
 
     /**

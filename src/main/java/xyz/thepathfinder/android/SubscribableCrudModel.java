@@ -39,16 +39,19 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
 
     /**
      * Creates the model at the path specified on the server.
+     *
+     * @param value JsonObject that represents the model to create
      */
-    public void create() {
+    protected void create(JsonObject value) {
         if (this.isConnected()) {
-            logger.warning("Cannot create a connected model: " + this.getPathName());
-            throw new IllegalStateException("Already created");
+            logger.warning("Cannot create connected model " + this.getPathName() + " the model already exists, ignoring request.");
+            return;
         }
 
         JsonObject json = this.getMessageHeader("Create");
+        json.addProperty("model", value.get("model").getAsString());
 
-        json.add("value", this.createValueJson());
+        json.add("value", value);
 
         this.getServices().getConnection().sendMessage(json.toString());
     }
@@ -57,11 +60,6 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
      * Deletes the model specified by the path on the server.
      */
     public void delete() {
-        if (!this.isConnected()) {
-            logger.warning("Cannot delete a model not connected: " + this.getPathName());
-            throw new IllegalStateException("Not connected to object on Pathfinder server");
-        }
-
         JsonObject json = this.getMessageHeader("Delete");
         this.getServices().getConnection().sendMessage(json.toString());
     }
@@ -72,10 +70,6 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
      * @param value of the update request.
      */
     protected void update(JsonObject value) {
-        if (!this.isConnected()) {
-            logger.warning("Cannot update a model not connected: " + this.getPathName());
-            throw new IllegalStateException("Not connected to object on Pathfinder server");
-        }
 
         JsonObject json = this.getMessageHeader("Update");
         json.add("value", value);

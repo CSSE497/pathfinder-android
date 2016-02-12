@@ -62,6 +62,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      *
      * @param path of the model.
      * @param services a pathfinder services object.
+     * @throws IllegalArgumentException occurs when a transport has already been registered with the same path.
      */
     protected Transport(String path, PathfinderServices services) {
         super(path, ModelType.TRANSPORT, services);
@@ -70,9 +71,8 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(new Path(path, ModelType.TRANSPORT));
         if (isRegistered) {
-            logger.warning("Illegal Argument Exception: Transport path already exists: " + path);
-            //TODO revert after path update
-            //throw new IllegalArgumentException("Transport path already exists: " + path);
+            logger.severe("Illegal Argument Exception: Transport path already exists: " + path);
+            throw new IllegalArgumentException("Transport path already exists: " + path);
         } else {
             this.getServices().getRegistry().registerModel(this);
         }
@@ -126,7 +126,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     public static Transport getInstance(String path, PathfinderServices services) {
         Transport transport = (Transport) services.getRegistry().getModel(new Path(path, ModelType.TRANSPORT));
 
-        if (transport == null) {
+        if (transport == null && Path.isValidPath(path)) {
             return new Transport(path, services);
         }
 
@@ -146,7 +146,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      */
     protected static Transport getInstance(JsonObject transportJson, PathfinderServices services) {
         if (!Transport.checkTransportFields(transportJson)) {
-            logger.warning("Illegal Argument Exception: Invalid JSON cannot be parsed to a transport " + transportJson);
+            logger.severe("Illegal Argument Exception: Invalid JSON cannot be parsed to a transport " + transportJson);
             throw new IllegalArgumentException("Invalid JSON cannot be parsed to a transport " + transportJson);
         }
 

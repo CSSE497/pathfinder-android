@@ -101,7 +101,7 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
      *
      * @return type of model
      */
-    protected ModelType getModelType() {
+    public ModelType getModelType() {
         return this.path.getModelType();
     }
 

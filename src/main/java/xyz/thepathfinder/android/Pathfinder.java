@@ -104,9 +104,10 @@ public class Pathfinder {
         this.connectionConfiguration = new ConnectionConfiguration(applicationIdentifier);
 
         ModelRegistry registry = new ModelRegistry();
-        Connection connection = new Connection(userCredentials, registry);
+        Connection connection = new Connection(userCredentials);
 
         this.services = new PathfinderServices(registry, connection);
+        connection.setServices(this.services);
     }
 
     /**

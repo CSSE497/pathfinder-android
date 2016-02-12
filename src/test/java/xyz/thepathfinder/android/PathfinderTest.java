@@ -116,6 +116,7 @@ public class PathfinderTest {
         send.add("value", value);
 
         cluster.connect();
+
         Assert.assertEquals(1, pathfinder.getSentMessageCount());
         Assert.assertEquals(0, pathfinder.getReceivedMessageCount());
         this.waitForMessages(this.messager, 1);
