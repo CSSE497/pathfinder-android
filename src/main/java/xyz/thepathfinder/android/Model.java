@@ -87,6 +87,17 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
     }
 
     /**
+     * Returns the name of the model. If the path of this model is
+     * <tt>"/default/cluster1/subcluster1/transport3"</tt> the name is
+     * <tt>"transport3"</tt>.
+     *
+     * @return the name of the model.
+     */
+    public String getName() {
+        return this.path.getName();
+    }
+
+    /**
      * Returns the parent cluster of this model.
      *
      * @return the parent cluster of this model. If the default cluster it returns <tt>null</tt>.

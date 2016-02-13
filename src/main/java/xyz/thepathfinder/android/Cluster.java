@@ -353,13 +353,12 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     /**
      * Creates a transport under this cluster on the pathfinder server.
      *
-     * @param name      Name of the transport, it must form a unique identifier when concatenated with this cluster's path.
      * @param latitude  The current latitude of the transport.
      * @param longitude The current longitude of the transport.
      * @param status    The current status of the transport. If <tt>null</tt> it defaults to <tt>TransportStatus.OFFLINE</tt>
      * @param metadata  The transports's metadata field. If <tt>null</tt> it defaults to an empty JSON object.
      */
-    public void createTransport(String name, double latitude, double longitude, TransportStatus status, JsonObject metadata) {
+    public void createTransport(double latitude, double longitude, TransportStatus status, JsonObject metadata) {
         if (!this.isConnected()) {
             logger.warning("Attempting to create a transport on an unconnected cluster, request will fail if " + this.getPathName() + " is not found.");
         }

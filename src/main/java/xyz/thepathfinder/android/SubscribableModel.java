@@ -40,7 +40,7 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
 
         json.addProperty("message", type);
 
-        json.addProperty("id", this.getPathName());
+        json.addProperty("id", this.getName());
         json.addProperty("model", this.getModelType().toString());
 
         return json;
