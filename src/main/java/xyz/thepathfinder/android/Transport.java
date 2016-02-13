@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 
 /**
  * Interface to the Pathfinder server's transport API. A transport may be create
- * by a {@link Cluster} object with the {@link Cluster#createTransport(String, double, double, TransportStatus, JsonObject)}
+ * by a {@link Cluster} object with the {@link Cluster#createTransport(double, double, TransportStatus, JsonObject)}
  * method.
  *
  * <p>
