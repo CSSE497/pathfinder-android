@@ -83,7 +83,7 @@ public class Pathfinder {
      * @param applicationIdentifier application Identifier provided by a Pathfinder service provider
      * @param userCredentials       JWT of the user's credentials
      */
-    Pathfinder(String applicationIdentifier, String userCredentials) {
+    private Pathfinder(String applicationIdentifier, String userCredentials) {
         try {
             this.webSocketUrl = new URI("ws://api.thepathfinder.xyz/socket");
         } catch(URISyntaxException e) {
@@ -123,7 +123,7 @@ public class Pathfinder {
      *
      * @throws IOException problem connecting to the Pathfinder server
      */
-    void connect() throws IOException {
+    private void connect() throws IOException {
         if (!this.isConnected()) {
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();

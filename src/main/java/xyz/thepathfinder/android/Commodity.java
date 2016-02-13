@@ -62,6 +62,11 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     private JsonObject metadata;
 
     /**
+     * The transport caring the commodity.
+     */
+    private Long transportId;
+
+    /**
      * The route of this commodity.
      */
     private Route route;
@@ -95,7 +100,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.endLongitude = 0;
         this.status = CommodityStatus.INACTIVE;
         this.metadata = new JsonObject();
-
+        this.transportId = null;
         this.route = null;
     }
 
@@ -109,9 +114,10 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @param endLongitude   the drop off longitude of the commodity.
      * @param status         the current status of the commodity.
      * @param metadata       a JSON object that holds metadata for the commodity.
+     * @param transportId    the id of the transport that picked up the commodity, null if not in a transport.
      * @param services       a pathfinder services object.
      */
-    protected Commodity(String path, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata, PathfinderServices services) {
+    protected Commodity(String path, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata, Long transportId, PathfinderServices services) {
         this(path, services);
 
         logger.info("Constructing commodity by parameters: " + path);
@@ -132,6 +138,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         } else {
             this.metadata = metadata;
         }
+
+        this.transportId = transportId;
 
         this.route = null;
     }
@@ -209,14 +217,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
                 Commodity.checkCommodityField(commodityJson, "status") &&
                 Commodity.checkCommodityField(commodityJson, "metadata") &&
                 commodityJson.get("metadata").isJsonObject();
-        /*return Commodity.checkCommodityField(commodityJson, "path") &&
-                Commodity.checkCommodityField(commodityJson, "startLatitude") &&
-                Commodity.checkCommodityField(commodityJson, "startLongitude") &&
-                Commodity.checkCommodityField(commodityJson, "endLatitude") &&
-                Commodity.checkCommodityField(commodityJson, "endLongitude") &&
-                Commodity.checkCommodityField(commodityJson, "status") &&
-                Commodity.checkCommodityField(commodityJson, "metadata") &&
-                commodityJson.get("metadata").isJsonObject();*/
     }
 
     /**
@@ -241,7 +241,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @param startLongitude The longitude to change the start location to.
      */
     public void updateStartLocation(double startLatitude, double startLongitude) {
-        this.update(startLatitude, startLongitude, null, null, null, null);
+        this.update(startLatitude, startLongitude, null, null, null, null, null);
     }
 
     /**
@@ -289,7 +289,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @param endLongitude The longitude to change the end location to.
      */
     public void updateEndLocation(double endLatitude, double endLongitude) {
-        this.update(null, null, endLatitude, endLongitude, null, null);
+        this.update(null, null, endLatitude, endLongitude, null, null, null);
     }
 
     /**
@@ -388,7 +388,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @param status The status to change to.
      */
     public void updateStatus(CommodityStatus status) {
-        this.update(null, null, null, null, status, null);
+        this.update(null, null, null, null, status, null, null);
     }
 
     /**
@@ -422,7 +422,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @param metadata The metadata to change to.
      */
     public void updateMetadata(JsonObject metadata) {
-        this.update(null, null, null, null, null, metadata);
+        this.update(null, null, null, null, null, metadata, null);
     }
 
     /**
@@ -444,6 +444,59 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     }
 
     /**
+     * Returns the transport carrying the commodity.
+     *
+     * @return the transport carrying the commodity, null if not being carried.
+     */
+    public Transport getTransport() {
+        Long transportId = this.getTransportId();
+        if(transportId == null) {
+            return null;
+        }
+
+        return Transport.getInstance(this.getParentPath().getPathName() + transportId, this.getServices());
+    }
+
+    /**
+     * Returns the transport id carrying the commodity.
+     *
+     * @return a transport id if being carried, null otherwise.
+     */
+    private Long getTransportId() {
+        return this.transportId;
+    }
+
+    /**
+     * Updates the transport of this commodity to the specified transport and sets the status to picked up.
+     * This method updates the transport of the commodity on the pathfinder server.
+     * The transport is not updated in this object by this method.
+     *
+     * @param transport The transport that picked up this commodity.
+     */
+    public void updatePickedUp(Transport transport) {
+        Long id = Long.parseLong(transport.getName());
+        this.update(null, null, null, null, CommodityStatus.PICKED_UP, null, id);
+    }
+
+    /**
+     * Updates the commodity to have a status of dropped off.
+     * This method updates the status of the commodity on the pathfinder server.
+     * The status is not updated in this object by this method.
+     */
+    public void updateDroppedOff() {
+        this.update(null, null, null, null, CommodityStatus.DROPPED_OFF, null, null);
+    }
+
+    /**
+     * Sets the transport id field to a new transport.
+     *
+     * @param transportId of the transport carrying the commodity, null if not being carried.
+     */
+    private void setTransportId(Long transportId) {
+        this.transportId = transportId;
+    }
+
+    /**
      * Sends update requests to the Pathfinder server. If a parameter is null it will
      * not be updated. This method does not update this commodities fields, it updates
      * the commodity on the pathfinder server.
@@ -454,8 +507,9 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @param endLongitude   The end longitude to change to.
      * @param status         The status to change to.
      * @param metadata       The metadata to change to.
+     * @param transportId    The id of the transport that picked up the commodity.
      */
-    public void update(Double startLatitude, Double startLongitude, Double endLatitude, Double endLongitude, CommodityStatus status, JsonObject metadata) {
+    public void update(Double startLatitude, Double startLongitude, Double endLatitude, Double endLongitude, CommodityStatus status, JsonObject metadata, Long transportId) {
         JsonObject value = new JsonObject();
 
         if (startLatitude != null) {
@@ -482,6 +536,10 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
             value.add("metadata", metadata);
         }
 
+        if (transportId != null) {
+            value.addProperty("vehicleId", transportId);
+        }
+
         super.update(value);
     }
 
@@ -493,8 +551,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         JsonObject json = new JsonObject();
 
         json.addProperty("clusterId", this.getPathName());
-        //TODO revert after path update
-        //json.addProperty("path", this.getPath());
         json.addProperty("model", this.getModelType().toString());
         json.addProperty("startLatitude", this.getStartLatitude());
         json.addProperty("startLongitude", this.getStartLongitude());
@@ -517,6 +573,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         double prevEndLongitude;
         CommodityStatus prevStatus;
         JsonObject prevMetadata;
+        Long prevTransportId;
 
         boolean updated = false;
 
@@ -550,6 +607,13 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
             this.setMetadata(json.get("metadata").getAsJsonObject());
         }
 
+        prevTransportId = this.getTransportId();
+        if (json.has("vehicleId")) {
+            this.setTransportId(json.get("vehicleId").getAsLong());
+        } else {
+            this.setTransportId(null);
+        }
+
         List<CommodityListener> listeners = this.getListeners();
 
         if (this.getStartLatitude() != prevStartLatitude || this.getStartLongitude() != prevStartLongitude) {
@@ -580,6 +644,15 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
             logger.info("Commodity " + this.getPath() + " metadata updated: " + this.getMetadata());
             for (CommodityListener listener : listeners) {
                 listener.metadataUpdated(this.getMetadata());
+            }
+            updated = true;
+        }
+
+        if (!this.getTransportId().equals(prevTransportId)) {
+            logger.info("Commodity " + this.getPath() + " transport updated: " + this.getTransportId());
+            Transport transport = this.getTransport();
+            for (CommodityListener listener : listeners) {
+                listener.transportUpdated(transport);
             }
             updated = true;
         }
