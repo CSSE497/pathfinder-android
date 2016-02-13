@@ -67,7 +67,7 @@ class Connection extends Endpoint {
      */
     protected void setServices(PathfinderServices services) {
         this.services = services;
-        this.messageHandler.setServices(this.services);
+        this.messageHandler = new MessageHandler(this.services);
     }
 
     /**
@@ -94,7 +94,6 @@ class Connection extends Endpoint {
     public void onOpen(Session session, EndpointConfig config) {
         logger.info("Pathfinder connection opened");
         this.session = session;
-        this.messageHandler = new MessageHandler(this.services);
         this.session.addMessageHandler(this.messageHandler);
     }
 

@@ -71,13 +71,19 @@ public class Pathfinder {
         logger.setLevel(Level.INFO);
     }
 
+    public static Pathfinder create(String applicationIdentifier) throws IOException {
+        Pathfinder pf = new Pathfinder(applicationIdentifier, "");
+        pf.connect();
+        return pf;
+    }
+
     /**
      * Constructs a Pathfinder object.
      *
      * @param applicationIdentifier application Identifier provided by a Pathfinder service provider
      * @param userCredentials       JWT of the user's credentials
      */
-    public Pathfinder(String applicationIdentifier, String userCredentials) {
+    Pathfinder(String applicationIdentifier, String userCredentials) {
         try {
             this.webSocketUrl = new URI("ws://api.thepathfinder.xyz/socket");
         } catch(URISyntaxException e) {
@@ -107,7 +113,8 @@ public class Pathfinder {
         Connection connection = new Connection(userCredentials);
 
         this.services = new PathfinderServices(registry, connection);
-        connection.setServices(this.services);
+
+        connection.setServices(services);
     }
 
     /**
@@ -115,9 +122,8 @@ public class Pathfinder {
      * This method blocks until the connection is established.
      *
      * @throws IOException problem connecting to the Pathfinder server
-     * @throws DeploymentException problem connecting to the Pathfinder server
      */
-    public void connect() throws IOException, DeploymentException {
+    void connect() throws IOException {
         if (!this.isConnected()) {
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
@@ -129,7 +135,7 @@ public class Pathfinder {
             } catch (DeploymentException e) {
                 // Invalid annotated connection object and connection problems
                 logger.severe("Deployment Exception: " + e.getMessage());
-                throw e;
+                throw new IOException(e);
             } catch (IOException e) {
                 logger.severe("IO Exception: " + e.getMessage());
                 throw e;
