@@ -369,7 +369,8 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      */
     private void setCommodities(JsonArray ids) {
         List<Long> commodities = new ArrayList<Long>();
-        for(JsonElement idje : ids) {
+        for(JsonElement commodityje : ids) {
+            JsonElement idje = ((JsonObject) commodityje).get("id");
             Long id = idje.getAsLong();
             commodities.add(id);
         }

@@ -125,7 +125,7 @@ class Path {
     public Path getParentPath() {
         int lastSlashIndex = this.path.lastIndexOf(Path.PATH_SEPARATOR);
 
-        if(lastSlashIndex == 0) {
+        if(lastSlashIndex <= 0) {
             return null;
         }
 
