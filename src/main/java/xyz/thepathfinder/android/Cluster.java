@@ -205,7 +205,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         json.addProperty("status", status.toString());
         json.add("metadata", metadata);
 
-        this.create(json);
+        this.create(json, false);
     }
 
     /**
@@ -290,7 +290,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         json.addProperty("id", this.getChildPath(name, ModelType.CLUSTER).getPathName());
         json.addProperty("model", ModelType.CLUSTER.toString());
 
-        this.create(json);
+        this.create(json, true);
     }
 
     /**
@@ -372,7 +372,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         json.addProperty("status", status.toString());
         json.add("metadata", metadata);
 
-        this.create(json);
+        this.create(json, false);
     }
 
     /**

@@ -41,9 +41,10 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
      * Creates the model at the path specified on the server.
      *
      * @param value JsonObject that represents the model to create
+     * @param checkConnected check if the model is connected.
      */
-    protected void create(JsonObject value) {
-        if (this.isConnected()) {
+    protected void create(JsonObject value, boolean checkConnected) {
+        if (checkConnected && this.isConnected()) {
             logger.warning("Cannot create connected model " + this.getPathName() + " the model already exists, ignoring request.");
             return;
         }
