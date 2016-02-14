@@ -648,7 +648,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
             updated = true;
         }
 
-        if (!this.getTransportId().equals(prevTransportId)) {
+        if (this.getTransportId() != null && !this.getTransportId().equals(prevTransportId)) {
             logger.info("Commodity " + this.getPath() + " transport updated: " + this.getTransportId());
             Transport transport = this.getTransport();
             for (CommodityListener listener : listeners) {
