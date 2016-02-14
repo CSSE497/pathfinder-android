@@ -219,7 +219,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @param longitude The longitude to change the location to.
      */
     public void updateLocation(double latitude, double longitude) {
-        this.update(latitude, longitude, null, null, null);
+        this.update(latitude, longitude, null, null);
     }
 
     /**
@@ -301,7 +301,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @param status The status to change to.
      */
     public void updateStatus(TransportStatus status) {
-        this.update(null, null, status, null, null);
+        this.update(null, null, status, null);
     }
 
     /**
@@ -334,7 +334,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @param metadata The metadata to change to.
      */
     public void updateMetadata(JsonObject metadata) {
-        this.update(null, null, null, metadata, null);
+        this.update(null, null, null, metadata);
     }
 
     /**
@@ -378,40 +378,6 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     }
 
     /**
-     * Adds a commodity to the list of commodities being transported by this transport.
-     *
-     * @param commodity to be picked up.
-     */
-    public void updatePickUpCommodity(Commodity commodity) {
-        List<Long> ids = new ArrayList<Long>(this.getCommodityIds());
-
-        Long id = Long.parseLong(commodity.getName());
-
-        ids.add(id);
-        this.update(null, null, null, null, ids);
-    }
-
-    /**
-     * Removes a commodity from the list of commodities being transported by this transport.
-     *
-     * @param commodity to be dropped off.
-     */
-    public void updateDropOffCommodity(Commodity commodity) {
-        List<Long> ids = new ArrayList<Long>(this.getCommodityIds());
-
-        Long id = Long.parseLong(commodity.getName());
-
-        for(int k = 0; k < ids.size(); k++) {
-            if(ids.get(k).equals(id)) {
-                ids.remove(k);
-                break;
-            }
-        }
-
-        this.update(null, null, null, null, ids);
-    }
-
-    /**
      * Returns the route of this transport.
      *
      * @return the route.
@@ -437,9 +403,8 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @param longitude to update to.
      * @param status to update to.
      * @param metadata to update to.
-     * @param commodities to update to.
      */
-    public void update(Double latitude, Double longitude, TransportStatus status, JsonObject metadata, List<Long> commodities) {
+    public void update(Double latitude, Double longitude, TransportStatus status, JsonObject metadata) {
         JsonObject value = new JsonObject();
 
         if (latitude != null) {
@@ -456,14 +421,6 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
         if (metadata != null) {
             value.add("metadata", metadata);
-        }
-
-        if (commodities != null) {
-            JsonArray arr = new JsonArray();
-            for(Long id : commodities) {
-                arr.add(id);
-            }
-            value.add("commodities", arr);
         }
 
         super.update(value);
