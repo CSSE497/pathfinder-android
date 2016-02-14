@@ -1,12 +1,13 @@
 package xyz.thepathfinder.android;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.Session;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Controls access the web socket connection with the Pathfinder sever.
@@ -15,6 +16,8 @@ import java.util.logging.Logger;
  * @author David Robinson
  */
 class Connection extends Endpoint {
+
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**
      * The user's credentials to the Pathfinder server.
@@ -40,14 +43,6 @@ class Connection extends Endpoint {
      * Handles incoming web socket messages.
      */
     private MessageHandler messageHandler;
-
-    /**
-     * Logs all outgoing messages through the web socket.
-     */
-    private static final Logger logger = Logger.getLogger(Connection.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
 
     /**
      * Constructs a connection object that controls access to the web socket connection
@@ -82,7 +77,7 @@ class Connection extends Endpoint {
             this.session.getAsyncRemote().sendText(message);
             this.sentMessageCount++;
         } else {
-            logger.severe("Illegal State Exception: The connection to Pathfinder is not open.");
+            logger.error("Illegal State Exception: The connection to Pathfinder is not open.");
             throw new IllegalStateException("The connection to Pathfinder is not open.");
         }
     }

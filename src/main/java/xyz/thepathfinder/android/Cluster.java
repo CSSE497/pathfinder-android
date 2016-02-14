@@ -3,6 +3,8 @@ package xyz.thepathfinder.android;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -10,8 +12,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>
@@ -34,10 +34,7 @@ import java.util.logging.Logger;
  */
 public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
-    private static final Logger logger = Logger.getLogger(Cluster.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
+    private static final Logger logger = LoggerFactory.getLogger(Cluster.class);
 
     /**
      * Maps a path in the form of a string to the commodities directly under this cluster
@@ -76,7 +73,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(new Path(path, ModelType.CLUSTER));
         if (isRegistered) {
-            logger.severe("Illegal Argument Exception: Constructing cluster with path that already exists: " + path);
+            logger.error("Illegal Argument Exception: Constructing cluster with path that already exists: " + path);
             throw new IllegalArgumentException("Cluster path already exists: " + path);
         } else {
             this.getServices().getRegistry().registerModel(this);
@@ -131,7 +128,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         boolean canParseToCluster = Cluster.checkClusterFields(clusterJson);
 
         if (!canParseToCluster) {
-            logger.severe("Illegal Argument Exception: JSON could not be parsed to a cluster: " + clusterJson);
+            logger.error("Illegal Argument Exception: JSON could not be parsed to a cluster: " + clusterJson);
             throw new IllegalArgumentException("JSON could not be parsed to a cluster");
         }
 
@@ -191,7 +188,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      */
     public void createCommodity(double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata) {
         if (!this.isConnected()) {
-            logger.warning("Attempting to create a commodity on an unconnected cluster, request will fail if " + this.getPathName() + " is not found.");
+            logger.warn("Attempting to create a commodity on an unconnected cluster, request will fail if " + this.getPathName() + " is not found.");
         }
 
         JsonObject json = new JsonObject();
@@ -282,7 +279,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      */
     public void createSubcluster(String name) {
         if (!this.isConnected()) {
-            logger.warning("Attempting to create a subcluster on an unconnected cluster, request will fail if " + this.getPathName() + " is not found.");
+            logger.warn("Attempting to create a subcluster on an unconnected cluster, request will fail if " + this.getPathName() + " is not found.");
         }
 
         JsonObject json = new JsonObject();
@@ -360,7 +357,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      */
     public void createTransport(double latitude, double longitude, TransportStatus status, JsonObject metadata) {
         if (!this.isConnected()) {
-            logger.warning("Attempting to create a transport on an unconnected cluster, request will fail if " + this.getPathName() + " is not found.");
+            logger.warn("Attempting to create a transport on an unconnected cluster, request will fail if " + this.getPathName() + " is not found.");
         }
 
         JsonObject json = new JsonObject();

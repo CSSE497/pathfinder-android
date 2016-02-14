@@ -2,9 +2,8 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Routes all web socket messages received to the receiving models.
@@ -13,13 +12,7 @@ import java.util.logging.Logger;
  */
 class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
 
-    /**
-     * Logs all messages
-     */
-    private static final Logger logger = Logger.getLogger(MessageHandler.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**
      * Holds access to all the models.
@@ -58,7 +51,7 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
             JsonObject json = new JsonParser().parse(message).getAsJsonObject();
 
             if (!json.has("message") || !json.has("model")) {
-                logger.warning("Ignoring invalid message: " + json.toString());
+                logger.warn("Ignoring invalid message: " + json.toString());
             } else {
                 String type = json.get("message").getAsString();
 
@@ -102,11 +95,11 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
                         }
                     }
 
-                    logger.warning("Received message that couldn't be routed to a model: " + message);
+                    logger.warn("Received message that couldn't be routed to a model: " + message);
                 }
             }
         } catch (Exception e) { // catch any exception that occured while serving a message
-            logger.severe(e.getMessage());
+            logger.error(e.getMessage());
             e.printStackTrace();
         }
     }

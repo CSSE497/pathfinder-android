@@ -1,10 +1,10 @@
 package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Basic class for dealing with models from the Pathfinder server.
@@ -14,10 +14,7 @@ import java.util.logging.Logger;
  */
 public abstract class Model<E extends Listener<? extends Model>> extends Listenable<E> {
 
-    private static final Logger logger = Logger.getLogger(Model.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**
      * The path of the model.
@@ -258,14 +255,14 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         }
 
         if (reason.equals("Error") && value != null) {
-            logger.warning("Model " + this.getPathName() + " received error: " + value.get("reason").getAsString());
+            logger.warn("Model " + this.getPathName() + " received error: " + value.get("reason").getAsString());
             for (Listener listener : listeners) {
                 listener.error(value.get("reason").getAsString());
             }
             return updated;
         }
 
-        logger.warning("Invalid message sent to " + this.getPathName() + " with type: " + reason + "\nJson: " + json);
+        logger.warn("Invalid message sent to " + this.getPathName() + " with type: " + reason + "\nJson: " + json);
         return updated;
     }
 
@@ -276,7 +273,7 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
     @SuppressWarnings("unchecked")
     protected boolean notifyUpdate(String reason, JsonObject json) {
 /*        if (!json.has("model") || !json.get("model").getAsString().equals(this.getModel())) {
-            logger.warning("Invalid model type: " + json + " given to a " + this.getModel());
+            logger.warn("Invalid model type: " + json + " given to a " + this.getModel());
             return false;
         }*/
 
