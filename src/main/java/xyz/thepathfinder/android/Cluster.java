@@ -228,13 +228,13 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     /**
-     * Returns a commodity directly under this cluster by its name.
+     * Returns a commodity directly under this cluster by its path.
      *
-     * @param name The name of the commodity.
-     * @return A commodity associated with that name if one exists, <tt>null</tt> if it doesn't exist.
+     * @param path of the commodity.
+     * @return A commodity associated with that path if one exists, <tt>null</tt> if it doesn't exist.
      */
-    public Commodity getCommodity(String name) {
-        return this.commodities.get(this.getChildPath(name, ModelType.COMMODITY).getPathName());
+    public Commodity getCommodity(String path) {
+        return this.commodities.get(path);
     }
 
     /**
@@ -294,13 +294,13 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     /**
-     * Returns a direct descendant subcluster by its name.
+     * Returns a direct descendant subcluster by its path.
      *
-     * @param name The name of the subcluster
-     * @return A subcluster associated with the provided name if exists, <tt>null</tt> if it doesn't exist.
+     * @param path of the subcluster
+     * @return A subcluster associated with the provided path if exists, <tt>null</tt> if it doesn't exist.
      */
-    public Cluster getSubcluster(String name) {
-        return this.subclusters.get(this.getChildPath(name, ModelType.CLUSTER).getPathName());
+    public Cluster getSubcluster(String path) {
+        return this.subclusters.get(path);
     }
 
     /**
@@ -386,13 +386,13 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     /**
-     * Returns a transport directly under this cluster by its name.
+     * Returns a transport directly under this cluster by its path.
      *
-     * @param name The name of the transport.
-     * @return A transport associated with the provided name if exists, <tt>null</tt> if it doesn't exist.
+     * @param path of the transport.
+     * @return A transport associated with the provided path if exists, <tt>null</tt> if it doesn't exist.
      */
-    public Transport getTransport(String name) {
-        return this.transports.get(this.getChildPath(name, ModelType.TRANSPORT).getPathName());
+    public Transport getTransport(String path) {
+        return this.transports.get(path);
     }
 
     /**
