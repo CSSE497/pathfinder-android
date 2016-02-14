@@ -158,8 +158,8 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
                 clusterJson.get("vehicles").isJsonArray() &&
                 clusterJson.has("commodities") &&
                 clusterJson.get("commodities").isJsonArray() &&
-                clusterJson.has("subClusters") &&
-                clusterJson.get("subClusters").isJsonArray();
+                clusterJson.has("subclusters") &&
+                clusterJson.get("subclusters").isJsonArray();
         /*return clusterJson.has("path") &&
                 clusterJson.has("transports") &&
                 clusterJson.get("transports").isJsonArray() &&
