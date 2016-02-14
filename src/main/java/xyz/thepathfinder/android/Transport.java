@@ -565,7 +565,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      */
     @Override
     protected void route(JsonObject json, PathfinderServices services) {
-        JsonObject route = json.getAsJsonObject("value");
+        JsonObject route = json.getAsJsonObject("route");
 
         logger.info("Transport setting route: " + this.getPath());
         this.route = new Route(route, services);

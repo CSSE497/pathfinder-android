@@ -522,9 +522,9 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
         prevSubclusters = this.getSubclustersMap();
         Map<String, Cluster> clusterMap = new HashMap<String, Cluster>();
-        if (json.has("subClusters")) {
-            JsonArray clusters = json.getAsJsonArray("subClusters");
-
+        if (json.has("subclusters")) {
+            JsonArray clusters = json.getAsJsonArray("subclusters");
+            logger.info("Cluster's subclusters : " + clusters.toString());
             for (JsonElement clusterJson : clusters) {
                 String path = this.getSubmodelPath((JsonObject) clusterJson);
                 Cluster cluster = Cluster.getInstance(path, this.getServices());
