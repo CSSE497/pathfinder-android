@@ -3,13 +3,13 @@ package xyz.thepathfinder.android;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Interface to the Pathfinder server's transport API. A transport may be create
@@ -29,10 +29,7 @@ import java.util.logging.Logger;
  */
 public class Transport extends SubscribableCrudModel<TransportListener> {
 
-    private static final Logger logger = Logger.getLogger(Transport.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**
      * Latitude of the transport.
@@ -80,7 +77,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(new Path(path, ModelType.TRANSPORT));
         if (isRegistered) {
-            logger.severe("Illegal Argument Exception: Transport path already exists: " + path);
+            logger.error("Illegal Argument Exception: Transport path already exists: " + path);
             throw new IllegalArgumentException("Transport path already exists: " + path);
         } else {
             this.getServices().getRegistry().registerModel(this);
@@ -159,7 +156,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      */
     protected static Transport getInstance(JsonObject transportJson, PathfinderServices services) {
         if (!Transport.checkTransportFields(transportJson)) {
-            logger.severe("Illegal Argument Exception: Invalid JSON cannot be parsed to a transport " + transportJson);
+            logger.error("Illegal Argument Exception: Invalid JSON cannot be parsed to a transport " + transportJson);
             throw new IllegalArgumentException("Invalid JSON cannot be parsed to a transport " + transportJson);
         }
 

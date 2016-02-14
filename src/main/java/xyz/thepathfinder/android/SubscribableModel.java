@@ -1,9 +1,8 @@
 package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Access to subscribe operations on models.
@@ -13,10 +12,7 @@ import java.util.logging.Logger;
  */
 public abstract class SubscribableModel<E extends Listener<? extends Model>> extends Model<E> {
 
-    private static final Logger logger = Logger.getLogger(SubscribableModel.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
+    private static final Logger logger = LoggerFactory.getLogger(SubscribableModel.class);
 
     /**
      * Constructs a subcribable model.

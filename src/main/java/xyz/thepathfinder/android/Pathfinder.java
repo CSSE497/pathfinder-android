@@ -1,5 +1,8 @@
 package xyz.thepathfinder.android;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
@@ -8,8 +11,6 @@ import javax.websocket.WebSocketContainer;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>
@@ -48,6 +49,8 @@ import java.util.logging.Logger;
  */
 public class Pathfinder {
 
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
+
     /**
      * Keeps track of all the Pathfinder models and connection to the server.
      */
@@ -62,14 +65,6 @@ public class Pathfinder {
      * Configures the opening connection header.
      */
     private ConnectionConfiguration connectionConfiguration;
-
-    /**
-     * Logs all messages
-     */
-    private static Logger logger = Logger.getLogger(Pathfinder.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
 
     public static Pathfinder create(String applicationIdentifier) throws IOException {
         Pathfinder pf = new Pathfinder(applicationIdentifier, "");
@@ -87,7 +82,7 @@ public class Pathfinder {
         try {
             this.webSocketUrl = new URI("ws://api.thepathfinder.xyz/socket");
         } catch(URISyntaxException e) {
-            logger.severe(e.getMessage());
+            logger.error(e.getMessage());
         }
 
         this.constructPathfinder(applicationIdentifier, userCredentials);
@@ -134,10 +129,10 @@ public class Pathfinder {
                 container.connectToServer(this.services.getConnection(), configuration, this.webSocketUrl);
             } catch (DeploymentException e) {
                 // Invalid annotated connection object and connection problems
-                logger.severe("Deployment Exception: " + e.getMessage());
+                logger.error("Deployment Exception: " + e.getMessage());
                 throw new IOException(e);
             } catch (IOException e) {
-                logger.severe("IO Exception: " + e.getMessage());
+                logger.error("IO Exception: " + e.getMessage());
                 throw e;
             }
         }

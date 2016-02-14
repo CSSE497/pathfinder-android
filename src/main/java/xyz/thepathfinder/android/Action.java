@@ -1,9 +1,8 @@
 package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Actions represent transport and commodity actions, such as picking up a commodity,
@@ -14,10 +13,7 @@ import java.util.logging.Logger;
  */
 public class Action {
 
-    private static final Logger logger = Logger.getLogger(Action.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**
      * Represents the type of action to occur at that location.

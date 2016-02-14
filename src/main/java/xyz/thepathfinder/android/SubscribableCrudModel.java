@@ -1,9 +1,8 @@
 package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Access to CRUD and subscribe operations.
@@ -13,11 +12,7 @@ import java.util.logging.Logger;
  */
 public abstract class SubscribableCrudModel<E extends Listener<? extends Model>> extends SubscribableModel<E> {
 
-    private static final Logger logger = Logger.getLogger(SubscribableCrudModel.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
-
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
     /**
      * Constructs a subscribable CRUD model.
      *
@@ -45,7 +40,7 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
      */
     protected void create(JsonObject value, boolean checkConnected) {
         if (checkConnected && this.isConnected()) {
-            logger.warning("Cannot create connected model " + this.getPathName() + " the model already exists, ignoring request.");
+            logger.warn("Cannot create connected model " + this.getPathName() + " the model already exists, ignoring request.");
             return;
         }
 

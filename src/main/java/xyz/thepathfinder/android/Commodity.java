@@ -1,11 +1,11 @@
 package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Interface to the Pathfinder server's commodity API. A commodity may be create
@@ -26,10 +26,7 @@ import java.util.logging.Logger;
  */
 public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
-    private static final Logger logger = Logger.getLogger(Commodity.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**
      * The pickup latitude of the commodity.
@@ -88,7 +85,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(new Path(path, ModelType.COMMODITY));
         if (isRegistered) {
-            logger.severe("Illegal Argument Exception: Commodity path already exists " + path);
+            logger.error("Illegal Argument Exception: Commodity path already exists " + path);
             throw new IllegalArgumentException("Commodity path already exists: " + path);
         } else {
             this.getServices().getRegistry().registerModel(this);
@@ -176,7 +173,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      */
     protected static Commodity getInstance(JsonObject commodityJson, PathfinderServices services) {
         if (!Commodity.checkCommodityFields(commodityJson)) {
-            logger.severe("Illegal Argument Exception: JSON could not be parse to a commodity " + commodityJson);
+            logger.error("Illegal Argument Exception: JSON could not be parse to a commodity " + commodityJson);
             throw new IllegalArgumentException("JSON could not be parsed to a commodity " + commodityJson);
         }
 
@@ -365,7 +362,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         if (status != null) {
             this.status = status;
         } else {
-            logger.severe("Illegal Argument Exception illegal commodity status: " + status);
+            logger.error("Illegal Argument Exception illegal commodity status: " + status);
             throw new IllegalArgumentException("Illegal commodity status: " + status);
         }
     }

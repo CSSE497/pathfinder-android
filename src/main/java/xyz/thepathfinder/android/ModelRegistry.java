@@ -1,11 +1,12 @@
 package xyz.thepathfinder.android;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The <tt>ModelRegistry</tt> keeps track of all {@link Model}s created by
@@ -15,10 +16,7 @@ import java.util.logging.Logger;
  */
 class ModelRegistry {
 
-    private static final Logger logger = Logger.getLogger(ModelRegistry.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**
      * Map to all the {@link Model}s created by the SDK. The keys are the string
@@ -48,7 +46,7 @@ class ModelRegistry {
      */
     protected void registerModel(Model model) {
         if (this.models.containsKey(model.getPath())) {
-            logger.severe("Illegal State Exception: path already exists" + model.getPathName());
+            logger.error("Illegal State Exception: path already exists" + model.getPathName());
             throw new IllegalStateException("Path already exists: " + model.getPathName());
         }
 
