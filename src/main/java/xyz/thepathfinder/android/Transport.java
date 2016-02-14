@@ -515,7 +515,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         boolean updatedCommodities = false;
         List<Long> commodityIds = this.getCommodityIds();
         for(int k = 0; k < commodityIds.size(); k++) {
-            if(!commodityIds.get(k).equals(prevCommodities.get(k))) {
+            if(k == prevCommodities.size() || !commodityIds.get(k).equals(prevCommodities.get(k))) {
                 updatedCommodities = true;
                 break;
             }
