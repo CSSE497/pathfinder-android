@@ -23,7 +23,7 @@ public class PathTest {
     @Test(expected = IllegalArgumentException.class)
     public void testInvalidName() {
         Path path = new Path("/hi/there", ModelType.CLUSTER);
-        path.getChildPath("la/de", ModelType.COMMODITY);
+        path.getChildPath("la/de", ModelType.CLUSTER);
     }
 
     @Test(expected = IllegalStateException.class)

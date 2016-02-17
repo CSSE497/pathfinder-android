@@ -1,12 +1,13 @@
 package xyz.thepathfinder.android;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.Session;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Controls access the web socket connection with the Pathfinder sever.
@@ -16,6 +17,8 @@ import java.util.logging.Logger;
  */
 class Connection extends Endpoint {
 
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
+
     /**
      * The user's credentials to the Pathfinder server.
      */
@@ -24,7 +27,7 @@ class Connection extends Endpoint {
     /**
      * Access to the model registry to notify {@link Model}s of incoming web socket messages.
      */
-    private final ModelRegistry registry;
+    private PathfinderServices services;
 
     /**
      * The web socket session used to send messages through the web socket.
@@ -42,24 +45,24 @@ class Connection extends Endpoint {
     private MessageHandler messageHandler;
 
     /**
-     * Logs all outgoing messages through the web socket.
-     */
-    private static final Logger logger = Logger.getLogger(Connection.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
-
-    /**
      * Constructs a connection object that controls access to the web socket connection
      * with the Pathfinder Server.
      *
      * @param userCredentials      the user's credentials for this application
-     * @param registry             a model registry
      */
-    protected Connection(String userCredentials, ModelRegistry registry) {
+    protected Connection(String userCredentials) {
         this.userCredentials = userCredentials;
-        this.registry = registry;
         this.sentMessageCount = 0L;
+    }
+
+    /**
+     * Sets the pathfinder services object.
+     *
+     * @param services a pathfinder services object
+     */
+    protected void setServices(PathfinderServices services) {
+        this.services = services;
+        this.messageHandler = new MessageHandler(this.services);
     }
 
     /**
@@ -74,7 +77,7 @@ class Connection extends Endpoint {
             this.session.getAsyncRemote().sendText(message);
             this.sentMessageCount++;
         } else {
-            logger.warning("Illegal State Exception: The connection to Pathfinder is not open.");
+            logger.error("Illegal State Exception: The connection to Pathfinder is not open.");
             throw new IllegalStateException("The connection to Pathfinder is not open.");
         }
     }
@@ -86,7 +89,6 @@ class Connection extends Endpoint {
     public void onOpen(Session session, EndpointConfig config) {
         logger.info("Pathfinder connection opened");
         this.session = session;
-        this.messageHandler = new MessageHandler(this.registry);
         this.session.addMessageHandler(this.messageHandler);
     }
 

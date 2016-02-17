@@ -33,7 +33,6 @@ public abstract class CommodityListener extends Listener<Commodity> {
      */
     public void endLocationUpdated(double latitude, double longitude) {}
 
-
     /**
      * Invoked when the commodity's status was updated by a message.
      *
@@ -47,4 +46,11 @@ public abstract class CommodityListener extends Listener<Commodity> {
      * @param metadata that the commodity updated to.
      */
     public void metadataUpdated(JsonObject metadata) {}
+
+    /**
+     * Invoked when the commodity's transport is changed.
+     *
+     * @param transport carrying the commodity.
+     */
+    public void transportUpdated(Transport transport) {}
 }

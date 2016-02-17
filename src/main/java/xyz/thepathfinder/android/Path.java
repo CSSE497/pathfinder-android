@@ -1,7 +1,7 @@
 package xyz.thepathfinder.android;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class is used to ease the manipulation of paths to models on the Pathfinder server.
@@ -10,10 +10,7 @@ import java.util.logging.Logger;
  */
 class Path {
 
-    private static final Logger logger = Logger.getLogger(Path.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**
      * Separator for path names.
@@ -45,7 +42,7 @@ class Path {
      */
     protected Path(String path, ModelType modelType) {
         if (!Path.isValidPath(path)) {
-            logger.warning("Illegal Argument Exception: Illegal path name " + path);
+            logger.error("Illegal Argument Exception: Illegal path name " + path);
             throw new IllegalArgumentException("Illegal path name " + path);
         }
 
@@ -70,7 +67,7 @@ class Path {
      * @return <tt>true</tt> if allowed, <tt>false</tt> otherwise.
      */
     public static boolean isValidName(String name) {
-        return !name.contains(Path.PATH_SEPARATOR) && !name.contains(" ");
+        return !(name.contains(Path.PATH_SEPARATOR) || name.equals("") || name.contains(" "));
     }
 
     /**
@@ -83,13 +80,13 @@ class Path {
      * @throws IllegalStateException if the model type isn't a cluster.
      */
     protected Path getChildPath(String name, ModelType type) {
-        if(!this.getModelType().equals(ModelType.CLUSTER)) {
-            logger.warning("Illegal State Exception: Cannot get a child path name on a non-cluster type");
+        if(!this.getModelType().equals(ModelType.CLUSTER) || !type.equals(ModelType.CLUSTER)) {
+            logger.error("Illegal State Exception: Cannot get a child path name on a non-cluster type");
             throw new IllegalStateException("Cannot get a child path name on a non-cluster type");
         } else if (Path.isValidName(name)) {
             return new Path(this.path + Path.PATH_SEPARATOR + name, type);
         } else {
-            logger.warning("Illegal Argument Exception: Illegal path name " + name);
+            logger.error("Illegal Argument Exception: Illegal path name " + name);
             throw new IllegalArgumentException("Illegal path name: " + name);
         }
     }
@@ -125,7 +122,7 @@ class Path {
     public Path getParentPath() {
         int lastSlashIndex = this.path.lastIndexOf(Path.PATH_SEPARATOR);
 
-        if(lastSlashIndex == 0) {
+        if(lastSlashIndex <= 0) {
             return null;
         }
 

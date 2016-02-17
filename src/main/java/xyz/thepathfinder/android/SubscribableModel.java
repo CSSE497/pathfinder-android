@@ -1,9 +1,8 @@
 package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Access to subscribe operations on models.
@@ -13,10 +12,7 @@ import java.util.logging.Logger;
  */
 public abstract class SubscribableModel<E extends Listener<? extends Model>> extends Model<E> {
 
-    private static final Logger logger = Logger.getLogger(SubscribableModel.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
+    private static final Logger logger = LoggerFactory.getLogger(SubscribableModel.class);
 
     /**
      * Constructs a subcribable model.
@@ -40,7 +36,12 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
 
         json.addProperty("message", type);
 
-        json.addProperty("id", this.getPathName());
+        if(this.getModelType() == ModelType.CLUSTER) {
+            json.addProperty("id", this.getPathName());
+        } else {
+            json.addProperty("id", Integer.parseInt(this.getName()));
+        }
+
         json.addProperty("model", this.getModelType().toString());
 
         return json;
@@ -50,11 +51,6 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
      * Subscribes to the models updates from the server.
      */
     public void subscribe() {
-        if (!this.isConnected()) {
-            logger.warning("Cannot subscribe to a model you are not connected to");
-            throw new IllegalStateException("Not connected to object on Pathfinder server");
-        }
-
         JsonObject json = this.getMessageHeader("Subscribe");
 
         if(this.getModelType().equals(ModelType.CLUSTER)) {
@@ -80,11 +76,6 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
      * Subscribes to route updates from the server.
      */
     public void routeSubscribe() {
-        if (!this.isConnected()) {
-            logger.warning("Cannot route subscribe to a model you are not connected to");
-            throw new IllegalStateException("Not connected to object on Pathfinder server");
-        }
-
         JsonObject json = this.getMessageHeader("RouteSubscribe");
         this.getServices().getConnection().sendMessage(json.toString());
     }

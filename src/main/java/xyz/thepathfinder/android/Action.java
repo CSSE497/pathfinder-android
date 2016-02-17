@@ -1,9 +1,8 @@
 package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Actions represent transport and commodity actions, such as picking up a commodity,
@@ -14,10 +13,7 @@ import java.util.logging.Logger;
  */
 public class Action {
 
-    private static final Logger logger = Logger.getLogger(Action.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**
      * Represents the type of action to occur at that location.
@@ -35,9 +31,9 @@ public class Action {
     private final double longitude;
 
     /**
-     * The model associated with the action.
+     * The commodity associated with the action.
      */
-    private final SubscribableCrudModel model;
+    private final Commodity commodity;
 
     /**
      * Constructs an Action with a JSON object that represents an Action.
@@ -53,9 +49,9 @@ public class Action {
         this.longitude = Action.getLongitude(actionJson);
 
         if(!this.status.equals(ActionStatus.START)) {
-            this.model = Action.getModel(actionJson, services);
+            this.commodity = Action.getCommodity(actionJson, services);
         } else {
-            this.model = null;
+            this.commodity = null;
         }
 
         logger.info("Done constructing action: " + this.toString());
@@ -89,13 +85,12 @@ public class Action {
     }
 
     /**
-     * Returns the model associated with this action. It can either be a
-     * transport or a commodity.
+     * Returns the commodity associated with this action.
      *
-     * @return the model associate with the action.
+     * @return the commodity associate with the action.
      */
-    public SubscribableCrudModel getModel() {
-        return this.model;
+    public Commodity getCommodity() {
+        return this.commodity;
     }
 
     /**
@@ -146,24 +141,15 @@ public class Action {
     }
 
     /**
-     * Returns the model of an action in the form a JSON object.
+     * Returns the commodity of an action in the form a JSON object.
      *
      * @param json     a JSON object that represents an action.
      * @param services a pathfinder services object.
-     * @return the model of the action.
-     * @throws IllegalArgumentException when the model isn't a transport or commodity.
+     * @return the commodity of the action.
      */
-    private static SubscribableCrudModel getModel(JsonObject json, PathfinderServices services) {
+    private static Commodity getCommodity(JsonObject json, PathfinderServices services) {
         JsonObject model = json.getAsJsonObject("commodity");
-        //String type = model.get("commodity").getAsString();
-
-        //if (type.equals(Pathfinder.TRANSPORT)) {
-        //    return Transport.getInstance(model, services);
-        //} else if (type.equals(Pathfinder.COMMODITY)) {
-            return Commodity.getInstance(model, services);
-        //}
-
-        //throw new IllegalArgumentException("Illegal model type in action creation: " + type);
+        return Commodity.getInstance(model, services);
     }
 
     /**
@@ -176,8 +162,8 @@ public class Action {
         json.addProperty("latitude", this.getLatitude());
         json.addProperty("longitude", this.getLongitude());
         json.addProperty("status", this.getStatus().toString());
-        if(this.getModel() != null) {
-            json.addProperty("model", this.getModel().getPathName());
+        if(this.getCommodity() != null) {
+            json.addProperty("model", this.getCommodity().getPathName());
         }
         return json.toString();
     }
