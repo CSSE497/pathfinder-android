@@ -2,9 +2,8 @@ package xyz.thepathfinder.android;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Routes all web socket messages received to the receiving models.
@@ -13,18 +12,12 @@ import java.util.logging.Logger;
  */
 class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
 
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
+
     /**
      * Holds access to all the models.
      */
-    private final ModelRegistry registry;
-
-    /**
-     * Logs all messages
-     */
-    private static final Logger logger = Logger.getLogger(MessageHandler.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
+    private PathfinderServices services;
 
     /**
      * Number of messages received, helps with testing.
@@ -34,11 +27,15 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
     /**
      * Constructs the message handler.
      *
-     * @param registry to find models.
+     * @param services to find models.
      */
-    protected MessageHandler(ModelRegistry registry) {
-        this.registry = registry;
+    protected MessageHandler(PathfinderServices services) {
+        this.services = services;
         this.receivedMessageCount = 0;
+    }
+
+    protected void setServices(PathfinderServices services) {
+        this.services = services;
     }
 
     /**
@@ -54,45 +51,55 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
             JsonObject json = new JsonParser().parse(message).getAsJsonObject();
 
             if (!json.has("message") || !json.has("model")) {
-                logger.warning("Ignoring invalid message: " + json.toString());
-            }
-            //TODO revert after path update
-        /*if (!json.has("message") || !json.has("model") || !json.has("path")) {
-            logger.warning("Ignoring invalid message: " + json.toString());
-        }*/
-            else {
+                logger.warn("Ignoring invalid message: " + json.toString());
+            } else {
                 String type = json.get("message").getAsString();
 
-                //TODO revert after path update
                 JsonObject value = json.getAsJsonObject("value");
-                String path = "";
+                String paths = "";
                 if (json.has("id")) {
-                    path += json.get("id").getAsString();
+                    paths += json.get("id").getAsString();
                 } else if (json.has("clusterId")) {
-                    path += json.get("clusterId").getAsString();
+                    paths += json.get("clusterId").getAsString();
                 } else if (!json.get("model").getAsString().equals(ModelType.CLUSTER.toString())) {
-                    path += value.get("clusterId").getAsString();
-                    path += "/" + value.get("id").getAsString();
+                    paths += value.get("clusterId").getAsString();
+                    paths += "/" + value.get("id").getAsString();
                 } else {
-                    path += value.get("id").getAsString();
+                    paths += value.get("id").getAsString();
                 }
-
-                //String path = json.get("path").getAsString();
-                //End TODO
 
                 ModelType modelType = ModelType.getModelType(json.get("model").getAsString());
                 logger.info("Model Type : " + modelType);
-                Model model = this.registry.getModel(new Path(path, modelType));
+
+                Path path = new Path(paths, modelType);
+
+                Model model = this.services.getRegistry().getModel(path);
 
                 if(model != null) {
                     logger.info("Notifying " + model.getPathName() + " Type: " + model.getModelType() + " of message");
 
                     model.notifyUpdate(type, json);
-                } else  {
-                    logger.warning("Received message that couldn't be routed to a model: " + message);
+                } else {
+                    Path parentPath = path.getParentPath();
+
+                    if(parentPath != null && this.services.getRegistry().isModelRegistered(parentPath)) {
+                        if(modelType == ModelType.CLUSTER) {
+                            Cluster.getInstance(value, this.services);
+                            return;
+                        } else if(modelType == ModelType.COMMODITY) {
+                            Commodity.getInstance(value, this.services);
+                            return;
+                        } else if(modelType == ModelType.TRANSPORT) {
+                            Transport.getInstance(value, this.services);
+                            return;
+                        }
+                    }
+
+                    logger.warn("Received message that couldn't be routed to a model: " + message);
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception e) { // catch any exception that occured while serving a message
+            logger.error(e.getMessage());
             e.printStackTrace();
         }
     }

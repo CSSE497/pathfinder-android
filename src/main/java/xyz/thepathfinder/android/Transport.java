@@ -1,15 +1,19 @@
 package xyz.thepathfinder.android;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Interface to the Pathfinder server's transport API. A transport may be create
- * by a {@link Cluster} object with the {@link Cluster#createTransport(String, double, double, TransportStatus, JsonObject)}
+ * by a {@link Cluster} object with the {@link Cluster#createTransport(double, double, TransportStatus, JsonObject)}
  * method.
  *
  * <p>
@@ -25,10 +29,7 @@ import java.util.logging.Logger;
  */
 public class Transport extends SubscribableCrudModel<TransportListener> {
 
-    private static final Logger logger = Logger.getLogger(Transport.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
-    }
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**
      * Latitude of the transport.
@@ -53,6 +54,11 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     private JsonObject metadata;
 
     /**
+     * List of commodities being carried by the transport.
+     */
+    private List<Commodity> commodities;
+
+    /**
      * Route of the transport.
      */
     private Route route;
@@ -62,6 +68,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      *
      * @param path of the model.
      * @param services a pathfinder services object.
+     * @throws IllegalArgumentException occurs when a transport has already been registered with the same path.
      */
     protected Transport(String path, PathfinderServices services) {
         super(path, ModelType.TRANSPORT, services);
@@ -70,9 +77,8 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
         boolean isRegistered = this.getServices().getRegistry().isModelRegistered(new Path(path, ModelType.TRANSPORT));
         if (isRegistered) {
-            logger.warning("Illegal Argument Exception: Transport path already exists: " + path);
-            //TODO revert after path update
-            //throw new IllegalArgumentException("Transport path already exists: " + path);
+            logger.error("Illegal Argument Exception: Transport path already exists: " + path);
+            throw new IllegalArgumentException("Transport path already exists: " + path);
         } else {
             this.getServices().getRegistry().registerModel(this);
         }
@@ -81,6 +87,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         this.longitude = 0;
         this.status = TransportStatus.OFFLINE;
         this.metadata = new JsonObject();
+        this.commodities = new ArrayList<Commodity>();
         this.route = null;
     }
 
@@ -91,10 +98,11 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @param latitude of the transport.
      * @param longitude of the transport.
      * @param status of the transport. If <tt>null</tt> it is set to {@link TransportStatus#OFFLINE}
-     * @param metadata of the transports. If <tt>null</tt> it is set to an empty JsonObject
+     * @param metadata of the transports. If <tt>null</tt> it is set to an empty JsonObject.
+     * @param commodities being transported by this transport.
      * @param services a pathfinder services object.
      */
-    protected Transport(String path, double latitude, double longitude, TransportStatus status, JsonObject metadata, PathfinderServices services) {
+    protected Transport(String path, double latitude, double longitude, TransportStatus status, JsonObject metadata, List<Commodity> commodities, PathfinderServices services) {
         this(path, services);
 
         this.latitude = latitude;
@@ -112,6 +120,8 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
             this.metadata = metadata;
         }
 
+        this.commodities = commodities;
+
         this.route = null;
     }
 
@@ -126,7 +136,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     public static Transport getInstance(String path, PathfinderServices services) {
         Transport transport = (Transport) services.getRegistry().getModel(new Path(path, ModelType.TRANSPORT));
 
-        if (transport == null) {
+        if (transport == null && Path.isValidPath(path)) {
             return new Transport(path, services);
         }
 
@@ -146,7 +156,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      */
     protected static Transport getInstance(JsonObject transportJson, PathfinderServices services) {
         if (!Transport.checkTransportFields(transportJson)) {
-            logger.warning("Illegal Argument Exception: Invalid JSON cannot be parsed to a transport " + transportJson);
+            logger.error("Illegal Argument Exception: Invalid JSON cannot be parsed to a transport " + transportJson);
             throw new IllegalArgumentException("Invalid JSON cannot be parsed to a transport " + transportJson);
         }
 
@@ -181,14 +191,9 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
                 Transport.checkTransportField(transportJson, "longitude") &&
                 Transport.checkTransportField(transportJson, "status") &&
                 Transport.checkTransportField(transportJson, "metadata") &&
-                transportJson.get("metadata").isJsonObject();
-        //TODO revert after path update
-        /*return Transport.checkTransportField(transportJson, "path") &&
-                Transport.checkTransportField(transportJson, "latitude") &&
-                Transport.checkTransportField(transportJson, "longitude") &&
-                Transport.checkTransportField(transportJson, "status") &&
-                Transport.checkTransportField(transportJson, "metadata") &&
-                transportJson.get("metadata").isJsonObject();*/
+                transportJson.get("metadata").isJsonObject() &&
+                Transport.checkTransportField(transportJson, "commodities") &&
+                transportJson.get("commodities").isJsonArray();
     }
 
     /**
@@ -200,8 +205,6 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     private static String getPath(JsonObject transportJson) {
         String path = transportJson.get("clusterId").getAsString();
         return path + "/" + transportJson.get("id").getAsString();
-        //TODO revert after path update
-        //return transportJson.get("path").getAsString();
     }
 
     /**
@@ -332,6 +335,30 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     }
 
     /**
+     * Returns an unmodifiable list of the commodities being carried by this transport.
+     *
+     * @return a list of commodities being carried.
+     */
+    public List<Commodity> getCommodities() {
+        return Collections.<Commodity>unmodifiableList(this.commodities);
+    }
+
+    /**
+     * Sets the commodities being carried by the transport.
+     *
+     * @param json JsonArray of commodities
+     */
+    private void setCommodities(JsonArray json) {
+        List<Commodity> commodities = new ArrayList<Commodity>();
+        for(JsonElement commodityje : json) {
+            Commodity commodity = Commodity.getInstance(commodityje.getAsJsonObject(), this.getServices());
+            commodities.add(commodity);
+        }
+
+        this.commodities = commodities;
+    }
+
+    /**
      * Returns the route of this transport.
      *
      * @return the route.
@@ -388,13 +415,14 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         JsonObject json = new JsonObject();
 
         json.addProperty("clusterId", this.getPathName());
-        //TODO revert after path update
-        //json.addProperty("path", this.getPath());
         json.addProperty("model", this.getModelType().toString());
         json.addProperty("latitude", this.getLatitude());
         json.addProperty("longitude", this.getLongitude());
         json.addProperty("status", this.getStatus().toString());
         json.add("metadata", this.getMetadata());
+
+        JsonArray commodities = new JsonArray();
+        json.add("commodities", commodities);
 
         return json;
     }
@@ -408,6 +436,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         double prevLongitude;
         TransportStatus prevStatus;
         JsonObject prevMetadata;
+        List<Commodity> prevCommodities;
 
         boolean updated = false;
 
@@ -428,7 +457,12 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
         prevMetadata = this.getMetadata();
         if (json.has("metadata")) {
-            this.setMetadata(json.get("metadata").getAsJsonObject());
+            this.setMetadata(json.getAsJsonObject("metadata"));
+        }
+
+        prevCommodities = this.getCommodities();
+        if (json.has("commodities")) {
+            this.setCommodities(json.getAsJsonArray("commodities"));
         }
 
         List<TransportListener> listeners = this.getListeners();
@@ -441,7 +475,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
             updated = true;
         }
 
-        if (this.getStatus().equals(prevStatus)) {
+        if (!this.getStatus().equals(prevStatus)) {
             logger.info("Transport " + this.getPath() + " status updated: " + this.getStatus());
             for (TransportListener listener : listeners) {
                 listener.statusUpdated(this.getStatus());
@@ -449,10 +483,28 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
             updated = true;
         }
 
-        if (this.getMetadata().equals(prevMetadata)) {
+        if (!this.getMetadata().equals(prevMetadata)) {
             logger.info("Transport " + this.getPath() + " metadata updated: " + this.getMetadata());
             for (TransportListener listener : listeners) {
                 listener.metadataUpdated(this.getMetadata());
+            }
+            updated = true;
+        }
+
+        boolean updatedCommodities = false;
+        List<Commodity> commodities = this.getCommodities();
+        for(int k = 0; k < commodities.size(); k++) {
+            if(k == prevCommodities.size() || !commodities.get(k).equals(prevCommodities.get(k))) {
+                updatedCommodities = true;
+                break;
+            }
+        }
+
+        if(updatedCommodities) {
+            logger.info("Transport " + this.getPath() + " commodities updated: " + this.getCommodities());
+            List<Commodity> commodities2 = this.getCommodities();
+            for (TransportListener listener : listeners) {
+                listener.commoditiesUpdated(commodities2);
             }
             updated = true;
         }
@@ -490,7 +542,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      */
     @Override
     protected void route(JsonObject json, PathfinderServices services) {
-        JsonObject route = json.getAsJsonObject("value");
+        JsonObject route = json.getAsJsonObject("route");
 
         logger.info("Transport setting route: " + this.getPath());
         this.route = new Route(route, services);

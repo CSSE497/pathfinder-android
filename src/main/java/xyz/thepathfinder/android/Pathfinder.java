@@ -1,5 +1,8 @@
 package xyz.thepathfinder.android;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
@@ -8,8 +11,6 @@ import javax.websocket.WebSocketContainer;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * <p>
@@ -48,6 +49,8 @@ import java.util.logging.Logger;
  */
 public class Pathfinder {
 
+    private static final Logger logger = LoggerFactory.getLogger(Action.class);
+
     /**
      * Keeps track of all the Pathfinder models and connection to the server.
      */
@@ -63,12 +66,10 @@ public class Pathfinder {
      */
     private ConnectionConfiguration connectionConfiguration;
 
-    /**
-     * Logs all messages
-     */
-    private static Logger logger = Logger.getLogger(Pathfinder.class.getName());
-    static {
-        logger.setLevel(Level.INFO);
+    public static Pathfinder create(String applicationIdentifier) throws IOException {
+        Pathfinder pf = new Pathfinder(applicationIdentifier, "");
+        pf.connect();
+        return pf;
     }
 
     /**
@@ -77,11 +78,11 @@ public class Pathfinder {
      * @param applicationIdentifier application Identifier provided by a Pathfinder service provider
      * @param userCredentials       JWT of the user's credentials
      */
-    public Pathfinder(String applicationIdentifier, String userCredentials) {
+    private Pathfinder(String applicationIdentifier, String userCredentials) {
         try {
             this.webSocketUrl = new URI("ws://api.thepathfinder.xyz/socket");
         } catch(URISyntaxException e) {
-            logger.severe(e.getMessage());
+            logger.error(e.getMessage());
         }
 
         this.constructPathfinder(applicationIdentifier, userCredentials);
@@ -104,9 +105,11 @@ public class Pathfinder {
         this.connectionConfiguration = new ConnectionConfiguration(applicationIdentifier);
 
         ModelRegistry registry = new ModelRegistry();
-        Connection connection = new Connection(userCredentials, registry);
+        Connection connection = new Connection(userCredentials);
 
         this.services = new PathfinderServices(registry, connection);
+
+        connection.setServices(services);
     }
 
     /**
@@ -114,9 +117,8 @@ public class Pathfinder {
      * This method blocks until the connection is established.
      *
      * @throws IOException problem connecting to the Pathfinder server
-     * @throws DeploymentException problem connecting to the Pathfinder server
      */
-    public void connect() throws IOException, DeploymentException {
+    private void connect() throws IOException {
         if (!this.isConnected()) {
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
@@ -127,10 +129,10 @@ public class Pathfinder {
                 container.connectToServer(this.services.getConnection(), configuration, this.webSocketUrl);
             } catch (DeploymentException e) {
                 // Invalid annotated connection object and connection problems
-                logger.severe("Deployment Exception: " + e.getMessage());
-                throw e;
+                logger.error("Deployment Exception: " + e.getMessage());
+                throw new IOException(e);
             } catch (IOException e) {
-                logger.severe("IO Exception: " + e.getMessage());
+                logger.error("IO Exception: " + e.getMessage());
                 throw e;
             }
         }
