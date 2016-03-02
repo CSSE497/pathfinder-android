@@ -8,6 +8,8 @@ import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
 import javax.websocket.Session;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Controls access the web socket connection with the Pathfinder sever.
@@ -45,6 +47,11 @@ class Connection extends Endpoint {
     private MessageHandler messageHandler;
 
     /**
+     * Stores messages while the connection is down.
+     */
+    private Queue<String> messageQueue;
+
+    /**
      * Constructs a connection object that controls access to the web socket connection
      * with the Pathfinder Server.
      *
@@ -53,6 +60,7 @@ class Connection extends Endpoint {
     protected Connection(String userCredentials) {
         this.userCredentials = userCredentials;
         this.sentMessageCount = 0L;
+        this.messageQueue = new LinkedList<String>();
     }
 
     /**
@@ -65,20 +73,22 @@ class Connection extends Endpoint {
         this.messageHandler = new MessageHandler(this.services);
     }
 
+    private void send(String message) {
+        this.session.getAsyncRemote().sendText(message);
+        this.sentMessageCount++;
+    }
+
     /**
      * Sends a text message through the web socket to the Pathfinder server.
      *
      * @param message the message to be sent.
-     * @throws IllegalStateException the web socket is not connected.
      */
     public void sendMessage(String message) {
         logger.info("Sending json to Pathfinder: " + message);
         if (this.isConnected()) {
-            this.session.getAsyncRemote().sendText(message);
-            this.sentMessageCount++;
+            this.send(message);
         } else {
-            logger.error("Illegal State Exception: The connection to Pathfinder is not open.");
-            throw new IllegalStateException("The connection to Pathfinder is not open.");
+            this.messageQueue.add(message);
         }
     }
 
@@ -90,6 +100,11 @@ class Connection extends Endpoint {
         logger.info("Pathfinder connection opened");
         this.session = session;
         this.session.addMessageHandler(this.messageHandler);
+
+        for(String message : this.messageQueue) {
+            this.send(message);
+        }
+        this.messageQueue.clear();
     }
 
     /**
