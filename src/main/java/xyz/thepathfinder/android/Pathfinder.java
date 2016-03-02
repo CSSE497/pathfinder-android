@@ -11,6 +11,9 @@ import javax.websocket.WebSocketContainer;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -61,14 +64,9 @@ public class Pathfinder {
      */
     private URI webSocketUrl;
 
-    /**
-     * Configures the opening connection header.
-     */
-    private ConnectionConfiguration connectionConfiguration;
-
     public static Pathfinder create(String applicationIdentifier) throws IOException {
         Pathfinder pf = new Pathfinder(applicationIdentifier, "");
-        pf.connect();
+        pf.connect(applicationIdentifier);
         return pf;
     }
 
@@ -101,9 +99,6 @@ public class Pathfinder {
     }
 
     private void constructPathfinder(String applicationIdentifier, String userCredentials) {
-
-        this.connectionConfiguration = new ConnectionConfiguration(applicationIdentifier);
-
         ModelRegistry registry = new ModelRegistry();
         Connection connection = new Connection(userCredentials);
 
@@ -118,11 +113,19 @@ public class Pathfinder {
      *
      * @throws IOException problem connecting to the Pathfinder server
      */
-    private void connect() throws IOException {
+    private void connect(final String applicationIdentifier) throws IOException {
         if (!this.isConnected()) {
 
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-            ClientEndpointConfig configuration = ClientEndpointConfig.Builder.create().configurator(this.connectionConfiguration).build();
+
+            ClientEndpointConfig.Configurator configurator = new ClientEndpointConfig.Configurator() {
+                @Override
+                public void beforeRequest(Map<String, List<String>> header) {
+                    header.put("Authorization", Arrays.asList(applicationIdentifier));
+                }
+            };
+
+            ClientEndpointConfig configuration = ClientEndpointConfig.Builder.create().configurator(configurator).build();
 
             try {
                 // blocks until connection is established, JSR 356
