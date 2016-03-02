@@ -1,5 +1,6 @@
 package xyz.thepathfinder.android;
 
+import org.glassfish.tyrus.client.ClientManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -110,13 +111,11 @@ public class Pathfinder {
     /**
      * Establishes a connection to the Pathfinder server, if the connection is not already open.
      * This method blocks until the connection is established.
-     *
-     * @throws IOException problem connecting to the Pathfinder server
      */
     private void connect(final String applicationIdentifier) throws IOException {
         if (!this.isConnected()) {
 
-            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+            ClientManager clientManager = new ClientManager();
 
             ClientEndpointConfig.Configurator configurator = new ClientEndpointConfig.Configurator() {
                 @Override
@@ -129,14 +128,11 @@ public class Pathfinder {
 
             try {
                 // blocks until connection is established, JSR 356
-                container.connectToServer(this.services.getConnection(), configuration, this.webSocketUrl);
+                clientManager.asyncConnectToServer(this.services.getConnection(), configuration, this.webSocketUrl);
             } catch (DeploymentException e) {
                 // Invalid annotated connection object and connection problems
                 logger.error("Deployment Exception: " + e.getMessage());
                 throw new IOException(e);
-            } catch (IOException e) {
-                logger.error("IO Exception: " + e.getMessage());
-                throw e;
             }
         }
     }
