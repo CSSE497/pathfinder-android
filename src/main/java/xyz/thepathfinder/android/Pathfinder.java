@@ -110,7 +110,7 @@ public class Pathfinder {
 
     /**
      * Establishes a connection to the Pathfinder server, if the connection is not already open.
-     * This method blocks until the connection is established.
+     * This method doesn't blocks until the connection is established.
      */
     private void connect(final String applicationIdentifier) throws IOException {
         if (!this.isConnected()) {
@@ -127,7 +127,6 @@ public class Pathfinder {
             ClientEndpointConfig configuration = ClientEndpointConfig.Builder.create().configurator(configurator).build();
 
             try {
-                // blocks until connection is established, JSR 356
                 clientManager.asyncConnectToServer(this.services.getConnection(), configuration, this.webSocketUrl);
             } catch (DeploymentException e) {
                 // Invalid annotated connection object and connection problems

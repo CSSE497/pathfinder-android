@@ -4,7 +4,9 @@ import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * Basic class for dealing with models from the Pathfinder server.
@@ -33,6 +35,11 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
     private boolean isConnected;
 
     /**
+     * Messages saved to be sent later, after the model's path is fully defined.
+     */
+    private Queue<JsonObject> messageBacklog;
+
+    /**
      * Creates a basic object that all pathfinder models should use.
      *
      * @param path     to the model on the Pathfinder server.
@@ -43,6 +50,10 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         this.path = new Path(path, type);
         this.services = services;
         this.isConnected = false;
+
+        if(path == null) {
+            this.messageBacklog = new LinkedList<JsonObject>();
+        }
     }
 
     /**
@@ -55,12 +66,45 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
     }
 
     /**
+     * Returns true if the model's path is unknown. This occurs if the model has
+     * not been created on the pathfinder server.
+     *
+     * @return true if the model's path is unknown and false if it is known.
+     */
+    public boolean isPathUnknown() {
+        return this.path.getPathName() == null;
+    }
+
+    /**
      * Returns the string of the path of the model.
      *
      * @return the path.
      */
     public String getPathName() {
         return this.path.getPathName();
+    }
+
+    /**
+     * Set the path of the model. This method may not be called after the path becomes known.
+     *
+     * @param path of the model.
+     *
+     * @throws IllegalStateException if the path is already known.
+     */
+    protected void setPathName(String path) {
+        if(this.isPathUnknown()) {
+            this.path.setPathName(path);
+
+            for(JsonObject json : this.messageBacklog) {
+                json.addProperty("id", this.getPathName());
+                this.getServices().getConnection().sendMessage(json.toString());
+            }
+
+            this.messageBacklog = null;
+        } else {
+            logger.error("Illegal State Exception: The path of a model may not be set after becoming known");
+            throw new IllegalStateException("The path of a model may not be set after becoming known");
+        }
     }
 
     /**
@@ -281,12 +325,13 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         return this.updateType(reason, json);
     }
 
-    /**
-     * Returns the value used in create request to the Pathfinder server
-     *
-     * @return the value JSON
-     */
-    protected abstract JsonObject createValueJson();
+    protected void sendMessage(JsonObject json) {
+        if(!this.isPathUnknown()) {
+            this.getServices().getConnection().sendMessage(json.toString());
+        } else {
+            this.messageBacklog.offer(json);
+        }
+    }
 
     /**
      * Updates the fields of the model.

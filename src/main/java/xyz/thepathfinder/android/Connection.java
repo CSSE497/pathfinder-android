@@ -74,6 +74,7 @@ class Connection extends Endpoint {
     }
 
     private void send(String message) {
+        logger.info("Sending json to Pathfinder: " + message);
         this.session.getAsyncRemote().sendText(message);
         this.sentMessageCount++;
     }
@@ -84,10 +85,10 @@ class Connection extends Endpoint {
      * @param message the message to be sent.
      */
     public void sendMessage(String message) {
-        logger.info("Sending json to Pathfinder: " + message);
         if (this.isConnected()) {
             this.send(message);
         } else {
+            logger.warn("Attempting to send message while websocket is not open. Storing message until connection opens: " + message);
             this.messageQueue.add(message);
         }
     }
@@ -101,9 +102,11 @@ class Connection extends Endpoint {
         this.session = session;
         this.session.addMessageHandler(this.messageHandler);
 
+        logger.info("Sending stored messages");
         for(String message : this.messageQueue) {
             this.send(message);
         }
+        logger.info("End sending stored messages");
         this.messageQueue.clear();
     }
 

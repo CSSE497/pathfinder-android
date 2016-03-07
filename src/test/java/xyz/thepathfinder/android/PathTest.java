@@ -16,11 +16,6 @@ public class PathTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void testNullPath(){
-        Path path = new Path(null, ModelType.COMMODITY);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void testInvalidName() {
         Path path = new Path("/hi/there", ModelType.CLUSTER);
         path.getChildPath("la/de", ModelType.CLUSTER);

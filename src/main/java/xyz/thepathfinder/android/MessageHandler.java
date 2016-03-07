@@ -56,24 +56,30 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
                 String type = json.get("message").getAsString();
 
                 JsonObject value = json.getAsJsonObject("value");
-                String paths = "";
+                String tempPath = "";
                 if (json.has("id")) {
-                    paths += json.get("id").getAsString();
+                    tempPath += json.get("id").getAsString();
                 } else if (json.has("clusterId")) {
-                    paths += json.get("clusterId").getAsString();
+                    tempPath += json.get("clusterId").getAsString();
                 } else if (!json.get("model").getAsString().equals(ModelType.CLUSTER.toString())) {
-                    paths += value.get("clusterId").getAsString();
-                    paths += "/" + value.get("id").getAsString();
+                    tempPath += value.get("clusterId").getAsString();
+                    tempPath += "/" + value.get("id").getAsString();
                 } else {
-                    paths += value.get("id").getAsString();
+                    tempPath += value.get("id").getAsString();
                 }
 
                 ModelType modelType = ModelType.getModelType(json.get("model").getAsString());
                 logger.info("Model Type : " + modelType);
 
-                Path path = new Path(paths, modelType);
+                Path path = new Path(tempPath, modelType);
 
-                Model model = this.services.getRegistry().getModel(path);
+                Model model = null;
+                if(type.equals("Created") && !ModelType.CLUSTER.equals(modelType)) {
+                    model = this.services.getRegistry().pollCreateBacklog();
+                    model.setPathName(path.getPathName());
+                } else {
+                    model = this.services.getRegistry().getModel(path);
+                }
 
                 if(model != null) {
                     logger.info("Notifying " + model.getPathName() + " Type: " + model.getModelType() + " of message");

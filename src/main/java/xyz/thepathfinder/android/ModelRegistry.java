@@ -24,17 +24,15 @@ class ModelRegistry {
      */
     private final Map<Path, Model> models;
 
-    /**
-     * List of all the expected incoming {@link Model}s with unknown ids.
-     */
-    private final Queue<Model> incomingModels;
+    //TODO docs
+    private final Queue<Model> createBacklog;
 
     /**
      * Constructs a ModelRegistry object with an empty registry of {@link Model}s.
      */
     protected ModelRegistry() {
         this.models = new HashMap<Path, Model>();
-        this.incomingModels = new LinkedList<Model>();
+        this.createBacklog = new LinkedList<Model>();
     }
 
     /**
@@ -43,11 +41,15 @@ class ModelRegistry {
      * @param model the model to be added to the registry.
      * @throws IllegalStateException the path has already been used by another
      *                               model.
+     * @throws IllegalArgumentException if the model's path is unknown.
      */
     protected void registerModel(Model model) {
         if (this.models.containsKey(model.getPath())) {
             logger.error("Illegal State Exception: path already exists" + model.getPathName());
             throw new IllegalStateException("Path already exists: " + model.getPathName());
+        } else if(model.isPathUnknown()) {
+            logger.error("Illegal Argument Exception: Cannot register a model with an unknown path.");
+            throw new IllegalArgumentException("Cannot register a model with an unknown path.");
         }
 
         this.models.put(model.getPath(), model);
@@ -86,16 +88,13 @@ class ModelRegistry {
         return this.models.get(path);
     }
 
-    protected void addIncomingModel() {
-
+    //TODO docs
+    protected Model pollCreateBacklog() {
+        return this.createBacklog.poll();
     }
 
-    protected Model getIncomingModel(Path parentPath, ModelType type) {
-        Model model = this.incomingModels.peek();
-        if(model.getParentPath().equals(parentPath) && model.getModelType().equals(type)) {
-            this.incomingModels.poll();
-            return model;
-        }
-        return null;
+    //TODO docs
+    protected void offerCreateBacklog(Model model) {
+        this.createBacklog.offer(model);
     }
 }

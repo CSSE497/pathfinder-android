@@ -65,6 +65,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param services A service object to send messages to the server and keep track of all
      *                 {@link Model} objects.
      * @throws IllegalArgumentException occurs when a cluster has already been registered with the same path.
+     * @throws IllegalArgumentException if path is null.
      */
     private Cluster(String path, PathfinderServices services) {
         super(path, ModelType.CLUSTER, services);
@@ -75,6 +76,9 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         if (isRegistered) {
             logger.error("Illegal Argument Exception: Constructing cluster with path that already exists: " + path);
             throw new IllegalArgumentException("Cluster path already exists: " + path);
+        } else if(path == null) {
+            logger.error("Illegal Argument Exception: Cluster's path may not be null");
+            throw new IllegalArgumentException("Cluster's path may not be null");
         } else {
             this.getServices().getRegistry().registerModel(this);
         }
@@ -149,7 +153,6 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @return Whether the json can be parsed to a cluster.
      */
     private static boolean checkClusterFields(JsonObject clusterJson) {
-        //TODO revert after path update
         return clusterJson.has("id") &&
                 clusterJson.has("vehicles") &&
                 clusterJson.get("vehicles").isJsonArray() &&
@@ -157,13 +160,6 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
                 clusterJson.get("commodities").isJsonArray() &&
                 clusterJson.has("subclusters") &&
                 clusterJson.get("subclusters").isJsonArray();
-        /*return clusterJson.has("path") &&
-                clusterJson.has("transports") &&
-                clusterJson.get("transports").isJsonArray() &&
-                clusterJson.has("commodities") &&
-                clusterJson.get("commodities").isJsonArray() &&
-                clusterJson.has("subClusters") &&
-                clusterJson.get("subClusters").isJsonArray();*/
     }
 
     /**
@@ -176,8 +172,27 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         return clusterJson.get("id").getAsString();
     }
 
+
+
     /**
-     * Creates a commodity under this cluster on the pathfinder server.
+     * Returns the value used in create request to the Pathfinder server
+     *
+     * @return the value JSON
+     */
+    protected JsonObject createValueJson() {
+        JsonObject json = new JsonObject();
+
+        json.addProperty("id", this.getPathName());
+        json.addProperty("model", this.getModelType().toString());
+
+        return json;
+    }
+
+    /**
+     * Creates a commodity under this cluster on the pathfinder server. Returns the commodity waiting for the server to
+     * respond to it's creation. The commodity will not be accessible through the cluster until the server responds. Also,
+     * all messages to the server will be stored until the server responds with the creation of the commodity.
+     * Once the server responds the stored messages will be sent in the order created.
      *
      * @param startLatitude  The pick up latitude of the commodity.
      * @param startLongitude The pick up longitude of the commodity.
@@ -185,16 +200,18 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param endLongitude   The drop off longitude of the commodity.
      * @param status         The current status of the commodity. If <tt>null</tt> it will default to <tt>CommodityStatus.OFFLINE</tt>.
      * @param metadata       A JsonObject representing the metadata field of the commodity. If <tt>null</tt> it will default to an empty JsonObject.
+     *
+     * @return Commodity with unknown path.
      */
-    public void createCommodity(double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata) {
+    public Commodity createCommodity(double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata) {
         if (!this.isConnected()) {
             logger.warn("Attempting to create a commodity on an unconnected cluster, request will fail if " + this.getPathName() + " is not found.");
         }
 
+        Commodity commodity = Commodity.getInstance((String) null, this.getServices());
+
         JsonObject json = new JsonObject();
 
-        json.addProperty("clusterId", this.getPathName());
-        json.addProperty("model", ModelType.COMMODITY.toString());
         json.addProperty("startLatitude", startLatitude);
         json.addProperty("startLongitude", startLongitude);
         json.addProperty("endLatitude", endLatitude);
@@ -202,7 +219,10 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         json.addProperty("status", status.toString());
         json.add("metadata", metadata);
 
-        this.create(json, false);
+        commodity.notifyUpdate(null, json);
+        commodity.create(this.getPathName());
+
+        return commodity;
     }
 
     /**
@@ -287,7 +307,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         json.addProperty("id", this.getChildPath(name, ModelType.CLUSTER).getPathName());
         json.addProperty("model", ModelType.CLUSTER.toString());
 
-        this.create(json, true);
+        this.create(json);
     }
 
     /**
@@ -355,21 +375,24 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param status    The current status of the transport. If <tt>null</tt> it defaults to <tt>TransportStatus.OFFLINE</tt>
      * @param metadata  The transports's metadata field. If <tt>null</tt> it defaults to an empty JSON object.
      */
-    public void createTransport(double latitude, double longitude, TransportStatus status, JsonObject metadata) {
+    public Transport createTransport(double latitude, double longitude, TransportStatus status, JsonObject metadata) {
         if (!this.isConnected()) {
             logger.warn("Attempting to create a transport on an unconnected cluster, request will fail if " + this.getPathName() + " is not found.");
         }
 
+        Transport transport = Transport.getInstance((String) null, this.getServices());
+
         JsonObject json = new JsonObject();
 
-        json.addProperty("clusterId", this.getPathName());
-        json.addProperty("model", ModelType.TRANSPORT.toString());
         json.addProperty("latitude", latitude);
         json.addProperty("longitude", longitude);
         json.addProperty("status", status.toString());
         json.add("metadata", metadata);
 
-        this.create(json, false);
+        transport.notifyUpdate(null, json);
+        transport.create(this.getPathName());
+
+        return transport;
     }
 
     /**
@@ -446,19 +469,6 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      */
     public Collection<Route> getRoutes() {
         return Collections.<Route>unmodifiableCollection(this.routes);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected JsonObject createValueJson() {
-        JsonObject json = new JsonObject();
-
-        json.addProperty("id", this.getPathName());
-        json.addProperty("model", this.getModelType().toString());
-
-        return json;
     }
 
     private String getSubmodelPath(JsonObject json) {

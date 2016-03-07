@@ -30,7 +30,7 @@ class Path {
     /**
      * Type of the model.
      */
-    private ModelType modelType;
+    private final ModelType modelType;
 
     /**
      * Constructs a path to a model. The path may not an empty string.
@@ -57,7 +57,7 @@ class Path {
      * @return <tt>true</tt> if allowed, <tt>false</tt> otherwise.
      */
     public static boolean isValidPath(String path) {
-        return !(path == null || path.equals("") || path.contains(" "));
+        return path == null || !(path.equals("") || path.contains(" "));
     }
 
     /**
@@ -67,7 +67,7 @@ class Path {
      * @return <tt>true</tt> if allowed, <tt>false</tt> otherwise.
      */
     public static boolean isValidName(String name) {
-        return !(name.contains(Path.PATH_SEPARATOR) || name.equals("") || name.contains(" "));
+        return name != null && !(name.contains(Path.PATH_SEPARATOR) || name.equals("") || name.contains(" "));
     }
 
     /**
@@ -83,6 +83,9 @@ class Path {
         if(!this.getModelType().equals(ModelType.CLUSTER) || !type.equals(ModelType.CLUSTER)) {
             logger.error("Illegal State Exception: Cannot get a child path name on a non-cluster type");
             throw new IllegalStateException("Cannot get a child path name on a non-cluster type");
+        } else if(this.path == null) {
+            logger.error("Illegal State Exception: Cannot get a child path with an unknown path, make sure the model has been created.");
+            throw new IllegalStateException("Cannot get a child path with an unknown path, make sure the model has been created.");
         } else if (Path.isValidName(name)) {
             return new Path(this.path + Path.PATH_SEPARATOR + name, type);
         } else {
@@ -99,6 +102,9 @@ class Path {
      * @return the name of the model.
      */
     public String getName() {
+        if(this.path == null) {
+            return null;
+        }
         int lastSlashIndex = this.path.lastIndexOf(Path.PATH_SEPARATOR) + 1;
         return this.path.substring(lastSlashIndex);
     }
@@ -109,7 +115,7 @@ class Path {
      * @return the path of the model.
      */
     public String getPathName() {
-        return path;
+        return this.path;
     }
 
     /**
@@ -120,6 +126,10 @@ class Path {
      * @return the path of the parent of this path.
      */
     public Path getParentPath() {
+        if(this.path == null) {
+            return null;
+        }
+
         int lastSlashIndex = this.path.lastIndexOf(Path.PATH_SEPARATOR);
 
         if(lastSlashIndex <= 0) {
@@ -127,6 +137,22 @@ class Path {
         }
 
         return new Path(this.path.substring(0, lastSlashIndex), ModelType.CLUSTER);
+    }
+
+    /**
+     * Set the path of the model. This method may not be called after the path becomes known.
+     *
+     * @param path of the model.
+     *
+     * @throws IllegalStateException if the path is already known.
+     */
+    protected void setPathName(String path) {
+        if(this.path == null) {
+            this.path = path;
+        } else {
+            logger.error("Illegal State Exception: The path of a model may not be set after becoming known");
+            throw new IllegalStateException("The path of a model may not be set after becoming known");
+        }
     }
 
     /**
@@ -145,7 +171,8 @@ class Path {
     public boolean equals(Object o) {
         if (o instanceof Path) {
             Path otherPath = (Path) o;
-            return this.modelType == otherPath.modelType && this.path.equals(otherPath.path);
+            return this.modelType == otherPath.modelType &&
+                    ((this.path == null && otherPath.path == null) || (this.path != null && this.path.equals(otherPath.path)));
         }
         return false;
     }
@@ -155,6 +182,9 @@ class Path {
      */
     @Override
     public int hashCode() {
+        if(this.path == null) {
+            return 0;
+        }
         return this.path.hashCode();
     }
 }
