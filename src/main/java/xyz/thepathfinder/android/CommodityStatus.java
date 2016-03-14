@@ -1,5 +1,8 @@
 package xyz.thepathfinder.android;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * An enum for the possible statuses of a {@link Commodity}.
  *
@@ -31,6 +34,15 @@ public enum CommodityStatus {
      */
     CANCELLED("Cancelled");
 
+    private static final Map<String, CommodityStatus> statuses;
+
+    static {
+        statuses = new HashMap<String, CommodityStatus>();
+        for(CommodityStatus status: CommodityStatus.values()) {
+            CommodityStatus.statuses.put(status.toString(), status);
+        }
+    }
+
     /**
      * The string representation of the status.
      */
@@ -60,5 +72,9 @@ public enum CommodityStatus {
      */
     public String toString() {
         return this.status;
+    }
+
+    public static CommodityStatus getStatus(String status) {
+        return CommodityStatus.statuses.get(status);
     }
 }

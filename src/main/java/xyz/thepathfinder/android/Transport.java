@@ -307,14 +307,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @return the status.
      */
     private static TransportStatus getStatus(String status) {
-        TransportStatus[] values = TransportStatus.values();
-        for (TransportStatus value : values) {
-            if (value.equals(status)) {
-                return value;
-            }
-        }
-
-        return null;
+        return TransportStatus.getStatus(status);
     }
 
     /**

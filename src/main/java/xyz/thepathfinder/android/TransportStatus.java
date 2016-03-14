@@ -1,5 +1,8 @@
 package xyz.thepathfinder.android;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * An enum for the possible statuses of a {@link Transport}.
  *
@@ -16,6 +19,15 @@ public enum TransportStatus {
      * The transport is currently active and accepting routes.
      */
     ONLINE("Online");
+
+    private static final Map<String, TransportStatus> statuses;
+
+    static {
+        statuses = new HashMap<String, TransportStatus>();
+        for(TransportStatus status: TransportStatus.values()) {
+            TransportStatus.statuses.put(status.toString(), status);
+        }
+    }
 
     /**
      * The string representation of the status.
@@ -47,5 +59,9 @@ public enum TransportStatus {
     @Override
     public String toString() {
         return this.status;
+    }
+
+    public static TransportStatus getStatus(String status) {
+        return TransportStatus.statuses.get(status);
     }
 }

@@ -110,14 +110,7 @@ public class Action {
      * @return an ActionStatus that represents the string.
      */
     private static ActionStatus getStatus(String status) {
-        ActionStatus[] values = ActionStatus.values();
-        for (int k = 0; k < values.length; k++) {
-            if (values[k].equals(status)) {
-                return values[k];
-            }
-        }
-
-        return null;
+        return ActionStatus.getStatus(status);
     }
 
     /**
