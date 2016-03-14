@@ -11,14 +11,14 @@ import javax.websocket.DeploymentException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.logging.Logger;
 
 public class PathfinderTest {
 
+/*
     private TestServer server;
     private TestMessager messager;
 
-/*
+
     @Before
     public void setupSever() {
         Logger l1 = Logger.getLogger("org.glassfish");
@@ -32,6 +32,7 @@ public class PathfinderTest {
     public void stopServer() {
         this.server.stopServer();
     }
+*/
 
     public void waitForMessages(Pathfinder pathfinder, int messageCount) throws InterruptedException {
         while(pathfinder.getReceivedMessageCount() != messageCount) {
@@ -46,7 +47,7 @@ public class PathfinderTest {
     }
 
 
-    @Test(timeout = 10000)
+/*    @Test(timeout = 10000)
     public void testConnection() throws URISyntaxException, IOException, InterruptedException, DeploymentException {
         URI url = new URI("ws://localhost:8025/socket");
         Pathfinder pathfinder = new Pathfinder("9c4166bb-9535-49e1-8844-1904a0b1f45b", "", url);

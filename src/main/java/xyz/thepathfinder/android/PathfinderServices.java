@@ -33,7 +33,7 @@ class PathfinderServices {
      *
      * @return the model registry.
      */
-    public ModelRegistry getRegistry() {
+    protected ModelRegistry getRegistry() {
         return this.registry;
     }
 
@@ -42,7 +42,7 @@ class PathfinderServices {
      *
      * @return the connection to the pathfinder server.
      */
-    public Connection getConnection() {
+    protected Connection getConnection() {
         return this.connection;
     }
 }

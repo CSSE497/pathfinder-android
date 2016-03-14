@@ -93,13 +93,16 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
      */
     protected void setPathName(String path) {
         if(this.isPathUnknown()) {
+            logger.info("Setting path to: " + path);
             this.path.setPathName(path);
+            this.getServices().getRegistry().registerModel(this);
 
+            logger.info("Flushing " + this.getPathName() + "'s message backlog");
             for(JsonObject json : this.messageBacklog) {
-                json.addProperty("id", this.getPathName());
+                json.addProperty("id", Integer.parseInt(this.getName()));
                 this.getServices().getConnection().sendMessage(json.toString());
             }
-
+            logger.info("End flushing backlog");
             this.messageBacklog = null;
         } else {
             logger.error("Illegal State Exception: The path of a model may not be set after becoming known");
@@ -320,8 +323,9 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
             logger.warn("Invalid model type: " + json + " given to a " + this.getModel());
             return false;
         }*/
-
-        this.setConnected(true);
+        if(!this.isPathUnknown()) {
+            this.setConnected(true);
+        }
         return this.updateType(reason, json);
     }
 
@@ -332,6 +336,9 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
             this.messageBacklog.offer(json);
         }
     }
+
+    //TODO documentation
+    public abstract JsonObject toJson();
 
     /**
      * Updates the fields of the model.

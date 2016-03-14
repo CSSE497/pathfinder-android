@@ -1,12 +1,13 @@
 package xyz.thepathfinder.android;
 
+import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 
 /**
  * The <tt>ModelRegistry</tt> keeps track of all {@link Model}s created by
@@ -24,15 +25,17 @@ class ModelRegistry {
      */
     private final Map<Path, Model> models;
 
-    //TODO docs
-    private final Queue<Model> createBacklog;
+    /**
+     * List of models that have unknown paths, occurs on create with commodities and transports.
+     */
+    private final List<Model> createBacklog;
 
     /**
      * Constructs a ModelRegistry object with an empty registry of {@link Model}s.
      */
     protected ModelRegistry() {
         this.models = new HashMap<Path, Model>();
-        this.createBacklog = new LinkedList<Model>();
+        this.createBacklog = new ArrayList<Model>();
     }
 
     /**
@@ -88,13 +91,48 @@ class ModelRegistry {
         return this.models.get(path);
     }
 
-    //TODO docs
-    protected Model pollCreateBacklog() {
-        return this.createBacklog.poll();
+    /**
+     * Adds a {@link Model} to the create backlog.
+     *
+     * @param model model to be added.
+     */
+    protected void addCreateBacklog(Model model) {
+        this.createBacklog.add(model);
     }
 
-    //TODO docs
-    protected void offerCreateBacklog(Model model) {
-        this.createBacklog.offer(model);
+    protected void removeCreateBacklog(Model model) {
+        this.createBacklog.remove(model);
+    }
+
+    /**
+     * Finds a model in the create backlog. Compares the json provided to the values
+     * of the models in the backlog to see if any match and returns a matching model
+     * if found.
+     *
+     * @param json of model to be found.
+     * @param type of the model.
+     * @return model if found, <tt>null</tt> otherwise.
+     */
+    protected Model findInCreateBacklog(JsonObject json, ModelType type) {
+        long id = json.remove("id").getAsLong();
+        String clusterId = json.remove("clusterId").getAsString();
+        json.addProperty("path", (String) null);
+
+        for(Model model : this.createBacklog) {
+            JsonObject modelJson = model.toJson();
+            modelJson.remove("model");
+            if(model.getModelType() == type && json.equals(modelJson)) {
+                json.remove("path");
+                json.addProperty("id", id);
+                json.addProperty("clusterId", clusterId);
+                return model;
+            }
+        }
+
+        json.remove("path");
+        json.addProperty("id", id);
+        json.addProperty("clusterId", clusterId);
+
+        return null;
     }
 }

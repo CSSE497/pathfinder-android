@@ -715,10 +715,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public String toString() {
+    public JsonObject toJson() {
         JsonObject json = new JsonObject();
 
         json.addProperty("path", this.getPathName());
@@ -727,6 +724,13 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         json.addProperty("transports", this.getTransports().toString());
         json.addProperty("routes", this.getRoutes().toString());
 
-        return json.toString();
+        return json;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String toString() {
+        return this.toJson().toString();
     }
 }

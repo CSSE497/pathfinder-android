@@ -475,7 +475,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         List<TransportListener> listeners = this.getListeners();
 
         if (this.getLatitude() != prevLatitude || this.getLongitude() != prevLongitude) {
-            logger.info("Transport " + this.getPath() + " location updated: " + this.getLatitude() + "," + this.getLongitude());
+            logger.info("Transport " + this.getPathName() + " location updated: " + this.getLatitude() + "," + this.getLongitude());
             for (TransportListener listener : listeners) {
                 listener.locationUpdated(this.getLatitude(), this.getLongitude());
             }
@@ -483,7 +483,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         }
 
         if (!this.getStatus().equals(prevStatus)) {
-            logger.info("Transport " + this.getPath() + " status updated: " + this.getStatus());
+            logger.info("Transport " + this.getPathName() + " status updated: " + this.getStatus());
             for (TransportListener listener : listeners) {
                 listener.statusUpdated(this.getStatus());
             }
@@ -491,7 +491,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         }
 
         if (!this.getMetadata().equals(prevMetadata)) {
-            logger.info("Transport " + this.getPath() + " metadata updated: " + this.getMetadata());
+            logger.info("Transport " + this.getPathName() + " metadata updated: " + this.getMetadata());
             for (TransportListener listener : listeners) {
                 listener.metadataUpdated(this.getMetadata());
             }
@@ -508,7 +508,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         }
 
         if(updatedCommodities) {
-            logger.info("Transport " + this.getPath() + " commodities updated: " + this.getCommodities());
+            logger.info("Transport " + this.getPathName() + " commodities updated: " + this.getCommodities());
             List<Commodity> commodities2 = this.getCommodities();
             for (TransportListener listener : listeners) {
                 listener.commoditiesUpdated(commodities2);
@@ -528,7 +528,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
             Collection<Transport> transports = parentCluster.getTransports();
 
-            logger.info("Transport " + this.getPath() + " calling parent cluster's update");
+            logger.info("Transport " + this.getPathName() + " calling parent cluster's update");
 
             List<ClusterListener> clusterListeners = parentCluster.getListeners();
             for (ClusterListener listener : clusterListeners) {
@@ -551,20 +551,16 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     protected void route(JsonObject json, PathfinderServices services) {
         JsonObject route = json.getAsJsonObject("route");
 
-        logger.info("Transport setting route: " + this.getPath());
+        logger.info("Transport setting route: " + this.getPathName());
         this.route = new Route(route, services);
 
-        logger.info("Transport updating route: " + this.getPath());
+        logger.info("Transport updating route: " + this.getPathName());
         for (TransportListener listener : this.getListeners()) {
             listener.routed(this.getRoute());
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
+    public JsonObject toJson() {
         JsonObject json = new JsonObject();
 
         json.addProperty("path", this.getPathName());
@@ -580,7 +576,14 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         if(route != null) {
             json.addProperty("route", this.route.toString());
         }
+        return json;
+    }
 
-        return json.toString();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return this.toJson().toString();
     }
 }

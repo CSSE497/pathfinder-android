@@ -38,7 +38,7 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
 
         if(this.getModelType() == ModelType.CLUSTER) {
             json.addProperty("id", this.getPathName());
-        } else {
+        } else if(!this.isPathUnknown()) {
             json.addProperty("id", Integer.parseInt(this.getName()));
         }
 

@@ -49,7 +49,7 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
         json.add("value", value);
 
         if(this.isPathUnknown()) {
-            this.getServices().getRegistry().offerCreateBacklog(this);
+            this.getServices().getRegistry().addCreateBacklog(this);
         }
 
         this.getServices().getConnection().sendMessage(json.toString()); // needs to bypass the unknown path check.

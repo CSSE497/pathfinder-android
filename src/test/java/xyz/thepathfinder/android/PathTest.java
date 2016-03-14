@@ -1,5 +1,6 @@
 package xyz.thepathfinder.android;
 
+import com.google.gson.JsonObject;
 import org.junit.Assert;
 import org.junit.Test;
 
