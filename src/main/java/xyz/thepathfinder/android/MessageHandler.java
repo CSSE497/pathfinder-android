@@ -54,26 +54,21 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
                 logger.warn("Ignoring invalid message: " + json.toString());
             } else {
                 String type = json.get("message").getAsString();
-
                 JsonObject value = json.getAsJsonObject("value");
-                String paths = "";
-                if (json.has("id")) {
-                    paths += json.get("id").getAsString();
-                } else if (json.has("clusterId")) {
-                    paths += json.get("clusterId").getAsString();
-                } else if (!json.get("model").getAsString().equals(ModelType.CLUSTER.toString())) {
-                    paths += value.get("clusterId").getAsString();
-                    paths += "/" + value.get("id").getAsString();
-                } else {
-                    paths += value.get("id").getAsString();
-                }
 
                 ModelType modelType = ModelType.getModelType(json.get("model").getAsString());
                 logger.info("Model Type : " + modelType);
 
-                Path path = new Path(paths, modelType);
+                Path path = new Path(this.getPath(json), modelType);
 
                 Model model = this.services.getRegistry().getModel(path);
+                if(model == null && type.equals("Created") && ModelType.CLUSTER != modelType) {
+                    model = this.services.getRegistry().findInCreateBacklog(value, modelType);
+                    if(model != null) {
+                        this.services.getRegistry().removeCreateBacklog(model);
+                        model.setPathName(path.getPathName());
+                    }
+                }
 
                 if(model != null) {
                     logger.info("Notifying " + model.getPathName() + " Type: " + model.getModelType() + " of message");
@@ -102,6 +97,22 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
             logger.error(e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private String getPath(JsonObject json) {
+        JsonObject value = json.getAsJsonObject("value");
+        String path = "";
+        if (json.has("id")) {
+            path += json.get("id").getAsString();
+        } else if (json.has("clusterId")) {
+            path += json.get("clusterId").getAsString();
+        } else if (!json.get("model").getAsString().equals(ModelType.CLUSTER.toString())) {
+            path += value.get("clusterId").getAsString();
+            path += "/" + value.get("id").getAsString();
+        } else {
+            path += value.get("id").getAsString();
+        }
+        return path;
     }
 
     /**

@@ -162,9 +162,11 @@ public class Action {
         json.addProperty("latitude", this.getLatitude());
         json.addProperty("longitude", this.getLongitude());
         json.addProperty("status", this.getStatus().toString());
+
         if(this.getCommodity() != null) {
             json.addProperty("model", this.getCommodity().getPathName());
         }
+
         return json.toString();
     }
 }

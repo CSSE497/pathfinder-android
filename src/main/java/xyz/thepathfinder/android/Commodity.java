@@ -78,7 +78,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @param services a pathfinder services objects
      * @throws IllegalArgumentException occurs if the path has already been used to create a commodity.
      */
-    protected Commodity(String path, PathfinderServices services) {
+    private Commodity(String path, PathfinderServices services) {
         super(path, ModelType.COMMODITY, services);
 
         logger.info("Constructing commodity by path: " + path);
@@ -87,7 +87,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         if (isRegistered) {
             logger.error("Illegal Argument Exception: Commodity path already exists " + path);
             throw new IllegalArgumentException("Commodity path already exists: " + path);
-        } else {
+        } else if(path != null){
             this.getServices().getRegistry().registerModel(this);
         }
 
@@ -114,7 +114,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @param transportId    the id of the transport that picked up the commodity, null if not in a transport.
      * @param services       a pathfinder services object.
      */
-    protected Commodity(String path, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata, Long transportId, PathfinderServices services) {
+    private Commodity(String path, double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata, Long transportId, PathfinderServices services) {
         this(path, services);
 
         logger.info("Constructing commodity by parameters: " + path);
@@ -225,8 +225,32 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     private static String getPath(JsonObject commodityJson) {
         String path = commodityJson.get("clusterId").getAsString();
         return path + "/" + commodityJson.get("id").getAsString();
-        //TODO revert after path update
-        //return commodityJson.get("path").getAsString();
+    }
+
+    //TODO write doc
+    protected void create(String clusterId) {
+        this.create(this.createValueJson(clusterId));
+    }
+
+    /**
+     * Returns the value used in create request to the Pathfinder server
+     *
+     * @param clusterId path to the cluster to create under.
+     * @return the value JSON
+     */
+    protected JsonObject createValueJson(String clusterId) {
+        JsonObject json = new JsonObject();
+
+        json.addProperty("clusterId", clusterId);
+        json.addProperty("model", this.getModelType().toString());
+        json.addProperty("startLatitude", this.getStartLatitude());
+        json.addProperty("startLongitude", this.getStartLongitude());
+        json.addProperty("endLatitude", this.getEndLatitude());
+        json.addProperty("endLongitude", this.getEndLongitude());
+        json.addProperty("status", this.getStatus().toString());
+        json.add("metadata", this.getMetadata());
+
+        return json;
     }
 
     /**
@@ -544,25 +568,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * {@inheritDoc}
      */
     @Override
-    protected JsonObject createValueJson() {
-        JsonObject json = new JsonObject();
-
-        json.addProperty("clusterId", this.getPathName());
-        json.addProperty("model", this.getModelType().toString());
-        json.addProperty("startLatitude", this.getStartLatitude());
-        json.addProperty("startLongitude", this.getStartLongitude());
-        json.addProperty("endLatitude", this.getEndLatitude());
-        json.addProperty("endLongitude", this.getEndLongitude());
-        json.addProperty("status", this.getStatus().toString());
-        json.add("metadata", this.getMetadata());
-
-        return json;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected boolean updateFields(JsonObject json) {
         double prevStartLatitude;
         double prevStartLongitude;
@@ -614,7 +619,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         List<CommodityListener> listeners = this.getListeners();
 
         if (this.getStartLatitude() != prevStartLatitude || this.getStartLongitude() != prevStartLongitude) {
-            logger.info("Commodity " + this.getPath() + " start location updated: " + this.getStartLatitude() + "," + this.getStartLongitude());
+            logger.info("Commodity " + this.getPathName() + " start location updated: " + this.getStartLatitude() + "," + this.getStartLongitude());
             for (CommodityListener listener : listeners) {
                 listener.startLocationUpdated(this.getStartLatitude(), this.getStartLongitude());
             }
@@ -622,7 +627,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         }
 
         if (this.getEndLatitude() != prevEndLatitude || this.getEndLongitude() != prevEndLongitude) {
-            logger.info("Commodity " + this.getPath() + " end location updated: " + this.getEndLatitude() + "," + this.getEndLongitude());
+            logger.info("Commodity " + this.getPathName() + " end location updated: " + this.getEndLatitude() + "," + this.getEndLongitude());
             for (CommodityListener listener : listeners) {
                 listener.endLocationUpdated(this.getEndLatitude(), this.getEndLongitude());
             }
@@ -630,7 +635,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         }
 
         if (!this.getStatus().equals(prevStatus)) {
-            logger.info("Commodity " + this.getPath() + " status updated: " + this.getStatus());
+            logger.info("Commodity " + this.getPathName() + " status updated: " + this.getStatus());
             for (CommodityListener listener : listeners) {
                 listener.statusUpdated(this.getStatus());
             }
@@ -638,7 +643,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         }
 
         if (!this.getMetadata().equals(prevMetadata)) {
-            logger.info("Commodity " + this.getPath() + " metadata updated: " + this.getMetadata());
+            logger.info("Commodity " + this.getPathName() + " metadata updated: " + this.getMetadata());
             for (CommodityListener listener : listeners) {
                 listener.metadataUpdated(this.getMetadata());
             }
@@ -646,7 +651,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         }
 
         if (this.getTransportId() != null && !this.getTransportId().equals(prevTransportId)) {
-            logger.info("Commodity " + this.getPath() + " transport updated: " + this.getTransportId());
+            logger.info("Commodity " + this.getPathName() + " transport updated: " + this.getTransportId());
             Transport transport = this.getTransport();
             for (CommodityListener listener : listeners) {
                 listener.transportUpdated(transport);
@@ -666,7 +671,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
             Collection<Commodity> commodities = parentCluster.getCommodities();
 
-            logger.info("Commodity " + this.getPath() + " calling parent cluster's update");
+            logger.info("Commodity " + this.getPathName() + " calling parent cluster's update");
 
             List<ClusterListener> clusterListeners = parentCluster.getListeners();
             for (ClusterListener listener : clusterListeners) {
@@ -689,13 +694,32 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     protected void route(JsonObject json, PathfinderServices services) {
         JsonObject route = json.getAsJsonObject("value");
 
-        logger.info("Commodity setting route: " + this.getPath());
+        logger.info("Commodity setting route: " + this.getPathName());
         this.setRoute(new Route(route, services));
 
-        logger.info("Commodity updating route: " + this.getPath());
+        logger.info("Commodity updating route: " + this.getPathName());
         for (CommodityListener listener : this.getListeners()) {
             listener.routed(this.getRoute());
         }
+    }
+
+    public JsonObject toJson() {
+        JsonObject json = new JsonObject();
+
+        json.addProperty("path", this.getPathName());
+        json.addProperty("model", this.getModelType().toString());
+        json.addProperty("startLatitude", this.getStartLatitude());
+        json.addProperty("startLongitude", this.getStartLongitude());
+        json.addProperty("endLatitude", this.getEndLatitude());
+        json.addProperty("endLongitude", this.getEndLongitude());
+        json.addProperty("status", this.getStatus().toString());
+        json.add("metadata", this.getMetadata());
+
+        if(this.getRoute() != null) {
+            json.addProperty("route", this.getRoute().toString());
+        }
+
+        return json;
     }
 
     /**
@@ -703,12 +727,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      */
     @Override
     public String toString() {
-        JsonObject json = this.createValueJson();
-
-        if(this.getRoute() != null) {
-            json.addProperty("route", this.getRoute().toString());
-        }
-
-        return json.toString();
+        return this.toJson().toString();
     }
 }

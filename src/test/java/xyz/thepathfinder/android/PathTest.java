@@ -1,5 +1,6 @@
 package xyz.thepathfinder.android;
 
+import com.google.gson.JsonObject;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -13,11 +14,6 @@ public class PathTest {
     @Test(expected = IllegalArgumentException.class)
     public void testEmptyPath(){
         Path path = new Path("", ModelType.CLUSTER);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void testNullPath(){
-        Path path = new Path(null, ModelType.COMMODITY);
     }
 
     @Test(expected = IllegalArgumentException.class)

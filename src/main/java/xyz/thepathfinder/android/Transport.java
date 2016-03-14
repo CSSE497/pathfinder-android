@@ -70,7 +70,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @param services a pathfinder services object.
      * @throws IllegalArgumentException occurs when a transport has already been registered with the same path.
      */
-    protected Transport(String path, PathfinderServices services) {
+    private Transport(String path, PathfinderServices services) {
         super(path, ModelType.TRANSPORT, services);
 
         logger.info("Constructing transport by parameters: " + path);
@@ -79,7 +79,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         if (isRegistered) {
             logger.error("Illegal Argument Exception: Transport path already exists: " + path);
             throw new IllegalArgumentException("Transport path already exists: " + path);
-        } else {
+        } else if(path != null) {
             this.getServices().getRegistry().registerModel(this);
         }
 
@@ -102,7 +102,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * @param commodities being transported by this transport.
      * @param services a pathfinder services object.
      */
-    protected Transport(String path, double latitude, double longitude, TransportStatus status, JsonObject metadata, List<Commodity> commodities, PathfinderServices services) {
+    private Transport(String path, double latitude, double longitude, TransportStatus status, JsonObject metadata, List<Commodity> commodities, PathfinderServices services) {
         this(path, services);
 
         this.latitude = latitude;
@@ -205,6 +205,33 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     private static String getPath(JsonObject transportJson) {
         String path = transportJson.get("clusterId").getAsString();
         return path + "/" + transportJson.get("id").getAsString();
+    }
+
+    //TODO write doc
+    protected void create(String clusterId) {
+        this.create(this.createValueJson(clusterId));
+    }
+
+    /**
+     * Returns the value used in create request to the Pathfinder server
+     *
+     * @param clusterId path to the cluster to create under.
+     * @return the value JSON
+     */
+    protected JsonObject createValueJson(String clusterId) {
+        JsonObject json = new JsonObject();
+
+        json.addProperty("clusterId", clusterId);
+        json.addProperty("model", this.getModelType().toString());
+        json.addProperty("latitude", this.getLatitude());
+        json.addProperty("longitude", this.getLongitude());
+        json.addProperty("status", this.getStatus().toString());
+        json.add("metadata", this.getMetadata());
+
+        JsonArray commodities = new JsonArray();
+        json.add("commodities", commodities);
+
+        return json;
     }
 
     /**
@@ -411,26 +438,6 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      * {@inheritDoc}
      */
     @Override
-    protected JsonObject createValueJson() {
-        JsonObject json = new JsonObject();
-
-        json.addProperty("clusterId", this.getPathName());
-        json.addProperty("model", this.getModelType().toString());
-        json.addProperty("latitude", this.getLatitude());
-        json.addProperty("longitude", this.getLongitude());
-        json.addProperty("status", this.getStatus().toString());
-        json.add("metadata", this.getMetadata());
-
-        JsonArray commodities = new JsonArray();
-        json.add("commodities", commodities);
-
-        return json;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     protected boolean updateFields(JsonObject json) {
         double prevLatitude;
         double prevLongitude;
@@ -468,7 +475,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         List<TransportListener> listeners = this.getListeners();
 
         if (this.getLatitude() != prevLatitude || this.getLongitude() != prevLongitude) {
-            logger.info("Transport " + this.getPath() + " location updated: " + this.getLatitude() + "," + this.getLongitude());
+            logger.info("Transport " + this.getPathName() + " location updated: " + this.getLatitude() + "," + this.getLongitude());
             for (TransportListener listener : listeners) {
                 listener.locationUpdated(this.getLatitude(), this.getLongitude());
             }
@@ -476,7 +483,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         }
 
         if (!this.getStatus().equals(prevStatus)) {
-            logger.info("Transport " + this.getPath() + " status updated: " + this.getStatus());
+            logger.info("Transport " + this.getPathName() + " status updated: " + this.getStatus());
             for (TransportListener listener : listeners) {
                 listener.statusUpdated(this.getStatus());
             }
@@ -484,7 +491,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         }
 
         if (!this.getMetadata().equals(prevMetadata)) {
-            logger.info("Transport " + this.getPath() + " metadata updated: " + this.getMetadata());
+            logger.info("Transport " + this.getPathName() + " metadata updated: " + this.getMetadata());
             for (TransportListener listener : listeners) {
                 listener.metadataUpdated(this.getMetadata());
             }
@@ -501,7 +508,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         }
 
         if(updatedCommodities) {
-            logger.info("Transport " + this.getPath() + " commodities updated: " + this.getCommodities());
+            logger.info("Transport " + this.getPathName() + " commodities updated: " + this.getCommodities());
             List<Commodity> commodities2 = this.getCommodities();
             for (TransportListener listener : listeners) {
                 listener.commoditiesUpdated(commodities2);
@@ -521,7 +528,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
 
             Collection<Transport> transports = parentCluster.getTransports();
 
-            logger.info("Transport " + this.getPath() + " calling parent cluster's update");
+            logger.info("Transport " + this.getPathName() + " calling parent cluster's update");
 
             List<ClusterListener> clusterListeners = parentCluster.getListeners();
             for (ClusterListener listener : clusterListeners) {
@@ -544,13 +551,32 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     protected void route(JsonObject json, PathfinderServices services) {
         JsonObject route = json.getAsJsonObject("route");
 
-        logger.info("Transport setting route: " + this.getPath());
+        logger.info("Transport setting route: " + this.getPathName());
         this.route = new Route(route, services);
 
-        logger.info("Transport updating route: " + this.getPath());
+        logger.info("Transport updating route: " + this.getPathName());
         for (TransportListener listener : this.getListeners()) {
             listener.routed(this.getRoute());
         }
+    }
+
+    public JsonObject toJson() {
+        JsonObject json = new JsonObject();
+
+        json.addProperty("path", this.getPathName());
+        json.addProperty("model", this.getModelType().toString());
+        json.addProperty("latitude", this.getLatitude());
+        json.addProperty("longitude", this.getLongitude());
+        json.addProperty("status", this.getStatus().toString());
+        json.add("metadata", this.getMetadata());
+
+        JsonArray commodities = new JsonArray();
+        json.add("commodities", commodities);
+
+        if(route != null) {
+            json.addProperty("route", this.route.toString());
+        }
+        return json;
     }
 
     /**
@@ -558,12 +584,6 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
      */
     @Override
     public String toString() {
-        JsonObject json = this.createValueJson();
-
-        if(route != null) {
-            json.addProperty("route", this.route.toString());
-        }
-
-        return json.toString();
+        return this.toJson().toString();
     }
 }
