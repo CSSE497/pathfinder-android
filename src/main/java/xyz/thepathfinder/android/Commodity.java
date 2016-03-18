@@ -366,14 +366,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      * @return the status as an enum.
      */
     private static CommodityStatus getStatus(String status) {
-        CommodityStatus[] values = CommodityStatus.values();
-        for(CommodityStatus possibleStatus : CommodityStatus.values()) {
-            if (possibleStatus.equals(status)) {
-                return possibleStatus;
-            }
-        }
-
-        return null;
+        return CommodityStatus.getStatus(status);
     }
 
     /**

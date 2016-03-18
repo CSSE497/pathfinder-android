@@ -1,5 +1,8 @@
 package xyz.thepathfinder.android;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * An enum for the possible statuses of an {@link Action}.
  *
@@ -21,6 +24,15 @@ public enum ActionStatus {
      * A commodity drop off will occur at this location.
      */
     DROP_OFF("DropOff");
+
+    private static final Map<String, ActionStatus> statuses;
+
+    static {
+        statuses = new HashMap<String, ActionStatus>();
+        for(ActionStatus status: ActionStatus.values()) {
+            ActionStatus.statuses.put(status.toString(), status);
+        }
+    }
 
     /**
      * The string representation of the status.
@@ -52,5 +64,9 @@ public enum ActionStatus {
     @Override
     public String toString() {
         return this.status;
+    }
+
+    public static ActionStatus getStatus(String status) {
+        return ActionStatus.statuses.get(status);
     }
 }
