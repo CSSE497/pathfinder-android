@@ -47,29 +47,33 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
         return json;
     }
 
-    /**
-     * Subscribes to the models updates from the server.
-     */
-    public void subscribe() {
-        JsonObject json = this.getMessageHeader("Subscribe");
+    private void sendSubscribeMessage(String type) {
+        JsonObject json = this.getMessageHeader(type);
 
         if(this.getModelType().equals(ModelType.CLUSTER)) {
             json.remove("id");
             json.addProperty("model", "Vehicle");
             json.addProperty("clusterId", this.getPathName());
-            this.getServices().getConnection().sendMessage(json.toString());
+            this.sendMessage(json);
             json.addProperty("model", "Commodity");
+            this.sendMessage(json);
+        } else {
+            this.sendMessage(json);
         }
-
-        this.sendMessage(json);
     }
 
     /**
-     * Unsubcribes from updates from the server. Not currently supported.
+     * Subscribes to the models updates from the server.
+     */
+    public void subscribe() {
+        this.sendSubscribeMessage("Subscribe");
+    }
+
+    /**
+     * Unsubcribes from updates from the server.
      */
     public void unsubscribe() {
-        //TODO implement
-        //Not implemented on server
+        this.sendSubscribeMessage("Unsubscribe");
     }
 
     /**
@@ -84,7 +88,7 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
      * Unsubcribes from route updates from the server. Not currently supported.
      */
     public void routeUnsubscribe() {
-        //TODO implement
-        //Not implemented on server
+        JsonObject json = this.getMessageHeader("RouteUnsubscribe");
+        this.sendMessage(json);
     }
 }
