@@ -17,6 +17,9 @@ import java.util.Map;
  */
 class ModelRegistry {
 
+    /**
+     * Logs actions performed by the class.
+     */
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**
@@ -42,15 +45,15 @@ class ModelRegistry {
      * Adds a {@link Model} to the registry.
      *
      * @param model the model to be added to the registry.
-     * @throws IllegalStateException the path has already been used by another
-     *                               model.
+     * @throws IllegalStateException    the path has already been used by another
+     *                                  model.
      * @throws IllegalArgumentException if the model's path is unknown.
      */
     protected void registerModel(Model model) {
         if (this.models.containsKey(model.getPath())) {
             logger.error("Illegal State Exception: path already exists" + model.getPathName());
             throw new IllegalStateException("Path already exists: " + model.getPathName());
-        } else if(model.isPathUnknown()) {
+        } else if (model.isPathUnknown()) {
             logger.error("Illegal Argument Exception: Cannot register a model with an unknown path.");
             throw new IllegalArgumentException("Cannot register a model with an unknown path.");
         }
@@ -94,12 +97,17 @@ class ModelRegistry {
     /**
      * Adds a {@link Model} to the create backlog.
      *
-     * @param model model to be added.
+     * @param model to be added.
      */
     protected void addCreateBacklog(Model model) {
         this.createBacklog.add(model);
     }
 
+    /**
+     * Removes a {@link Model} from the create backlog.
+     *
+     * @param model to be removed.
+     */
     protected void removeCreateBacklog(Model model) {
         this.createBacklog.remove(model);
     }
@@ -118,10 +126,10 @@ class ModelRegistry {
         String clusterId = json.remove("clusterId").getAsString();
         json.addProperty("path", (String) null);
 
-        for(Model model : this.createBacklog) {
+        for (Model model : this.createBacklog) {
             JsonObject modelJson = model.toJson();
             modelJson.remove("model");
-            if(model.getModelType() == type && json.equals(modelJson)) {
+            if (model.getModelType() == type && json.equals(modelJson)) {
                 json.remove("path");
                 json.addProperty("id", id);
                 json.addProperty("clusterId", clusterId);

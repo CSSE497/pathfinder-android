@@ -20,7 +20,7 @@ class PathfinderServices {
     /**
      * Constructs a pathfinder services object.
      *
-     * @param registry model registry use to store access to all the models.
+     * @param registry   model registry use to store access to all the models.
      * @param connection to the pathfinder server
      */
     protected PathfinderServices(ModelRegistry registry, Connection connection) {

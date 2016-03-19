@@ -15,42 +15,48 @@ public abstract class CommodityListener extends Listener<Commodity> {
      *
      * @param route the commodity's new route.
      */
-    public void routed(Route route) {}
+    public void routed(Route route) {
+    }
 
     /**
      * Invoked when the commodity's start location was updated by a message.
      *
-     * @param latitude that the commodity updated to.
+     * @param latitude  that the commodity updated to.
      * @param longitude that the commodity updated to.
      */
-    public void startLocationUpdated(double latitude, double longitude) {}
+    public void startLocationUpdated(double latitude, double longitude) {
+    }
 
     /**
      * Invoked when the commodity's end location was updated by a message.
      *
-     * @param latitude that the commodity updated to.
+     * @param latitude  that the commodity updated to.
      * @param longitude that the commodity updated to.
      */
-    public void endLocationUpdated(double latitude, double longitude) {}
+    public void endLocationUpdated(double latitude, double longitude) {
+    }
 
     /**
      * Invoked when the commodity's status was updated by a message.
      *
      * @param status that the commodity updated to.
      */
-    public void statusUpdated(CommodityStatus status) {}
+    public void statusUpdated(CommodityStatus status) {
+    }
 
     /**
      * Invoked when the commodity's metadata was updated by a message.
      *
      * @param metadata that the commodity updated to.
      */
-    public void metadataUpdated(JsonObject metadata) {}
+    public void metadataUpdated(JsonObject metadata) {
+    }
 
     /**
      * Invoked when the commodity's transport is changed.
      *
      * @param transport carrying the commodity.
      */
-    public void transportUpdated(Transport transport) {}
+    public void transportUpdated(Transport transport) {
+    }
 }

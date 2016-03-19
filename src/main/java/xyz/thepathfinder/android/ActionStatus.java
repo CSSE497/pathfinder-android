@@ -7,6 +7,7 @@ import java.util.Map;
  * An enum for the possible statuses of an {@link Action}.
  *
  * @author David Robinson
+ * @see Action
  */
 public enum ActionStatus {
 
@@ -25,11 +26,15 @@ public enum ActionStatus {
      */
     DROP_OFF("DropOff");
 
+    /**
+     * Map of the possible statuses. It maps String of status to ActionStatus.
+     */
     private static final Map<String, ActionStatus> statuses;
 
+    // Creates the status map.
     static {
         statuses = new HashMap<String, ActionStatus>();
-        for(ActionStatus status: ActionStatus.values()) {
+        for (ActionStatus status : ActionStatus.values()) {
             ActionStatus.statuses.put(status.toString(), status);
         }
     }
@@ -49,6 +54,16 @@ public enum ActionStatus {
     }
 
     /**
+     * Changes a String to an ActionStatus. If the status cannot be converted <tt>null</tt> is returned.
+     *
+     * @param status represented as a String.
+     * @return ActionStatus if status could be converted, <tt>null</tt> otherwise.
+     */
+    public static ActionStatus getStatus(String status) {
+        return ActionStatus.statuses.get(status);
+    }
+
+    /**
      * Checks if this status is the same as the provided status.
      *
      * @param status a string of status
@@ -64,9 +79,5 @@ public enum ActionStatus {
     @Override
     public String toString() {
         return this.status;
-    }
-
-    public static ActionStatus getStatus(String status) {
-        return ActionStatus.statuses.get(status);
     }
 }

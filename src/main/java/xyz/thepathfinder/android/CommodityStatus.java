@@ -7,8 +7,10 @@ import java.util.Map;
  * An enum for the possible statuses of a {@link Commodity}.
  *
  * @author David Robinson
+ * @see Commodity
  */
 public enum CommodityStatus {
+
     /**
      * The commodity is currently not being routed.
      */
@@ -34,11 +36,15 @@ public enum CommodityStatus {
      */
     CANCELLED("Cancelled");
 
+    /**
+     * Map of the possible statuses. It maps String of status to CommodityStatus.
+     */
     private static final Map<String, CommodityStatus> statuses;
 
+    // Creates the status map.
     static {
         statuses = new HashMap<String, CommodityStatus>();
-        for(CommodityStatus status: CommodityStatus.values()) {
+        for (CommodityStatus status : CommodityStatus.values()) {
             CommodityStatus.statuses.put(status.toString(), status);
         }
     }
@@ -58,6 +64,16 @@ public enum CommodityStatus {
     }
 
     /**
+     * Changes a String to an CommodityStatus. If the status cannot be converted <tt>null</tt> is returned.
+     *
+     * @param status represented as a String.
+     * @return CommodityStatus if status could be converted, <tt>null</tt> otherwise.
+     */
+    public static CommodityStatus getStatus(String status) {
+        return CommodityStatus.statuses.get(status);
+    }
+
+    /**
      * Checks if this status is the same as the provided status.
      *
      * @param status a string of status
@@ -70,11 +86,8 @@ public enum CommodityStatus {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String toString() {
         return this.status;
-    }
-
-    public static CommodityStatus getStatus(String status) {
-        return CommodityStatus.statuses.get(status);
     }
 }

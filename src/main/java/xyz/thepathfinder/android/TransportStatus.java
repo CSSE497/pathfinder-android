@@ -7,6 +7,7 @@ import java.util.Map;
  * An enum for the possible statuses of a {@link Transport}.
  *
  * @author David Robinson
+ * @see Transport
  */
 public enum TransportStatus {
 
@@ -20,11 +21,15 @@ public enum TransportStatus {
      */
     ONLINE("Online");
 
+    /**
+     * Map of the possible statuses. It maps String of status to TransportStatus.
+     */
     private static final Map<String, TransportStatus> statuses;
 
+    // Creates the status map.
     static {
         statuses = new HashMap<String, TransportStatus>();
-        for(TransportStatus status: TransportStatus.values()) {
+        for (TransportStatus status : TransportStatus.values()) {
             TransportStatus.statuses.put(status.toString(), status);
         }
     }
@@ -44,6 +49,16 @@ public enum TransportStatus {
     }
 
     /**
+     * Changes a String to an TransportStatus. If the status cannot be converted <tt>null</tt> is returned.
+     *
+     * @param status represented as a String.
+     * @return TransportStatus if status could be converted, <tt>null</tt> otherwise.
+     */
+    public static TransportStatus getStatus(String status) {
+        return TransportStatus.statuses.get(status);
+    }
+
+    /**
      * Checks if this status is the same as the provided status.
      *
      * @param status a string of status
@@ -59,9 +74,5 @@ public enum TransportStatus {
     @Override
     public String toString() {
         return this.status;
-    }
-
-    public static TransportStatus getStatus(String status) {
-        return TransportStatus.statuses.get(status);
     }
 }

@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory;
  */
 class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
 
+    /**
+     * Logs actions performed by the class.
+     */
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**
@@ -34,6 +37,11 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
         this.receivedMessageCount = 0;
     }
 
+    /**
+     * Sets the pathfinder services object.
+     *
+     * @param services to be set to.
+     */
     protected void setServices(PathfinderServices services) {
         this.services = services;
     }
@@ -62,29 +70,29 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
                 Path path = new Path(this.getPath(json), modelType);
 
                 Model model = this.services.getRegistry().getModel(path);
-                if(model == null && type.equals("Created") && ModelType.CLUSTER != modelType) {
+                if (model == null && type.equals("Created") && ModelType.CLUSTER != modelType) {
                     model = this.services.getRegistry().findInCreateBacklog(value, modelType);
-                    if(model != null) {
+                    if (model != null) {
                         this.services.getRegistry().removeCreateBacklog(model);
                         model.setPathName(path.getPathName());
                     }
                 }
 
-                if(model != null) {
+                if (model != null) {
                     logger.info("Notifying " + model.getPathName() + " Type: " + model.getModelType() + " of message");
 
                     model.notifyUpdate(type, json);
                 } else {
                     Path parentPath = path.getParentPath();
 
-                    if(parentPath != null && this.services.getRegistry().isModelRegistered(parentPath)) {
-                        if(modelType == ModelType.CLUSTER) {
+                    if (parentPath != null && this.services.getRegistry().isModelRegistered(parentPath)) {
+                        if (modelType == ModelType.CLUSTER) {
                             Cluster.getInstance(value, this.services);
                             return;
-                        } else if(modelType == ModelType.COMMODITY) {
+                        } else if (modelType == ModelType.COMMODITY) {
                             Commodity.getInstance(value, this.services);
                             return;
-                        } else if(modelType == ModelType.TRANSPORT) {
+                        } else if (modelType == ModelType.TRANSPORT) {
                             Transport.getInstance(value, this.services);
                             return;
                         }
@@ -99,6 +107,12 @@ class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
         }
     }
 
+    /**
+     * Returns the path of a received message.
+     *
+     * @param json message received.
+     * @return the string path name.
+     */
     private String getPath(JsonObject json) {
         JsonObject value = json.getAsJsonObject("value");
         String path = "";

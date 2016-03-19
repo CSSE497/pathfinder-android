@@ -8,10 +8,11 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * <p>
  * Interface to the Pathfinder server's commodity API. A commodity may be create
  * by a {@link Cluster} object with the {@link Cluster#createCommodity(double, double, double, double, CommodityStatus, JsonObject)}
  * method.
- *
+ * </p>
  * <p>
  * Be careful with the update methods, they do not update the object immediately.
  * They send the updates to the pathfinder server. If the server responds the commodity's
@@ -26,6 +27,9 @@ import java.util.List;
  */
 public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
+    /**
+     * Logs actions performed by the class.
+     */
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**
@@ -92,7 +96,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         if (isRegistered) {
             logger.error("Illegal Argument Exception: Commodity path already exists " + path);
             throw new IllegalArgumentException("Commodity path already exists: " + path);
-        } else if(path != null){
+        } else if (path != null) {
             this.getServices().getRegistry().registerModel(this);
         }
 
@@ -234,10 +238,21 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     }
 
     /**
+     * Returns the enum version of a status from a string.
+     *
+     * @param status the status as a string.
+     * @return the status as an enum.
+     */
+    private static CommodityStatus getStatus(String status) {
+        return CommodityStatus.getStatus(status);
+    }
+
+    /**
      * Returns the value used in create request to the Pathfinder server
      *
      * @return the value JSON
      */
+    @Override
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
@@ -253,6 +268,18 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return json;
     }
 
+    /**
+     * Initializes a commodity object with the specified parameters. This method should only be
+     * called right before {@link Commodity#create()} is called.
+     *
+     * @param startLatitude  the pickup latitude of the commodity.
+     * @param startLongitude the pickup longitude of the commodity.
+     * @param endLatitude    the drop off latitude of the commodity.
+     * @param endLongitude   the drop off longitude of the commodity.
+     * @param status         the current status of the commodity.
+     * @param metadata       a JSON object that holds metadata for the commodity.
+     * @param cluster        a string path of the cluster to create this commodity under.
+     */
     protected void initCommodity(double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata, String cluster) {
         this.startLatitude = startLatitude;
         this.startLongitude = startLongitude;
@@ -370,13 +397,13 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     }
 
     /**
-     * Returns the enum version of a status from a string.
+     * Sets the status field to a new status
      *
-     * @param status the status as a string.
-     * @return the status as an enum.
+     * @param status the status to change to.
+     * @throws IllegalArgumentException when an illegal status is provided
      */
-    private static CommodityStatus getStatus(String status) {
-        return CommodityStatus.getStatus(status);
+    private void setStatus(String status) {
+        this.setStatus(Commodity.getStatus(status));
     }
 
     /**
@@ -392,16 +419,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
             logger.error("Illegal Argument Exception illegal commodity status: " + status);
             throw new IllegalArgumentException("Illegal commodity status: " + status);
         }
-    }
-
-    /**
-     * Sets the status field to a new status
-     *
-     * @param status the status to change to.
-     * @throws IllegalArgumentException when an illegal status is provided
-     */
-    private void setStatus(String status) {
-        this.setStatus(Commodity.getStatus(status));
     }
 
     /**
@@ -474,7 +491,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      */
     public Transport getTransport() {
         Long transportId = this.getTransportId();
-        if(transportId == null) {
+        if (transportId == null) {
             return null;
         }
 
@@ -488,6 +505,15 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      */
     private Long getTransportId() {
         return this.transportId;
+    }
+
+    /**
+     * Sets the transport id field to a new transport.
+     *
+     * @param transportId of the transport carrying the commodity, null if not being carried.
+     */
+    private void setTransportId(Long transportId) {
+        this.transportId = transportId;
     }
 
     /**
@@ -509,15 +535,6 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
      */
     public void updateDroppedOff() {
         this.update(null, null, null, null, CommodityStatus.DROPPED_OFF, null, null);
-    }
-
-    /**
-     * Sets the transport id field to a new transport.
-     *
-     * @param transportId of the transport carrying the commodity, null if not being carried.
-     */
-    private void setTransportId(Long transportId) {
-        this.transportId = transportId;
     }
 
     /**
@@ -668,7 +685,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
 
             boolean added = !parentCluster.getCommoditiesMap().containsKey(this.getPathName());
 
-            if(added) {
+            if (added) {
                 parentCluster.addCommodity(this);
             }
 
@@ -679,7 +696,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
             List<ClusterListener> clusterListeners = parentCluster.getListeners();
             for (ClusterListener listener : clusterListeners) {
                 if (added) {
-                   listener.commodityAdded(this);
+                    listener.commodityAdded(this);
                 }
 
                 listener.commodityUpdated(this);
@@ -706,6 +723,10 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
 
@@ -718,7 +739,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         json.addProperty("status", this.getStatus().toString());
         json.add("metadata", this.getMetadata());
 
-        if(this.getRoute() != null) {
+        if (this.getRoute() != null) {
             json.addProperty("route", this.getRoute().toString());
         }
 
