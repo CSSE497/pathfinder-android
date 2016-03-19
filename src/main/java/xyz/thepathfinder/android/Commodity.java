@@ -8,10 +8,11 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * <p>
  * Interface to the Pathfinder server's commodity API. A commodity may be create
  * by a {@link Cluster} object with the {@link Cluster#createCommodity(double, double, double, double, CommodityStatus, JsonObject)}
  * method.
- * <p/>
+ * </p>
  * <p>
  * Be careful with the update methods, they do not update the object immediately.
  * They send the updates to the pathfinder server. If the server responds the commodity's

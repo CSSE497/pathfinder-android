@@ -37,7 +37,7 @@ public enum CommodityStatus {
     CANCELLED("Cancelled");
 
     /**
-     * Map of the possible statuses. It maps String of status -> CommodityStatus.
+     * Map of the possible statuses. It maps String of status to CommodityStatus.
      */
     private static final Map<String, CommodityStatus> statuses;
 

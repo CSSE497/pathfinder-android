@@ -27,7 +27,7 @@ public enum ActionStatus {
     DROP_OFF("DropOff");
 
     /**
-     * Map of the possible statuses. It maps String of status -> ActionStatus.
+     * Map of the possible statuses. It maps String of status to ActionStatus.
      */
     private static final Map<String, ActionStatus> statuses;
 

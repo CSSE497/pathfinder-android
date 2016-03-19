@@ -20,7 +20,6 @@ import java.util.Map;
  * type of transportation, or anything else. To sync the cluster with a
  * cluster on the Pathfinder server use the {@link Cluster#connect} method.
  * </p>
- * <p/>
  * <p>
  * Note, that clusters, as are all models, are implemented as singletons.
  * If a cluster already exists with the same path it will be returned, not a
@@ -287,6 +286,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * Creates a subcluster under this cluster on the pathfinder server.
      *
      * @param name Name of the subcluster, it must form a unique identifier when concatenated with this cluster's path.
+     * @return subcluster.
      */
     public Cluster createSubcluster(String name) {
         if (!this.isConnected()) {
@@ -360,6 +360,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param longitude The current longitude of the transport.
      * @param status    The current status of the transport. If <tt>null</tt> it defaults to <tt>TransportStatus.OFFLINE</tt>
      * @param metadata  The transports's metadata field. If <tt>null</tt> it defaults to an empty JSON object.
+     * @return transport with the specified arguments.
      */
     public Transport createTransport(double latitude, double longitude, TransportStatus status, JsonObject metadata) {
         if (!this.isConnected()) {

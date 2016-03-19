@@ -22,7 +22,7 @@ public enum TransportStatus {
     ONLINE("Online");
 
     /**
-     * Map of the possible statuses. It maps String of status -> TransportStatus.
+     * Map of the possible statuses. It maps String of status to TransportStatus.
      */
     private static final Map<String, TransportStatus> statuses;
 

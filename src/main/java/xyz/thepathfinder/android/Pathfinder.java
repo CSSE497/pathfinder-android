@@ -22,13 +22,11 @@ import java.util.Map;
  * requires a JWT in the form of a String to authenticate the user. The URI to your pathfinder provider is also
  * required to initiate the connection.
  * </p>
- * <p/>
  * <p>
  * The default cluster is available via the {@link #getDefaultCluster} method. Any other cluster available to
  * the user may be obtained through the {@link #getCluster(String)} method, where the path is of the form
  * <tt>"/default/clusterName/subclusterName/subsubclusterName"</tt>.
  * </p>
- * <p/>
  * <p>
  * Note, when connecting the<code>Pathfinder</code> object the thread is blocked until the web socket to the
  * Pathfinder service is opened.
@@ -100,7 +98,7 @@ public class Pathfinder {
      * @return a Pathfinder object.
      * @throws RuntimeException if the connection to the Pathfinder server could not be opened.
      */
-    public static Pathfinder create(String applicationIdentifier) throws IOException {
+    public static Pathfinder create(String applicationIdentifier) {
         Pathfinder pf = new Pathfinder(applicationIdentifier, "");
         pf.connect(applicationIdentifier);
         return pf;
@@ -125,6 +123,7 @@ public class Pathfinder {
      * Establishes a connection to the Pathfinder server, if the connection is not already open.
      * This method doesn't blocks until the connection is established.
      *
+     * @param applicationIdentifier of your application.
      * @throws RuntimeException if could not connect to the Pathfinder server.
      */
     private void connect(final String applicationIdentifier) {

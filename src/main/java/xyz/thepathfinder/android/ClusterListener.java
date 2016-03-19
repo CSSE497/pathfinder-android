@@ -70,7 +70,6 @@ public abstract class ClusterListener extends Listener<Cluster> {
 
     /**
      * Invoked when a subcluster was updated from this cluster by a message.
-     * <p/>
      * Note, this update doesn't recurse up the cluster tree. If the cluster
      * <tt>"/default/c1/c2/c3"</tt> receives an update message, both cluster
      * <tt>"/defautl/c1/c2/c3"</tt> and <tt>"/default/c1/c2"</tt> will receive
