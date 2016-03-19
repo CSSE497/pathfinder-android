@@ -4,7 +4,6 @@ package xyz.thepathfinder.android;
  * An enum for the possible types of {@link Model}s.
  *
  * @author David Robinson
- *
  * @see Cluster
  * @see Commodity
  * @see Transport
@@ -41,6 +40,23 @@ public enum ModelType {
     }
 
     /**
+     * Returns the enum version of a model type from a string.
+     *
+     * @param type the model as a string.
+     * @return the model type as an enum.
+     */
+    protected static ModelType getModelType(String type) {
+        ModelType[] values = ModelType.values();
+        for (int k = 0; k < values.length; k++) {
+            if (values[k].equals(type)) {
+                return values[k];
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Checks if this type is the same as the provided type.
      *
      * @param type a string of type.
@@ -56,22 +72,5 @@ public enum ModelType {
     @Override
     public String toString() {
         return this.type;
-    }
-
-    /**
-     * Returns the enum version of a model type from a string.
-     *
-     * @param type the model as a string.
-     * @return the model type as an enum.
-     */
-    protected static ModelType getModelType(String type) {
-        ModelType[] values = ModelType.values();
-        for (int k = 0; k < values.length; k++) {
-            if (values[k].equals(type)) {
-                return values[k];
-            }
-        }
-
-        return null;
     }
 }

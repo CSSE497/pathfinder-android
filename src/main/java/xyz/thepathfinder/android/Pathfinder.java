@@ -22,21 +22,20 @@ import java.util.Map;
  * requires a JWT in the form of a String to authenticate the user. The URI to your pathfinder provider is also
  * required to initiate the connection.
  * </p>
- *
+ * <p/>
  * <p>
  * The default cluster is available via the {@link #getDefaultCluster} method. Any other cluster available to
  * the user may be obtained through the {@link #getCluster(String)} method, where the path is of the form
  * <tt>"/default/clusterName/subclusterName/subsubclusterName"</tt>.
  * </p>
- *
+ * <p/>
  * <p>
  * Note, when connecting the<code>Pathfinder</code> object the thread is blocked until the web socket to the
  * Pathfinder service is opened.
  * </p>
- *
- * <pre><code>   Pathfinder pathfinder = new Pathfinder("myAppId", "UserJWT");
- *   pathfinder.connect();
- *   Cluster cluster = pathfinder.getCluster("/default/cluster1/subcluster2");
+ * <p/>
+ * <pre><code>   Pathfinder pathfinder = Pathfinder.create("myAppId");
+ *   Cluster cluster = pathfinder.getCluster("/root/cluster1/subcluster2");
  *   MyClusterListener clusterListener = new MyClusterListener();
  *   cluster.addListener(clusterListener);
  *   cluster.connect();
@@ -66,12 +65,6 @@ public class Pathfinder {
      */
     private URI webSocketUrl;
 
-    public static Pathfinder create(String applicationIdentifier) throws IOException {
-        Pathfinder pf = new Pathfinder(applicationIdentifier, "");
-        pf.connect(applicationIdentifier);
-        return pf;
-    }
-
     /**
      * Constructs a Pathfinder object.
      *
@@ -81,11 +74,11 @@ public class Pathfinder {
     private Pathfinder(String applicationIdentifier, String userCredentials) {
         try {
             this.webSocketUrl = new URI("ws://api.thepathfinder.xyz/socket");
-        } catch(URISyntaxException e) {
+        } catch (URISyntaxException e) {
             logger.error(e.getMessage());
         }
 
-        this.constructPathfinder(applicationIdentifier, userCredentials);
+        this.constructPathfinderServices(applicationIdentifier, userCredentials);
     }
 
     /**
@@ -97,10 +90,29 @@ public class Pathfinder {
      */
     protected Pathfinder(String applicationIdentifier, String userCredentials, URI webSocketUrl) {
         this.webSocketUrl = webSocketUrl;
-        this.constructPathfinder(applicationIdentifier, userCredentials);
+        this.constructPathfinderServices(applicationIdentifier, userCredentials);
     }
 
-    private void constructPathfinder(String applicationIdentifier, String userCredentials) {
+    /**
+     * Creates an asynchronous connection to the Pathfinder server.
+     *
+     * @param applicationIdentifier the application identifier of your application.
+     * @return a Pathfinder object.
+     * @throws RuntimeException if the connection to the Pathfinder server could not be opened.
+     */
+    public static Pathfinder create(String applicationIdentifier) throws IOException {
+        Pathfinder pf = new Pathfinder(applicationIdentifier, "");
+        pf.connect(applicationIdentifier);
+        return pf;
+    }
+
+    /**
+     * Sets the {@link PathfinderServices} object.
+     *
+     * @param applicationIdentifier of your application
+     * @param userCredentials       the user's identity JWT.
+     */
+    private void constructPathfinderServices(String applicationIdentifier, String userCredentials) {
         ModelRegistry registry = new ModelRegistry();
         Connection connection = new Connection(userCredentials);
 
@@ -112,8 +124,10 @@ public class Pathfinder {
     /**
      * Establishes a connection to the Pathfinder server, if the connection is not already open.
      * This method doesn't blocks until the connection is established.
+     *
+     * @throws RuntimeException if could not connect to the Pathfinder server.
      */
-    private void connect(final String applicationIdentifier) throws IOException {
+    private void connect(final String applicationIdentifier) {
         if (!this.isConnected()) {
 
             ClientManager clientManager = new ClientManager();
@@ -132,7 +146,7 @@ public class Pathfinder {
             } catch (DeploymentException e) {
                 // Invalid annotated connection object and connection problems
                 logger.error("Deployment Exception: " + e.getMessage());
-                throw new IOException(e);
+                throw new RuntimeException(e);
             }
         }
     }

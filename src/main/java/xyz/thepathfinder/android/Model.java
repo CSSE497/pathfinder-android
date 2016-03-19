@@ -54,7 +54,7 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         this.services = services;
         this.isConnected = false;
 
-        if(path == null) {
+        if (path == null) {
             this.messageBacklog = new LinkedList<JsonObject>();
         }
     }
@@ -91,17 +91,16 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
      * Set the path of the model. This method may not be called after the path becomes known.
      *
      * @param path of the model.
-     *
      * @throws IllegalStateException if the path is already known.
      */
     protected void setPathName(String path) {
-        if(this.isPathUnknown()) {
+        if (this.isPathUnknown()) {
             logger.info("Setting path to: " + path);
             this.path.setPathName(path);
             this.getServices().getRegistry().registerModel(this);
 
             logger.info("Flushing " + this.getPathName() + "'s message backlog");
-            for(JsonObject json : this.messageBacklog) {
+            for (JsonObject json : this.messageBacklog) {
                 json.addProperty("id", Integer.parseInt(this.getName()));
                 this.getServices().getConnection().sendMessage(json.toString());
             }
@@ -173,21 +172,21 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
     }
 
     /**
-     * Sets if the model has connected with the Pathfinder server.
-     *
-     * @param connected has connected with the Pathfinder server.
-     */
-    protected void setConnected(boolean connected) {
-        this.isConnected = connected;
-    }
-
-    /**
      * Returns if the model has connected to the Pathfinder server.
      *
      * @return <tt>true</tt> if the model has connected to the Pathfinder server, <tt>false</tt> otherwise.
      */
     public boolean isConnected() {
         return this.isConnected;
+    }
+
+    /**
+     * Sets if the model has connected with the Pathfinder server.
+     *
+     * @param connected has connected with the Pathfinder server.
+     */
+    protected void setConnected(boolean connected) {
+        this.isConnected = connected;
     }
 
     /**
@@ -206,13 +205,13 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
 
         if (json.has("value") && !json.has("route")) {
             value = json.getAsJsonObject("value");
-        } else if(reason == null){
+        } else if (reason == null) {
             value = json;
         }
 
         logger.info("Value is: " + value);
 
-        if(value != null) {
+        if (value != null) {
             updated = this.updateFields(value);
         }
 
@@ -229,7 +228,7 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
         }
 
         logger.info("Reason: " + reason);
-        if(reason == null) {
+        if (reason == null) {
             return updated;
         }
 
@@ -322,21 +321,30 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
     @Override
     @SuppressWarnings("unchecked")
     protected boolean notifyUpdate(String reason, JsonObject json) {
-        if(!this.isPathUnknown()) {
+        if (!this.isPathUnknown()) {
             this.setConnected(true);
         }
         return this.updateType(reason, json);
     }
 
+    /**
+     * Sends a json message through the web socket connection if connected. Otherwise, it stores the message.
+     *
+     * @param json message to be sent.
+     */
     protected void sendMessage(JsonObject json) {
-        if(!this.isPathUnknown()) {
+        if (!this.isPathUnknown()) {
             this.getServices().getConnection().sendMessage(json.toString());
         } else {
             this.messageBacklog.offer(json);
         }
     }
 
-    //TODO documentation
+    /**
+     * Converts the {@link Model} to JSON.
+     *
+     * @return the {@link Model} as JSON.
+     */
     public abstract JsonObject toJson();
 
     /**

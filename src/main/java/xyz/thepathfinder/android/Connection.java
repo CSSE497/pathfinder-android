@@ -58,7 +58,7 @@ class Connection extends Endpoint {
      * Constructs a connection object that controls access to the web socket connection
      * with the Pathfinder Server.
      *
-     * @param userCredentials      the user's credentials for this application
+     * @param userCredentials the user's credentials for this application
      */
     protected Connection(String userCredentials) {
         this.userCredentials = userCredentials;
@@ -76,6 +76,11 @@ class Connection extends Endpoint {
         this.messageHandler = new MessageHandler(this.services);
     }
 
+    /**
+     * Sends a message through the web socket connection to the Pathfinder server.
+     *
+     * @param message to be send.
+     */
     private void send(String message) {
         logger.info("Sending json to Pathfinder: " + message);
         this.session.getAsyncRemote().sendText(message);
@@ -83,9 +88,10 @@ class Connection extends Endpoint {
     }
 
     /**
-     * Sends a text message through the web socket to the Pathfinder server.
+     * Sends a text message through the web socket to the Pathfinder server if connected.
+     * It will save the message in a queue if not connected.
      *
-     * @param message the message to be sent.
+     * @param message to be sent.
      */
     public void sendMessage(String message) {
         if (this.isConnected()) {
@@ -106,7 +112,7 @@ class Connection extends Endpoint {
         this.session.addMessageHandler(this.messageHandler);
 
         logger.info("Sending stored messages");
-        for(String message : this.messageQueue) {
+        for (String message : this.messageQueue) {
             this.send(message);
         }
         logger.info("End sending stored messages");

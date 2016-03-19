@@ -20,8 +20,8 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
     /**
      * Constructs a subscribable CRUD model.
      *
-     * @param path of the model.
-     * @param type of the model.
+     * @param path     of the model.
+     * @param type     of the model.
      * @param services a pathfinder services object.
      */
     public SubscribableCrudModel(String path, ModelType type, PathfinderServices services) {
@@ -51,7 +51,7 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
 
         json.add("value", value);
 
-        if(this.isPathUnknown()) {
+        if (this.isPathUnknown()) {
             this.getServices().getRegistry().addCreateBacklog(this);
         }
 
@@ -79,5 +79,10 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
         this.sendMessage(json);
     }
 
+    /**
+     * Returns the JSON needed to create the object on the Pathfinder server.
+     *
+     * @return JSON needed to create the object on the Pathfinder server.
+     */
     protected abstract JsonObject createValueJson();
 }

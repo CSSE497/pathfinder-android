@@ -61,42 +61,6 @@ public class Action {
     }
 
     /**
-     * Returns the status of the action.
-     *
-     * @return the status
-     */
-    public ActionStatus getStatus() {
-        return this.status;
-    }
-
-    /**
-     * The latitude that the action occurs at.
-     *
-     * @return the latitude
-     */
-    public double getLatitude() {
-        return this.latitude;
-    }
-
-    /**
-     * The longitude that the action occurs at.
-     *
-     * @return the longitude
-     */
-    public double getLongitude() {
-        return this.longitude;
-    }
-
-    /**
-     * Returns the commodity associated with this action.
-     *
-     * @return the commodity associate with the action.
-     */
-    public Commodity getCommodity() {
-        return this.commodity;
-    }
-
-    /**
      * Returns the status of an action in the form a JSON object.
      *
      * @param json a JSON object that represents an action.
@@ -146,6 +110,42 @@ public class Action {
     private static Commodity getCommodity(JsonObject json, PathfinderServices services) {
         JsonObject model = json.getAsJsonObject("commodity");
         return Commodity.getInstance(model, services);
+    }
+
+    /**
+     * Returns the status of the action.
+     *
+     * @return the status
+     */
+    public ActionStatus getStatus() {
+        return this.status;
+    }
+
+    /**
+     * The latitude that the action occurs at.
+     *
+     * @return the latitude
+     */
+    public double getLatitude() {
+        return this.latitude;
+    }
+
+    /**
+     * The longitude that the action occurs at.
+     *
+     * @return the longitude
+     */
+    public double getLongitude() {
+        return this.longitude;
+    }
+
+    /**
+     * Returns the commodity associated with this action.
+     *
+     * @return the commodity associate with the action.
+     */
+    public Commodity getCommodity() {
+        return this.commodity;
     }
 
     /**

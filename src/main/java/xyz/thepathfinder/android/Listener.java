@@ -12,61 +12,70 @@ public class Listener<T extends Model> {
      *
      * @param model connected to, with updated fields.
      */
-    public void connected(T model) {}
+    public void connected(T model) {
+    }
 
     /**
      * Invoked when the model receives a created message.
      *
      * @param model created, with updated fields.
      */
-    public void created(T model) {}
+    public void created(T model) {
+    }
 
     /**
      * Invoked when the model receives a deleted message.
      *
      * @param model deleted to, with updated fields.
      */
-    public void deleted(T model) {}
+    public void deleted(T model) {
+    }
 
     /**
      * Invoked when the model receives a error message.
      *
      * @param error message as a String.
      */
-    public void error(String error) {}
+    public void error(String error) {
+    }
 
     /**
      * Invoked when the model receives an updated message.
      *
      * @param model updated, with updated fields.
      */
-    public void updated(T model) {}
+    public void updated(T model) {
+    }
 
     /**
      * Invoked when the model receives a route subscribed message.
      *
      * @param model route subscribed.
      */
-    public void routeSubscribed(T model) {}
+    public void routeSubscribed(T model) {
+    }
 
     /**
      * Invoked when the model receives a route unsubscribed message.
      *
      * @param model route unsubscribed.
      */
-    public void routeUnsubscribed(T model) {}
+    public void routeUnsubscribed(T model) {
+    }
 
     /**
      * Invoked when the model receives a subscribed message.
      *
      * @param model subscribed to.
      */
-    public void subscribed(T model) {}
+    public void subscribed(T model) {
+    }
 
     /**
      * Invoked when the model receives an unsubscribed message.
      *
      * @param model unsubscribed from.
      */
-    public void unsubscribed(T model) {}
+    public void unsubscribed(T model) {
+    }
 }

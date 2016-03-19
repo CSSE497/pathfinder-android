@@ -20,7 +20,7 @@ import java.util.Map;
  * type of transportation, or anything else. To sync the cluster with a
  * cluster on the Pathfinder server use the {@link Cluster#connect} method.
  * </p>
- *
+ * <p/>
  * <p>
  * Note, that clusters, as are all models, are implemented as singletons.
  * If a cluster already exists with the same path it will be returned, not a
@@ -79,7 +79,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         if (isRegistered) {
             logger.error("Illegal Argument Exception: Constructing cluster with path that already exists: " + path);
             throw new IllegalArgumentException("Cluster path already exists: " + path);
-        } else if(path == null) {
+        } else if (path == null) {
             logger.error("Illegal Argument Exception: Cluster's path may not be null");
             throw new IllegalArgumentException("Cluster's path may not be null");
         } else {
@@ -129,7 +129,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param services    The pathfinder services object.
      * @return A cluster with the specified path.
      * @throws IllegalArgumentException occurs if the json object doesn't parse to
-     *                            a cluster object.
+     *                                  a cluster object.
      */
     protected static Cluster getInstance(JsonObject clusterJson, PathfinderServices services) {
         boolean canParseToCluster = Cluster.checkClusterFields(clusterJson);
@@ -176,12 +176,12 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
 
-
     /**
      * Returns the value used in create request to the Pathfinder server
      *
      * @return the value JSON
      */
+    @Override
     protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
@@ -203,7 +203,6 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      * @param endLongitude   The drop off longitude of the commodity.
      * @param status         The current status of the commodity. If <tt>null</tt> it will default to <tt>CommodityStatus.OFFLINE</tt>.
      * @param metadata       A JsonObject representing the metadata field of the commodity. If <tt>null</tt> it will default to an empty JsonObject.
-     *
      * @return Commodity with unknown path.
      */
     public Commodity createCommodity(double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata) {
@@ -256,6 +255,15 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     /**
+     * Sets this cluster's commodities.
+     *
+     * @param commodities a map of commodities
+     */
+    private void setCommodities(Map<String, Commodity> commodities) {
+        this.commodities = commodities;
+    }
+
+    /**
      * Returns an immutable map of this cluster's commodities. The key is the path of commodity.
      *
      * @return A map of commodities.
@@ -273,15 +281,6 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         for (Commodity commodity : commodities) {
             this.commodities.put(commodity.getPathName(), commodity);
         }
-    }
-
-    /**
-     * Sets this cluster's commodities.
-     *
-     * @param commodities a map of commodities
-     */
-    private void setCommodities(Map<String, Commodity> commodities) {
-        this.commodities = commodities;
     }
 
     /**
@@ -317,6 +316,15 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     /**
+     * Sets this cluster's sub-clusters.
+     *
+     * @param subclusters a map of clusters
+     */
+    private void setSubclusters(Map<String, Cluster> subclusters) {
+        this.subclusters = subclusters;
+    }
+
+    /**
      * Returns an immutable map of this cluster's direct subclusters.
      *
      * @return An immutable map of clusters.
@@ -334,15 +342,6 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         for (Cluster cluster : subclusters) {
             this.subclusters.put(cluster.getPathName(), cluster);
         }
-    }
-
-    /**
-     * Sets this cluster's sub-clusters.
-     *
-     * @param subclusters a map of clusters
-     */
-    private void setSubclusters(Map<String, Cluster> subclusters) {
-        this.subclusters = subclusters;
     }
 
     /**
@@ -393,6 +392,15 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     /**
+     * Sets this cluster's transports.
+     *
+     * @param transports a map of transports
+     */
+    private void setTransports(Map<String, Transport> transports) {
+        this.transports = transports;
+    }
+
+    /**
      * Returns an immutable map of this cluster's transports.
      *
      * @return A map of transports.
@@ -413,12 +421,12 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     /**
-     * Sets this cluster's transports.
+     * Returns an immutable collection of this cluster's routes.
      *
-     * @param transports a map of transports
+     * @return A collection of routes.
      */
-    private void setTransports(Map<String, Transport> transports) {
-        this.transports = transports;
+    public Collection<Route> getRoutes() {
+        return Collections.<Route>unmodifiableCollection(this.routes);
     }
 
     /**
@@ -431,14 +439,11 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     }
 
     /**
-     * Returns an immutable collection of this cluster's routes.
+     * Returns the path name of a JSON {@link Model}.
      *
-     * @return A collection of routes.
+     * @param json of a {@link Model}.
+     * @return String of the path.
      */
-    public Collection<Route> getRoutes() {
-        return Collections.<Route>unmodifiableCollection(this.routes);
-    }
-
     private String getSubmodelPath(JsonObject json) {
         String path = json.get("clusterId").getAsString();
         return path + "/" + json.get("id").getAsString();
@@ -447,6 +452,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected boolean updateFields(JsonObject json) {
         Map<String, Commodity> prevCommodities;
         Map<String, Cluster> prevSubclusters;
@@ -615,21 +621,21 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
 
         if (!updatedCommodities.isEmpty()) {
-            logger.info("Cluster " + this.getPathName() +  " commodities updated " + this.getCommodities());
+            logger.info("Cluster " + this.getPathName() + " commodities updated " + this.getCommodities());
             for (ClusterListener listener : listeners) {
                 listener.commoditiesUpdated(this.getCommodities());
             }
         }
 
         if (!updatedClusters.isEmpty()) {
-            logger.info("Cluster " + this.getPathName() +  " subclusters updated " + this.getSubclusters());
+            logger.info("Cluster " + this.getPathName() + " subclusters updated " + this.getSubclusters());
             for (ClusterListener listener : listeners) {
                 listener.subclustersUpdated(this.getSubclusters());
             }
         }
 
         if (!updatedTransports.isEmpty()) {
-            logger.info("Cluster " + this.getPathName() +  " transports updated " + this.getTransports());
+            logger.info("Cluster " + this.getPathName() + " transports updated " + this.getTransports());
             for (ClusterListener listener : listeners) {
                 listener.transportsUpdated(this.getTransports());
             }
@@ -655,6 +661,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     /**
      * {@inheritDoc}
      */
+    @Override
     protected void route(JsonObject json, PathfinderServices services) {
         JsonArray routesJson = json.getAsJsonArray("route");
         List<Route> routes = new ArrayList<Route>();
@@ -666,11 +673,11 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
         this.setRoutes(routes);
 
-        for(Route route: this.getRoutes()) {
+        for (Route route : this.getRoutes()) {
             Transport transport = route.getTransport();
             transport.setRoute(route);
 
-            for(TransportListener listener : transport.getListeners()) {
+            for (TransportListener listener : transport.getListeners()) {
                 listener.routed(route);
                 listener.updated(transport);
             }
@@ -683,6 +690,10 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public JsonObject toJson() {
         JsonObject json = new JsonObject();
 
@@ -698,6 +709,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String toString() {
         return this.toJson().toString();
     }

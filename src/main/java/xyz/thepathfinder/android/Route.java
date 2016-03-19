@@ -35,12 +35,44 @@ public class Route {
      * Creates a route for a transport to perform.
      *
      * @param routeJson JSON of the route.
-     * @param services a pathfinder services object.
+     * @param services  a pathfinder services object.
      */
     protected Route(JsonObject routeJson, PathfinderServices services) {
         logger.info("Parsing route: " + routeJson.toString());
         this.transport = Route.getTransport(routeJson, services);
         this.actions = Route.getActions(routeJson, services);
+    }
+
+    /**
+     * Gets the transport from the route JSON.
+     *
+     * @param json     the route JSON.
+     * @param services the pathfinder services object.
+     * @return a transport
+     */
+    private static Transport getTransport(JsonObject json, PathfinderServices services) {
+        logger.info("Route getting transport: " + json.toString());
+        return Transport.getInstance(json.getAsJsonObject("vehicle"), services);
+    }
+
+    /**
+     * Gets the actions for the transport to perform from the route JSON.
+     *
+     * @param json     the route JSON.
+     * @param services the pathfinder services object.
+     * @return a list actions for the transport to perform.
+     */
+    private static List<Action> getActions(JsonObject json, PathfinderServices services) {
+        logger.info("route getting actions: " + json.toString());
+        JsonArray actions = json.getAsJsonArray("actions");
+        List<Action> list = new ArrayList<Action>();
+
+        for (JsonElement element : actions) {
+            logger.info("route adding action: " + element.toString());
+            list.add(new Action(element.getAsJsonObject(), services));
+        }
+
+        return list;
     }
 
     /**
@@ -59,38 +91,6 @@ public class Route {
      */
     public List<Action> getActions() {
         return this.actions;
-    }
-
-    /**
-     * Gets the transport from the route JSON.
-     *
-     * @param json the route JSON.
-     * @param services the pathfinder services object.
-     * @return a transport
-     */
-    private static Transport getTransport(JsonObject json, PathfinderServices services) {
-        logger.info("Route getting transport: " + json.toString());
-        return Transport.getInstance(json.getAsJsonObject("vehicle"), services);
-    }
-
-    /**
-     * Gets the actions for the transport to perform from the route JSON.
-     *
-     * @param json the route JSON.
-     * @param services the pathfinder services object.
-     * @return a list actions for the transport to perform.
-     */
-    private static List<Action> getActions(JsonObject json, PathfinderServices services) {
-        logger.info("route getting actions: " + json.toString());
-        JsonArray actions = json.getAsJsonArray("actions");
-        List<Action> list = new ArrayList<Action>();
-
-        for (JsonElement element : actions) {
-            logger.info("route adding action: " + element.toString());
-            list.add(new Action(element.getAsJsonObject(), services));
-        }
-
-        return list;
     }
 
     /**
