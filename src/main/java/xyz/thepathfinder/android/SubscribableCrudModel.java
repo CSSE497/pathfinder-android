@@ -34,15 +34,14 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
 
     /**
      * Creates the model at the path specified on the server.
-     *
-     * @param value JsonObject that represents the model to create
      */
-    protected void create(JsonObject value) {
+    public void create() {
         if (this.isConnected()) {
             logger.warn("Cannot create connected model " + this.getPathName() + " the model already exists, ignoring request.");
             return;
         }
 
+        JsonObject value = this.createValueJson();
         JsonObject json = this.getMessageHeader("Create");
         json.addProperty("model", value.get("model").getAsString());
 
@@ -75,4 +74,6 @@ public abstract class SubscribableCrudModel<E extends Listener<? extends Model>>
 
         this.sendMessage(json);
     }
+
+    protected abstract JsonObject createValueJson();
 }

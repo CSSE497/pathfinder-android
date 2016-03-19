@@ -69,6 +69,11 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     private Route route;
 
     /**
+     * The cluster to be created under.
+     */
+    private String createCluster;
+
+    /**
      * Constructs a commodity object with the path specified. When creating the commodity
      * it uses default values, so that requests are fully qualified. The default values
      * are zero for all the locations, the status is inactive, and the metadata is an
@@ -99,6 +104,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         this.metadata = new JsonObject();
         this.transportId = null;
         this.route = null;
+        this.createCluster = null;
     }
 
     /**
@@ -227,21 +233,15 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         return path + "/" + commodityJson.get("id").getAsString();
     }
 
-    //TODO write doc
-    protected void create(String clusterId) {
-        this.create(this.createValueJson(clusterId));
-    }
-
     /**
      * Returns the value used in create request to the Pathfinder server
      *
-     * @param clusterId path to the cluster to create under.
      * @return the value JSON
      */
-    protected JsonObject createValueJson(String clusterId) {
+    protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("clusterId", clusterId);
+        json.addProperty("clusterId", this.createCluster);
         json.addProperty("model", this.getModelType().toString());
         json.addProperty("startLatitude", this.getStartLatitude());
         json.addProperty("startLongitude", this.getStartLongitude());
@@ -251,6 +251,16 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         json.add("metadata", this.getMetadata());
 
         return json;
+    }
+
+    protected void initCommodity(double startLatitude, double startLongitude, double endLatitude, double endLongitude, CommodityStatus status, JsonObject metadata, String cluster) {
+        this.startLatitude = startLatitude;
+        this.startLongitude = startLongitude;
+        this.endLatitude = endLatitude;
+        this.endLongitude = endLongitude;
+        this.status = status;
+        this.metadata = metadata;
+        this.createCluster = cluster;
     }
 
     /**

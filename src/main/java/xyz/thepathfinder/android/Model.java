@@ -319,10 +319,6 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
     @Override
     @SuppressWarnings("unchecked")
     protected boolean notifyUpdate(String reason, JsonObject json) {
-/*        if (!json.has("model") || !json.get("model").getAsString().equals(this.getModel())) {
-            logger.warn("Invalid model type: " + json + " given to a " + this.getModel());
-            return false;
-        }*/
         if(!this.isPathUnknown()) {
             this.setConnected(true);
         }
