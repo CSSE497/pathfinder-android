@@ -64,6 +64,11 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     private Route route;
 
     /**
+     * The cluster to be created under.
+     */
+    private String createCluster;
+
+    /**
      * Constructs a transport model. Sets the transport to default values.
      *
      * @param path of the model.
@@ -89,6 +94,7 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         this.metadata = new JsonObject();
         this.commodities = new ArrayList<Commodity>();
         this.route = null;
+        this.createCluster = null;
     }
 
     /**
@@ -207,21 +213,15 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         return path + "/" + transportJson.get("id").getAsString();
     }
 
-    //TODO write doc
-    protected void create(String clusterId) {
-        this.create(this.createValueJson(clusterId));
-    }
-
     /**
      * Returns the value used in create request to the Pathfinder server
      *
-     * @param clusterId path to the cluster to create under.
      * @return the value JSON
      */
-    protected JsonObject createValueJson(String clusterId) {
+    protected JsonObject createValueJson() {
         JsonObject json = new JsonObject();
 
-        json.addProperty("clusterId", clusterId);
+        json.addProperty("clusterId", this.createCluster);
         json.addProperty("model", this.getModelType().toString());
         json.addProperty("latitude", this.getLatitude());
         json.addProperty("longitude", this.getLongitude());
@@ -232,6 +232,14 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         json.add("commodities", commodities);
 
         return json;
+    }
+
+    protected void initTransport(double latitude, double longitude, TransportStatus status, JsonObject metadata, String cluster) {
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.status = status;
+        this.metadata = metadata;
+        this.createCluster = cluster;
     }
 
     /**
@@ -446,6 +454,10 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
         List<Commodity> prevCommodities;
 
         boolean updated = false;
+
+        if(json.has("createCluster")) {
+            this.createCluster = json.get("createCluster").getAsString();
+        }
 
         prevLatitude = this.getLatitude();
         if (json.has("latitude")) {

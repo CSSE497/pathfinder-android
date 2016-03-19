@@ -209,18 +209,7 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
 
         Commodity commodity = Commodity.getInstance((String) null, this.getServices());
-
-        JsonObject json = new JsonObject();
-
-        json.addProperty("startLatitude", startLatitude);
-        json.addProperty("startLongitude", startLongitude);
-        json.addProperty("endLatitude", endLatitude);
-        json.addProperty("endLongitude", endLongitude);
-        json.addProperty("status", status.toString());
-        json.add("metadata", metadata);
-
-        commodity.notifyUpdate(null, json);
-        commodity.create(this.getPathName());
+        commodity.initCommodity(startLatitude, startLongitude, endLatitude, endLongitude, status, metadata, this.getPathName());
 
         return commodity;
     }
@@ -297,17 +286,12 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
      *
      * @param name Name of the subcluster, it must form a unique identifier when concatenated with this cluster's path.
      */
-    public void createSubcluster(String name) {
+    public Cluster createSubcluster(String name) {
         if (!this.isConnected()) {
             logger.warn("Attempting to create a subcluster on an unconnected cluster, request will fail if " + this.getPathName() + " is not found.");
         }
 
-        JsonObject json = new JsonObject();
-
-        json.addProperty("id", this.getChildPath(name, ModelType.CLUSTER).getPathName());
-        json.addProperty("model", ModelType.CLUSTER.toString());
-
-        this.create(json);
+        return Cluster.getInstance(this.getChildPath(name, ModelType.CLUSTER).getPathName(), this.getServices());
     }
 
     /**
@@ -381,28 +365,9 @@ public class Cluster extends SubscribableCrudModel<ClusterListener> {
         }
 
         Transport transport = Transport.getInstance((String) null, this.getServices());
-
-        JsonObject json = new JsonObject();
-
-        json.addProperty("latitude", latitude);
-        json.addProperty("longitude", longitude);
-        json.addProperty("status", status.toString());
-        json.add("metadata", metadata);
-
-        transport.notifyUpdate(null, json);
-        transport.create(this.getPathName());
+        transport.initTransport(latitude, longitude, status, metadata, this.getPathName());
 
         return transport;
-    }
-
-    /**
-     * Creates a connected transport under this cluster with the values in the JSON object provided.
-     *
-     * @param transportJson a JSON object that represents a transport.
-     * @return A transport with the values in the JSON object.
-     */
-    private Transport createTransport(JsonObject transportJson) {
-        return Transport.getInstance(transportJson, this.getServices());
     }
 
     /**
