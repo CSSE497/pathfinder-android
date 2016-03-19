@@ -16,7 +16,7 @@ import java.util.List;
  * Interface to the Pathfinder server's transport API. A transport may be create
  * by a {@link Cluster} object with the {@link Cluster#createTransport(double, double, TransportStatus, JsonObject)}
  * method.
- * <p/>
+ * </p>
  * <p>
  * Be careful with the update methods, they do not update the object immediately.
  * They send the updates to the pathfinder server. If the server responds the transport's

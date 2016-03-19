@@ -31,7 +31,6 @@ import java.util.Map;
  * Note, when connecting the<code>Pathfinder</code> object the thread is blocked until the web socket to the
  * Pathfinder service is opened.
  * </p>
- * <p/>
  * <pre><code>   Pathfinder pathfinder = Pathfinder.create("myAppId");
  *   Cluster cluster = pathfinder.getCluster("/root/cluster1/subcluster2");
  *   MyClusterListener clusterListener = new MyClusterListener();

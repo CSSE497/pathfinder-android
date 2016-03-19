@@ -82,6 +82,7 @@ public abstract class ClusterListener extends Listener<Cluster> {
     }
 
     /**
+     * <p>
      * Invoked when a sublcuster was updated from this cluster by a message.
      * <p/>
      * Note, this update doesn't recurse up the cluster tree. If the cluster
