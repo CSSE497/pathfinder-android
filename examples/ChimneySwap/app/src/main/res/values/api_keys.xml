@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="google_signin_id_token"></string>
-    <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false"></string>
-    <string name="pathfinder_app_id"></string>
-</resources>
