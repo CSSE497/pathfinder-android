@@ -17,6 +17,9 @@ import java.util.Map;
  */
 class ModelRegistry {
 
+    /**
+     * Logs actions performed by the class.
+     */
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**

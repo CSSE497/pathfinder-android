@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
  */
 class Path {
 
+    /**
+     * Logs actions performed by the class.
+     */
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**

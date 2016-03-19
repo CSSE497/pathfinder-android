@@ -1,6 +1,5 @@
 package xyz.thepathfinder.android;
 
-import com.google.gson.JsonObject;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -43,9 +42,6 @@ public class PathTest {
 
         Path time = dime.getParentPath();
         Assert.assertEquals("/time", time.getPathName());
-
-        //Path def = time.getParentPath();
-        //Assert.assertNull(def);
     }
 
     @Test

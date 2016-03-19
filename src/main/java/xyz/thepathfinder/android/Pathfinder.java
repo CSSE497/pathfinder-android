@@ -6,9 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
-import javax.websocket.ContainerProvider;
 import javax.websocket.DeploymentException;
-import javax.websocket.WebSocketContainer;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -53,6 +51,9 @@ import java.util.Map;
  */
 public class Pathfinder {
 
+    /**
+     * Logs actions performed by the class.
+     */
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**

@@ -16,6 +16,9 @@ import java.util.List;
  */
 public class Route {
 
+    /**
+     * Logs actions performed by the class.
+     */
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**

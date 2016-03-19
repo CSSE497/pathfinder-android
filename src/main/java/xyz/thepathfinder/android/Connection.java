@@ -19,6 +19,9 @@ import java.util.Queue;
  */
 class Connection extends Endpoint {
 
+    /**
+     * Logs actions performed by the class.
+     */
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**

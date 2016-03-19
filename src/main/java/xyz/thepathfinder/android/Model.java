@@ -16,6 +16,9 @@ import java.util.Queue;
  */
 public abstract class Model<E extends Listener<? extends Model>> extends Listenable<E> {
 
+    /**
+     * Logs actions performed by the class.
+     */
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**

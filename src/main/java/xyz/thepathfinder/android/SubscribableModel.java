@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class SubscribableModel<E extends Listener<? extends Model>> extends Model<E> {
 
+    /**
+     * Logs actions performed by the class.
+     */
     private static final Logger logger = LoggerFactory.getLogger(SubscribableModel.class);
 
     /**

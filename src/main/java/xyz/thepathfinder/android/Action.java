@@ -13,6 +13,9 @@ import org.slf4j.LoggerFactory;
  */
 public class Action {
 
+    /**
+     * Logs actions performed by the class.
+     */
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**
@@ -48,7 +51,7 @@ public class Action {
         this.latitude = Action.getLatitude(actionJson);
         this.longitude = Action.getLongitude(actionJson);
 
-        if(!this.status.equals(ActionStatus.START)) {
+        if (!this.status.equals(ActionStatus.START)) {
             this.commodity = Action.getCommodity(actionJson, services);
         } else {
             this.commodity = null;
@@ -156,7 +159,7 @@ public class Action {
         json.addProperty("longitude", this.getLongitude());
         json.addProperty("status", this.getStatus().toString());
 
-        if(this.getCommodity() != null) {
+        if (this.getCommodity() != null) {
             json.addProperty("model", this.getCommodity().getPathName());
         }
 

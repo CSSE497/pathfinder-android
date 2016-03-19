@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory;
  */
 class MessageHandler implements javax.websocket.MessageHandler.Whole<String> {
 
+    /**
+     * Logs actions performed by the class.
+     */
     private static final Logger logger = LoggerFactory.getLogger(Action.class);
 
     /**

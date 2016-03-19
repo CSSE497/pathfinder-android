@@ -25,11 +25,15 @@ public enum ActionStatus {
      */
     DROP_OFF("DropOff");
 
+    /**
+     * Map of the possible statuses. It maps String of status -> ActionStatus.
+     */
     private static final Map<String, ActionStatus> statuses;
 
+    // Creates the status map.
     static {
         statuses = new HashMap<String, ActionStatus>();
-        for(ActionStatus status: ActionStatus.values()) {
+        for (ActionStatus status : ActionStatus.values()) {
             ActionStatus.statuses.put(status.toString(), status);
         }
     }
@@ -66,6 +70,12 @@ public enum ActionStatus {
         return this.status;
     }
 
+    /**
+     * Changes a String to an ActionStatus. If the status cannot be converted <tt>null</tt> is returned.
+     *
+     * @param status represented as a String.
+     * @return ActionStatus if status could be converted, <tt>null</tt> otherwise.
+     */
     public static ActionStatus getStatus(String status) {
         return ActionStatus.statuses.get(status);
     }

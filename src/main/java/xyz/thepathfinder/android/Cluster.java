@@ -34,6 +34,9 @@ import java.util.Map;
  */
 public class Cluster extends SubscribableCrudModel<ClusterListener> {
 
+    /**
+     * Logs actions performed by the class.
+     */
     private static final Logger logger = LoggerFactory.getLogger(Cluster.class);
 
     /**
