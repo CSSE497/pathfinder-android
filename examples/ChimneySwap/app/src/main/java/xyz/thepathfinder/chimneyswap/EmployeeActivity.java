@@ -1,4 +1,4 @@
-package xyz.thepathfinder.www.chimneyswap;
+package xyz.thepathfinder.chimneyswap;
 
 import android.Manifest;
 import android.content.Context;
@@ -34,6 +34,7 @@ import xyz.thepathfinder.android.Pathfinder;
 import xyz.thepathfinder.android.Route;
 import xyz.thepathfinder.android.Transport;
 import xyz.thepathfinder.android.TransportStatus;
+import xyz.thepathfinder.chimneyswap.R;
 
 public class EmployeeActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, OnMapReadyCallback {
 

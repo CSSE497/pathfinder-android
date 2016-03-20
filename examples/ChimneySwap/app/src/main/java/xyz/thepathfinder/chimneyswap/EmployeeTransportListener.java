@@ -1,4 +1,4 @@
-package xyz.thepathfinder.www.chimneyswap;
+package xyz.thepathfinder.chimneyswap;
 
 import android.os.Handler;
 import android.util.Log;

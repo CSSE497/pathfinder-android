@@ -1,4 +1,4 @@
-package xyz.thepathfinder.www.chimneyswap;
+package xyz.thepathfinder.chimneyswap;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -9,6 +9,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.List;
+
+import xyz.thepathfinder.chimneyswap.R;
 
 public class ChimneyAdapter extends ArrayAdapter<Chimney> {
 

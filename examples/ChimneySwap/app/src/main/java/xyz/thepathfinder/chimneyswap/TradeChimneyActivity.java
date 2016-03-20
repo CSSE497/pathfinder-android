@@ -1,4 +1,4 @@
-package xyz.thepathfinder.www.chimneyswap;
+package xyz.thepathfinder.chimneyswap;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -21,6 +21,8 @@ import com.google.gson.JsonParser;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import xyz.thepathfinder.chimneyswap.R;
 
 public class TradeChimneyActivity extends AppCompatActivity {
 

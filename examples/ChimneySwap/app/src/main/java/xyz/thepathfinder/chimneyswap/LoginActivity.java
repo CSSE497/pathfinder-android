@@ -1,4 +1,4 @@
-package xyz.thepathfinder.www.chimneyswap;
+package xyz.thepathfinder.chimneyswap;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +14,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+
+import xyz.thepathfinder.chimneyswap.R;
 
 public class LoginActivity extends AppCompatActivity {
 

@@ -1,4 +1,4 @@
-package xyz.thepathfinder.www.chimneyswap;
+package xyz.thepathfinder.chimneyswap;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.JsonObject;

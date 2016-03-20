@@ -1,10 +1,13 @@
-package xyz.thepathfinder.www.chimneyswap;
+package xyz.thepathfinder.chimneyswap;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.RadioButton;
+
+import xyz.thepathfinder.chimneyswap.R;
+import xyz.thepathfinder.chimneyswap.TradeChimneyActivity;
 
 public class SelectionActivity extends AppCompatActivity {
 

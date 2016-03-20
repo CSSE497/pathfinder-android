@@ -10,7 +10,7 @@
     android:gravity="center"
     android:orientation="vertical"
     android:background="@color/white"
-    tools:context="xyz.thepathfinder.www.chimneyswap.LoginActivity">
+    tools:context="xyz.thepathfinder.chimneyswap.LoginActivity">
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/sign_in_button"

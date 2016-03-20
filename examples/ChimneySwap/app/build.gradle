@@ -3,19 +3,12 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.2"
-
     defaultConfig {
-        applicationId "xyz.thepathfinder.www.chimneyswap"
+        applicationId 'xyz.thepathfinder.chimneyswap'
         minSdkVersion 21
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
-    }
-    buildTypes {
-        release {
-            minifyEnabled true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
     }
 }
 
@@ -34,15 +27,5 @@ dependencies {
     compile 'com.google.android.gms:play-services-location:8.4.0'
     compile 'com.google.android.gms:play-services-auth:8.4.0'
 }
-
-
-
-
-
-
-
-
-
-
 
 apply plugin: 'com.google.gms.google-services'

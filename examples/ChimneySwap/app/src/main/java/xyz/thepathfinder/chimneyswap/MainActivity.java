@@ -1,4 +1,4 @@
-package xyz.thepathfinder.www.chimneyswap;
+package xyz.thepathfinder.chimneyswap;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,7 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    public static final String PREFERENCES_FILE = "xyz_thepathfinder_www_chimneyswap_preferences";
+    public static final String PREFERENCES_FILE = "xyz_thepathfinder_chimneyswap_preferences";
     public static final String ID_TOKEN = "id_token";
     public static final String EMPLOYEE_ID = "employee_id";
 

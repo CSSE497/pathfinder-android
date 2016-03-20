@@ -1,4 +1,4 @@
-package xyz.thepathfinder.www.chimneyswap;
+package xyz.thepathfinder.chimneyswap;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -53,9 +53,8 @@ public class PostChimneyActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
         if(requestCode == READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
-            Uri uri = null;
             if(resultData != null) {
-                uri = resultData.getData();
+                Uri uri = resultData.getData();
                 getBitmapFromUri(uri);
             }
         }
