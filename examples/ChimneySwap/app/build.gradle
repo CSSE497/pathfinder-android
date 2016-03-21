@@ -1,0 +1,31 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+    defaultConfig {
+        applicationId 'xyz.thepathfinder.chimneyswap'
+        minSdkVersion 21
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+    }
+}
+
+dependencies {
+    testCompile 'junit:junit:4.12'
+    compile files('libs/pathfinder-android-0.0.15.jar')
+    compile 'org.glassfish.tyrus.bundles:tyrus-standalone-client:1.12'
+    compile project(':volley')
+    //compile 'xyz.thepathfinder:pathfinder-android:0.0.13'
+    compile 'ch.qos.logback:logback-classic:1.1.3'
+    compile 'ch.qos.logback:logback-core:1.1.3'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:design:23.1.1'
+    compile 'com.google.code.gson:gson:2.5'
+    compile 'com.google.android.gms:play-services-maps:8.4.0'
+    compile 'com.google.android.gms:play-services-location:8.4.0'
+    compile 'com.google.android.gms:play-services-auth:8.4.0'
+}
+
+apply plugin: 'com.google.gms.google-services'
