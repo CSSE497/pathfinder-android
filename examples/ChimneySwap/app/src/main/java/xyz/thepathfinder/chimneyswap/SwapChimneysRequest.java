@@ -22,13 +22,7 @@ public class SwapChimneysRequest {
     }
 
     public void swap() {
-        Pathfinder pathfinder;
-        try {
-            pathfinder = Pathfinder.create(this.appId);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+        Pathfinder pathfinder = Pathfinder.create(this.appId);
         Cluster defaultCluster = pathfinder.getCluster(SelectionActivity.cluster);
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("chimney", 1);

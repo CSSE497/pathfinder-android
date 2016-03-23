@@ -24,7 +24,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.JsonObject;
 
-import java.io.IOException;
 import java.util.List;
 
 import xyz.thepathfinder.android.Action;
@@ -40,7 +39,6 @@ public class EmployeeActivity extends AppCompatActivity implements GoogleApiClie
 
     public static String MAPS_API_KEY;
 
-    private Pathfinder pathfinder;
     private GoogleApiClient googleApiClient;
     private LatLng startLocation;
     private GoogleMap map;
@@ -96,22 +94,17 @@ public class EmployeeActivity extends AppCompatActivity implements GoogleApiClie
         SharedPreferences preferences = this.getSharedPreferences(MainActivity.PREFERENCES_FILE, Context.MODE_PRIVATE);
         String employeeId = preferences.getString(MainActivity.EMPLOYEE_ID + SelectionActivity.cluster, "");
 
-        try {
-            EmployeeActivity.this.pathfinder = Pathfinder.create(getString(R.string.pathfinder_app_id));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+        Pathfinder pathfinder = Pathfinder.create(getString(R.string.pathfinder_app_id));
         Transport transport;
         if(employeeId.equals("")) { // didn't find the employee's id
-            Cluster cluster = this.pathfinder.getCluster(SelectionActivity.cluster);
+            Cluster cluster = pathfinder.getCluster(SelectionActivity.cluster);
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("chimney", 5);
             transport = cluster.createTransport(this.startLocation.latitude, this.startLocation.longitude, TransportStatus.OFFLINE, jsonObject);
             transport.addListener(new EmployeeTransportListener(this, map, handler));
             transport.create();
         } else {
-            transport = this.pathfinder.getTransport(employeeId);
+            transport = pathfinder.getTransport(employeeId);
             transport.updateStatus(TransportStatus.OFFLINE);
             transport.updateLocation(this.startLocation.latitude, this.startLocation.longitude);
             transport.addListener(new EmployeeTransportListener(this, map, handler));

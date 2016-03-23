@@ -14,7 +14,7 @@ android {
 
 dependencies {
     testCompile 'junit:junit:4.12'
-    compile files('libs/pathfinder-android-0.0.15.jar')
+    compile files('libs/pathfinder-android-0.0.14.jar')
     compile 'org.glassfish.tyrus.bundles:tyrus-standalone-client:1.12'
     compile project(':volley')
     //compile 'xyz.thepathfinder:pathfinder-android:0.0.13'
