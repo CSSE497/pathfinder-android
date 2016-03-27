@@ -10,12 +10,12 @@ import org.slf4j.LoggerFactory;
  * @param <E> Listener type
  * @author David Robinson
  */
-public abstract class SubscribableCrudModel<E extends Listener<? extends Model>> extends SubscribableModel<E> {
+public abstract class SubscribableCrudModel<T extends SubscribableCrudModel<T, E>, E extends ModelListener<T>> extends SubscribableModel<T, E> {
 
     /**
      * Logs actions performed by the class.
      */
-    private static final Logger logger = LoggerFactory.getLogger(Action.class);
+    private static final Logger logger = LoggerFactory.getLogger(SubscribableCrudModel.class);
 
     /**
      * Constructs a subscribable CRUD model.

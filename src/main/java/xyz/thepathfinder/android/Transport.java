@@ -28,12 +28,12 @@ import java.util.List;
  * @see TransportListener
  * @see TransportStatus
  */
-public class Transport extends SubscribableCrudModel<TransportListener> {
+public class Transport extends SubscribableCrudModel<Transport, TransportListener> {
 
     /**
      * Logs actions performed by the class.
      */
-    private static final Logger logger = LoggerFactory.getLogger(Action.class);
+    private static final Logger logger = LoggerFactory.getLogger(Transport.class);
 
     /**
      * Latitude of the transport.
@@ -611,5 +611,13 @@ public class Transport extends SubscribableCrudModel<TransportListener> {
     @Override
     public String toString() {
         return this.toJson().toString();
+    }
+
+    /**
+     *  {@inheritDoc}
+     */
+    @Override
+    protected Transport getThis() {
+        return this;
     }
 }

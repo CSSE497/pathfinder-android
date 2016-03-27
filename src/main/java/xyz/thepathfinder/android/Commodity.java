@@ -25,12 +25,12 @@ import java.util.List;
  * @see CommodityStatus
  * @see Transport
  */
-public class Commodity extends SubscribableCrudModel<CommodityListener> {
+public class Commodity extends SubscribableCrudModel<Commodity, CommodityListener> {
 
     /**
      * Logs actions performed by the class.
      */
-    private static final Logger logger = LoggerFactory.getLogger(Action.class);
+    private static final Logger logger = LoggerFactory.getLogger(Commodity.class);
 
     /**
      * The pickup latitude of the commodity.
@@ -578,7 +578,7 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         }
 
         if (transportId != null) {
-            value.addProperty("vehicleId", transportId);
+            value.addProperty("transportId", transportId);
         }
 
         super.update(value);
@@ -630,8 +630,8 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
         }
 
         prevTransportId = this.getTransportId();
-        if (json.has("vehicleId")) {
-            this.setTransportId(json.get("vehicleId").getAsLong());
+        if (json.has("transportId")) {
+            this.setTransportId(json.get("transportId").getAsLong());
         } else {
             this.setTransportId(null);
         }
@@ -752,5 +752,13 @@ public class Commodity extends SubscribableCrudModel<CommodityListener> {
     @Override
     public String toString() {
         return this.toJson().toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Commodity getThis() {
+        return this;
     }
 }

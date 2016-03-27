@@ -20,7 +20,7 @@ class ModelRegistry {
     /**
      * Logs actions performed by the class.
      */
-    private static final Logger logger = LoggerFactory.getLogger(Action.class);
+    private static final Logger logger = LoggerFactory.getLogger(ModelRegistry.class);
 
     /**
      * Map to all the {@link Model}s created by the SDK. The keys are the string

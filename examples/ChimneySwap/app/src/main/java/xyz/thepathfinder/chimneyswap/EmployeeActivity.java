@@ -93,8 +93,10 @@ public class EmployeeActivity extends AppCompatActivity implements GoogleApiClie
 
         SharedPreferences preferences = this.getSharedPreferences(MainActivity.PREFERENCES_FILE, Context.MODE_PRIVATE);
         String employeeId = preferences.getString(MainActivity.EMPLOYEE_ID + SelectionActivity.cluster, "");
+        String idToken = preferences.getString(MainActivity.ID_TOKEN, "");
 
-        Pathfinder pathfinder = Pathfinder.create(getString(R.string.pathfinder_app_id));
+        Pathfinder pathfinder = new Pathfinder(getString(R.string.pathfinder_app_id), idToken);
+        pathfinder.connect();
         Transport transport;
         if(employeeId.equals("")) { // didn't find the employee's id
             Cluster cluster = pathfinder.getCluster(SelectionActivity.cluster);

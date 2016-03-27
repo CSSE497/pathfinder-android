@@ -10,7 +10,7 @@ import javax.websocket.DeploymentException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -50,17 +50,23 @@ public class Pathfinder {
     /**
      * Logs actions performed by the class.
      */
-    private static final Logger logger = LoggerFactory.getLogger(Action.class);
+    private static final Logger logger = LoggerFactory.getLogger(Pathfinder.class);
 
     /**
      * Keeps track of all the Pathfinder models and connection to the server.
      */
     private PathfinderServices services;
 
+    private final String applicationIdentifier;
+
     /**
      * URL to the Pathfinder server being connected to.
      */
     private URI webSocketUrl;
+
+    private static final String AUTH_URI = "http://auth.thepathfinder.xyz/connection";
+
+    private static final String WEBSOCKET_URI = "ws://api.thepathfinder.xyz/socket";
 
     /**
      * Constructs a Pathfinder object.
@@ -68,14 +74,30 @@ public class Pathfinder {
      * @param applicationIdentifier application Identifier provided by a Pathfinder service provider
      * @param userCredentials       JWT of the user's credentials
      */
-    private Pathfinder(String applicationIdentifier, String userCredentials) {
+    public Pathfinder(String applicationIdentifier, String userCredentials) {
         try {
-            this.webSocketUrl = new URI("ws://api.thepathfinder.xyz/socket");
+            this.webSocketUrl = new URI(WEBSOCKET_URI);
         } catch (URISyntaxException e) {
             logger.error(e.getMessage());
         }
+        this.applicationIdentifier = applicationIdentifier;
+        this.constructPathfinderServices(applicationIdentifier, userCredentials, AUTH_URI);
+    }
 
-        this.constructPathfinderServices(applicationIdentifier, userCredentials);
+    /**
+     * Constructs a Pathfinder object.
+     *
+     * @param applicationIdentifier application Identifier provided by a Pathfinder service provider
+     * @param userCredentials       JWT of the user's credentials
+     */
+    public Pathfinder(String applicationIdentifier, String userCredentials, String authenticationServerURL) {
+        try {
+            this.webSocketUrl = new URI(WEBSOCKET_URI);
+        } catch (URISyntaxException e) {
+            logger.error(e.getMessage());
+        }
+        this.applicationIdentifier = applicationIdentifier;
+        this.constructPathfinderServices(applicationIdentifier, userCredentials, authenticationServerURL);
     }
 
     /**
@@ -86,46 +108,35 @@ public class Pathfinder {
      * @param webSocketUrl          URL to the Pathfinder web socket service provider
      */
     protected Pathfinder(String applicationIdentifier, String userCredentials, URI webSocketUrl) {
+        this.applicationIdentifier = applicationIdentifier;
         this.webSocketUrl = webSocketUrl;
-        this.constructPathfinderServices(applicationIdentifier, userCredentials);
-    }
-
-    /**
-     * Creates an asynchronous connection to the Pathfinder server.
-     *
-     * @param applicationIdentifier the application identifier of your application.
-     * @return a Pathfinder object.
-     * @throws RuntimeException if the connection to the Pathfinder server could not be opened.
-     */
-    public static Pathfinder create(String applicationIdentifier) {
-        Pathfinder pf = new Pathfinder(applicationIdentifier, "");
-        pf.connect(applicationIdentifier);
-        return pf;
+        this.constructPathfinderServices(applicationIdentifier, userCredentials, AUTH_URI);
     }
 
     /**
      * Sets the {@link PathfinderServices} object.
      *
-     * @param applicationIdentifier of your application
      * @param userCredentials       the user's identity JWT.
      */
-    private void constructPathfinderServices(String applicationIdentifier, String userCredentials) {
-        ModelRegistry registry = new ModelRegistry();
-        Connection connection = new Connection(userCredentials);
+    private void constructPathfinderServices(String applicationIdentifier, String userCredentials, String authenticationServerURL) {
+        Connection connection = new Connection();
 
+        ModelRegistry registry = new ModelRegistry();
         this.services = new PathfinderServices(registry, connection);
 
-        connection.setServices(services);
+        Authenticator authenticator = new Authenticator(applicationIdentifier, userCredentials, authenticationServerURL, this.services);
+        AuthenticationMessageHandler messageHandler = new AuthenticationMessageHandler(authenticator);
+
+        connection.setMessageHandler(messageHandler);
     }
 
     /**
      * Establishes a connection to the Pathfinder server, if the connection is not already open.
      * This method doesn't blocks until the connection is established.
      *
-     * @param applicationIdentifier of your application.
      * @throws RuntimeException if could not connect to the Pathfinder server.
      */
-    private void connect(final String applicationIdentifier) {
+    public void connect() {
         if (!this.isConnected()) {
 
             ClientManager clientManager = new ClientManager();
@@ -133,7 +144,7 @@ public class Pathfinder {
             ClientEndpointConfig.Configurator configurator = new ClientEndpointConfig.Configurator() {
                 @Override
                 public void beforeRequest(Map<String, List<String>> header) {
-                    header.put("Authorization", Arrays.asList(applicationIdentifier));
+                    header.put("Authorization", Collections.singletonList(applicationIdentifier));
                 }
             };
 

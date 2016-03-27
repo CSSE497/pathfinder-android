@@ -22,17 +22,7 @@ class Connection extends Endpoint {
     /**
      * Logs actions performed by the class.
      */
-    private static final Logger logger = LoggerFactory.getLogger(Action.class);
-
-    /**
-     * The user's credentials to the Pathfinder server.
-     */
-    private final String userCredentials;
-
-    /**
-     * Access to the model registry to notify {@link Model}s of incoming web socket messages.
-     */
-    private PathfinderServices services;
+    private static final Logger logger = LoggerFactory.getLogger(Connection.class);
 
     /**
      * The web socket session used to send messages through the web socket.
@@ -57,23 +47,28 @@ class Connection extends Endpoint {
     /**
      * Constructs a connection object that controls access to the web socket connection
      * with the Pathfinder Server.
-     *
-     * @param userCredentials the user's credentials for this application
      */
-    protected Connection(String userCredentials) {
-        this.userCredentials = userCredentials;
+    protected Connection() {
         this.sentMessageCount = 0L;
         this.messageQueue = new LinkedList<String>();
     }
 
-    /**
-     * Sets the pathfinder services object.
-     *
-     * @param services a pathfinder services object
-     */
-    protected void setServices(PathfinderServices services) {
-        this.services = services;
-        this.messageHandler = new MessageHandler(this.services);
+    protected void setMessageHandler(MessageHandler messageHandler) {
+        if(this.session != null) {
+            this.session.removeMessageHandler(this.messageHandler);
+            this.session.addMessageHandler(messageHandler);
+        }
+        this.messageHandler = messageHandler;
+
+        if(!(this.messageHandler instanceof AuthenticationMessageHandler)) {
+            logger.info("Sending stored messages");
+            for (String message : this.messageQueue) {
+                this.send(message);
+            }
+
+            logger.info("End sending stored messages");
+            this.messageQueue.clear();
+        }
     }
 
     /**
@@ -102,6 +97,10 @@ class Connection extends Endpoint {
         }
     }
 
+    protected void sendAuthenticationMessage(String message) {
+        this.send(message);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -110,13 +109,6 @@ class Connection extends Endpoint {
         logger.info("Pathfinder connection opened");
         this.session = session;
         this.session.addMessageHandler(this.messageHandler);
-
-        logger.info("Sending stored messages");
-        for (String message : this.messageQueue) {
-            this.send(message);
-        }
-        logger.info("End sending stored messages");
-        this.messageQueue.clear();
     }
 
     /**

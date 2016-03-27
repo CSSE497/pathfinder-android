@@ -10,7 +10,7 @@ import java.util.List;
  *
  * @author David Robinson
  */
-public abstract class TransportListener extends Listener<Transport> {
+public abstract class TransportListener extends ModelListener<Transport> {
 
     /**
      * Invoked when the transport receives a routed message.

@@ -23,7 +23,7 @@ public enum ModelType {
     /**
      * Transport type.
      */
-    TRANSPORT("Vehicle");
+    TRANSPORT("Transport");
 
     /**
      * The string representation of the type.

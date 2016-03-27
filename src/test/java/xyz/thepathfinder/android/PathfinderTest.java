@@ -37,13 +37,13 @@ public class PathfinderTest {
 
     public void waitForMessages(Pathfinder pathfinder, int messageCount) throws InterruptedException {
         while(pathfinder.getReceivedMessageCount() != messageCount) {
-            Thread.sleep(10);
+            Thread.sleep(100);
         }
     }
 
     public void waitForMessages(TestMessager messager, int messageCount) throws InterruptedException {
         while(messager.messagesReceived != messageCount) {
-            Thread.sleep(10);
+            Thread.sleep(100);
         }
     }
 
@@ -133,4 +133,13 @@ public class PathfinderTest {
         pathfinder.close();
     }
 */
+
+/*    @Test(timeout = 10000)
+    public void test() throws InterruptedException {
+        Pathfinder pf = new Pathfinder("9869bd06-12ec-451f-8207-2c5f217eb4d0", "");
+        pf.connect();
+        Cluster cluster = pf.getDefaultCluster();
+        cluster.connect();
+        waitForMessages(pf, 4);
+    }*/
 }
