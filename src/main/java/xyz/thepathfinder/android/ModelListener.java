@@ -3,6 +3,7 @@ package xyz.thepathfinder.android;
 /**
  * An interface for Listener classes to implement.
  *
+ * @param <T> Type of the model receiving the {@link ModelListener} updates.
  * @author David Robinson
  */
 public class ModelListener<T extends Model> implements Listener {

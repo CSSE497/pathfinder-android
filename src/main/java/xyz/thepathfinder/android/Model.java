@@ -11,6 +11,7 @@ import java.util.Queue;
 /**
  * Basic class for dealing with models from the Pathfinder server.
  *
+ * @param <T> The type of model receiving the {@link ModelListener}'s updates.
  * @param <E> a type of {@link ModelListener}
  * @author David Robinson
  */
@@ -361,5 +362,10 @@ public abstract class Model<T extends Model<T, E>, E extends ModelListener<T>> e
      */
     protected abstract void route(JsonObject json, PathfinderServices services);
 
+    /**
+     * Returns the current object represented by this.
+     *
+     * @return this.
+     */
     protected abstract T getThis();
 }

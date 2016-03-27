@@ -1,5 +1,8 @@
 package xyz.thepathfinder.android;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * An enum for the possible types of {@link Model}s.
  *
@@ -26,6 +29,19 @@ public enum ModelType {
     TRANSPORT("Transport");
 
     /**
+     * Map of the possible statuses. It maps String of status to ModelType.
+     */
+    private static final Map<String, ModelType> types;
+
+    // Creates the status map.
+    static {
+        types = new HashMap<String, ModelType>();
+        for (ModelType type : ModelType.values()) {
+            ModelType.types.put(type.toString(), type);
+        }
+    }
+
+    /**
      * The string representation of the type.
      */
     private final String type;
@@ -46,14 +62,7 @@ public enum ModelType {
      * @return the model type as an enum.
      */
     protected static ModelType getModelType(String type) {
-        ModelType[] values = ModelType.values();
-        for (int k = 0; k < values.length; k++) {
-            if (values[k].equals(type)) {
-                return values[k];
-            }
-        }
-
-        return null;
+        return ModelType.types.get(type);
     }
 
     /**

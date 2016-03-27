@@ -6,5 +6,11 @@ package xyz.thepathfinder.android;
  * @author David Robinson
  */
 interface MessageHandler extends javax.websocket.MessageHandler.Whole<String> {
+
+    /**
+     * Returns the number of messages received by the message handler.
+     *
+     * @return number of messages received by the message handler.
+     */
     public int getReceivedMessageCount();
 }

@@ -53,14 +53,21 @@ class Connection extends Endpoint {
         this.messageQueue = new LinkedList<String>();
     }
 
+    /**
+     * Sets the web socket connection's message handler. If the message handler is not
+     * of the type {@link AuthenticationMessageHandler} it will attempt to send all
+     * of the backed up messages until the user was authenticated.
+     *
+     * @param messageHandler to receive the web socket messages.
+     */
     protected void setMessageHandler(MessageHandler messageHandler) {
-        if(this.session != null) {
+        if (this.session != null) {
             this.session.removeMessageHandler(this.messageHandler);
             this.session.addMessageHandler(messageHandler);
         }
         this.messageHandler = messageHandler;
 
-        if(!(this.messageHandler instanceof AuthenticationMessageHandler)) {
+        if (this.session != null && !(this.messageHandler instanceof AuthenticationMessageHandler)) {
             logger.info("Sending stored messages");
             for (String message : this.messageQueue) {
                 this.send(message);
@@ -97,6 +104,11 @@ class Connection extends Endpoint {
         }
     }
 
+    /**
+     * Sends an authentication messages that bypasses the message queue.
+     *
+     * @param message to send to the pathfinder server.
+     */
     protected void sendAuthenticationMessage(String message) {
         this.send(message);
     }
@@ -109,6 +121,16 @@ class Connection extends Endpoint {
         logger.info("Pathfinder connection opened");
         this.session = session;
         this.session.addMessageHandler(this.messageHandler);
+
+        if (!(this.messageHandler instanceof AuthenticationMessageHandler)) {
+            logger.info("Sending stored messages");
+            for (String message : this.messageQueue) {
+                this.send(message);
+            }
+
+            logger.info("End sending stored messages");
+            this.messageQueue.clear();
+        }
     }
 
     /**
@@ -134,7 +156,7 @@ class Connection extends Endpoint {
      *
      * @return the number of messages sent.
      */
-    public long getSentMessageCount() {
+    protected long getSentMessageCount() {
         return this.sentMessageCount;
     }
 
@@ -143,7 +165,7 @@ class Connection extends Endpoint {
      *
      * @return the number of messages received.
      */
-    public long getReceivedMessageCount() {
+    protected long getReceivedMessageCount() {
         return this.messageHandler.getReceivedMessageCount();
     }
 

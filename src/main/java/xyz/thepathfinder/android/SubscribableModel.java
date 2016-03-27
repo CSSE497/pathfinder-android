@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Access to subscribe operations on models.
  *
+ * @param <T> Model Type
  * @param <E> Listener type
  * @author David Robinson
  */

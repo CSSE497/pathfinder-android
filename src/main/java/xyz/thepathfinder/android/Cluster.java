@@ -256,6 +256,17 @@ public class Cluster extends SubscribableCrudModel<Cluster, ClusterListener> {
     /**
      * Sets this cluster's commodities.
      *
+     * @param commodities an iterable collection of commodities
+     */
+    private void setCommodities(Iterable<Commodity> commodities) {
+        for (Commodity commodity : commodities) {
+            this.commodities.put(commodity.getPathName(), commodity);
+        }
+    }
+
+    /**
+     * Sets this cluster's commodities.
+     *
      * @param commodities a map of commodities
      */
     private void setCommodities(Map<String, Commodity> commodities) {
@@ -269,17 +280,6 @@ public class Cluster extends SubscribableCrudModel<Cluster, ClusterListener> {
      */
     public Map<String, Commodity> getCommoditiesMap() {
         return Collections.<String, Commodity>unmodifiableMap(this.commodities);
-    }
-
-    /**
-     * Sets this cluster's commodities.
-     *
-     * @param commodities an iterable collection of commodities
-     */
-    private void setCommodities(Iterable<Commodity> commodities) {
-        for (Commodity commodity : commodities) {
-            this.commodities.put(commodity.getPathName(), commodity);
-        }
     }
 
     /**
@@ -318,6 +318,17 @@ public class Cluster extends SubscribableCrudModel<Cluster, ClusterListener> {
     /**
      * Sets this cluster's sub-clusters.
      *
+     * @param subclusters an iterable collection of clusters
+     */
+    private void setSubclusters(Iterable<Cluster> subclusters) {
+        for (Cluster cluster : subclusters) {
+            this.subclusters.put(cluster.getPathName(), cluster);
+        }
+    }
+
+    /**
+     * Sets this cluster's sub-clusters.
+     *
      * @param subclusters a map of clusters
      */
     private void setSubclusters(Map<String, Cluster> subclusters) {
@@ -331,17 +342,6 @@ public class Cluster extends SubscribableCrudModel<Cluster, ClusterListener> {
      */
     public Map<String, Cluster> getSubclustersMap() {
         return Collections.<String, Cluster>unmodifiableMap(this.subclusters);
-    }
-
-    /**
-     * Sets this cluster's sub-clusters.
-     *
-     * @param subclusters an iterable collection of clusters
-     */
-    private void setSubclusters(Iterable<Cluster> subclusters) {
-        for (Cluster cluster : subclusters) {
-            this.subclusters.put(cluster.getPathName(), cluster);
-        }
     }
 
     /**
@@ -395,6 +395,17 @@ public class Cluster extends SubscribableCrudModel<Cluster, ClusterListener> {
     /**
      * Sets this cluster's transports.
      *
+     * @param transports an iterable collection of transports
+     */
+    private void setTransports(Iterable<Transport> transports) {
+        for (Transport transport : transports) {
+            this.transports.put(transport.getPathName(), transport);
+        }
+    }
+
+    /**
+     * Sets this cluster's transports.
+     *
      * @param transports a map of transports
      */
     private void setTransports(Map<String, Transport> transports) {
@@ -408,17 +419,6 @@ public class Cluster extends SubscribableCrudModel<Cluster, ClusterListener> {
      */
     public Map<String, Transport> getTransportsMap() {
         return Collections.<String, Transport>unmodifiableMap(this.transports);
-    }
-
-    /**
-     * Sets this cluster's transports.
-     *
-     * @param transports an iterable collection of transports
-     */
-    private void setTransports(Iterable<Transport> transports) {
-        for (Transport transport : transports) {
-            this.transports.put(transport.getPathName(), transport);
-        }
     }
 
     /**

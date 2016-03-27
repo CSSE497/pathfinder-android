@@ -126,6 +126,7 @@ class ModelMessageHandler implements MessageHandler {
      *
      * @return number of messages received by the web socket.
      */
+    @Override
     public int getReceivedMessageCount() {
         return this.receivedMessageCount;
     }

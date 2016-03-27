@@ -31,7 +31,9 @@ import java.util.Map;
  * Note, when connecting the<code>Pathfinder</code> object the thread is blocked until the web socket to the
  * Pathfinder service is opened.
  * </p>
- * <pre><code>   Pathfinder pathfinder = Pathfinder.create("myAppId");
+ * <pre><code>   Pathfinder pathfinder = new Pathfinder("myAppId", "userJWT");
+ *   pathfinder.addAuthenticationListener(new MyAuthListener());
+ *   pathfinder.connect();
  *   Cluster cluster = pathfinder.getCluster("/root/cluster1/subcluster2");
  *   MyClusterListener clusterListener = new MyClusterListener();
  *   cluster.addListener(clusterListener);
@@ -53,20 +55,34 @@ public class Pathfinder {
     private static final Logger logger = LoggerFactory.getLogger(Pathfinder.class);
 
     /**
+     * The default authentication server URI.
+     */
+    private static final String DEFAULT_AUTH_URI = "http://auth.thepathfinder.xyz/connection";
+
+    /**
+     * The default web socket URI.
+     */
+    private static final String DEFAULT_WEBSOCKET_URI = "ws://api.thepathfinder.xyz/socket";
+
+    /**
+     * Application Identifier that identifies the application on the pathfinder server.
+     */
+    private final String applicationIdentifier;
+
+    /**
+     * The authenticator controlling the authentication sequence.
+     */
+    private Authenticator authenticator;
+
+    /**
      * Keeps track of all the Pathfinder models and connection to the server.
      */
     private PathfinderServices services;
-
-    private final String applicationIdentifier;
 
     /**
      * URL to the Pathfinder server being connected to.
      */
     private URI webSocketUrl;
-
-    private static final String AUTH_URI = "http://auth.thepathfinder.xyz/connection";
-
-    private static final String WEBSOCKET_URI = "ws://api.thepathfinder.xyz/socket";
 
     /**
      * Constructs a Pathfinder object.
@@ -76,12 +92,12 @@ public class Pathfinder {
      */
     public Pathfinder(String applicationIdentifier, String userCredentials) {
         try {
-            this.webSocketUrl = new URI(WEBSOCKET_URI);
+            this.webSocketUrl = new URI(DEFAULT_WEBSOCKET_URI);
         } catch (URISyntaxException e) {
             logger.error(e.getMessage());
         }
         this.applicationIdentifier = applicationIdentifier;
-        this.constructPathfinderServices(applicationIdentifier, userCredentials, AUTH_URI);
+        this.constructPathfinderServices(applicationIdentifier, userCredentials, DEFAULT_AUTH_URI);
     }
 
     /**
@@ -92,7 +108,7 @@ public class Pathfinder {
      */
     public Pathfinder(String applicationIdentifier, String userCredentials, String authenticationServerURL) {
         try {
-            this.webSocketUrl = new URI(WEBSOCKET_URI);
+            this.webSocketUrl = new URI(DEFAULT_WEBSOCKET_URI);
         } catch (URISyntaxException e) {
             logger.error(e.getMessage());
         }
@@ -110,13 +126,13 @@ public class Pathfinder {
     protected Pathfinder(String applicationIdentifier, String userCredentials, URI webSocketUrl) {
         this.applicationIdentifier = applicationIdentifier;
         this.webSocketUrl = webSocketUrl;
-        this.constructPathfinderServices(applicationIdentifier, userCredentials, AUTH_URI);
+        this.constructPathfinderServices(applicationIdentifier, userCredentials, DEFAULT_AUTH_URI);
     }
 
     /**
      * Sets the {@link PathfinderServices} object.
      *
-     * @param userCredentials       the user's identity JWT.
+     * @param userCredentials the user's identity JWT.
      */
     private void constructPathfinderServices(String applicationIdentifier, String userCredentials, String authenticationServerURL) {
         Connection connection = new Connection();
@@ -124,7 +140,7 @@ public class Pathfinder {
         ModelRegistry registry = new ModelRegistry();
         this.services = new PathfinderServices(registry, connection);
 
-        Authenticator authenticator = new Authenticator(applicationIdentifier, userCredentials, authenticationServerURL, this.services);
+        this.authenticator = new Authenticator(applicationIdentifier, userCredentials, authenticationServerURL, this.services);
         AuthenticationMessageHandler messageHandler = new AuthenticationMessageHandler(authenticator);
 
         connection.setMessageHandler(messageHandler);
@@ -158,6 +174,16 @@ public class Pathfinder {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    /**
+     * Adds an {@link AuthenticationListener} to listen for the success or failure
+     * of the authentication sequence.
+     *
+     * @param listener to add.
+     */
+    public void addAuthenticationListener(AuthenticationListener listener) {
+        this.authenticator.addListener(listener);
     }
 
     /**
