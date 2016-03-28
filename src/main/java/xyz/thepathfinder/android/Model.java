@@ -11,15 +11,16 @@ import java.util.Queue;
 /**
  * Basic class for dealing with models from the Pathfinder server.
  *
- * @param <E> a type of {@link Listener}
+ * @param <T> The type of model receiving the {@link ModelListener}'s updates.
+ * @param <E> a type of {@link ModelListener}
  * @author David Robinson
  */
-public abstract class Model<E extends Listener<? extends Model>> extends Listenable<E> {
+public abstract class Model<T extends Model<T, E>, E extends ModelListener<T>> extends Listenable<E, JsonObject> {
 
     /**
      * Logs actions performed by the class.
      */
-    private static final Logger logger = LoggerFactory.getLogger(Action.class);
+    private static final Logger logger = LoggerFactory.getLogger(Model.class);
 
     /**
      * The path of the model.
@@ -196,7 +197,6 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
      * @param json   the message
      * @return <tt>true</tt> if model changed in any way, <tt>false</tt> otherwise.
      */
-    @SuppressWarnings("unchecked")
     private boolean updateType(String reason, JsonObject json) {
         boolean updated = false;
         JsonObject value = null;
@@ -220,9 +220,9 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
 
         if (updated && !"Updated".equals(reason)) {
             logger.info("Model " + this.getPathName() + " updated");
-            for (Listener listener : listeners) {
+            for (E listener : listeners) {
                 logger.info("Calling updated");
-                listener.updated(this);
+                listener.updated(this.getThis());
                 logger.info("Finished Calling updated");
             }
         }
@@ -234,8 +234,8 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
 
         if (reason.equals("Updated")) {
             logger.info("Model " + this.getPathName() + " updated");
-            for (Listener listener : listeners) {
-                listener.updated(this);
+            for (E listener : listeners) {
+                listener.updated(this.getThis());
             }
             return updated;
         }
@@ -248,64 +248,64 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
 
         if (reason.equals("Model")) {
             logger.info("Model " + this.getPathName() + " connected");
-            for (Listener listener : listeners) {
-                listener.connected(this);
+            for (E listener : listeners) {
+                listener.connected(this.getThis());
             }
             return updated;
         }
 
         if (reason.equals("Subscribed")) {
             logger.info("Model " + this.getPathName() + " subscribed");
-            for (Listener listener : listeners) {
-                listener.subscribed(this);
+            for (E listener : listeners) {
+                listener.subscribed(this.getThis());
             }
             return updated;
         }
 
         if (reason.equals("RouteSubscribed")) {
             logger.info("Model " + this.getPathName() + " route subscribed");
-            for (Listener listener : listeners) {
-                listener.routeSubscribed(this);
+            for (E listener : listeners) {
+                listener.routeSubscribed(this.getThis());
             }
             return updated;
         }
 
         if (reason.equals("Unsubscribed")) {
             logger.info("Model " + this.getPathName() + " unsubscribed");
-            for (Listener listener : listeners) {
-                listener.unsubscribed(this);
+            for (E listener : listeners) {
+                listener.unsubscribed(this.getThis());
             }
             return updated;
         }
 
         if (reason.equals("RouteUnsubscribed")) {
             logger.info("Model " + this.getPathName() + " route unsubscribed");
-            for (Listener listener : listeners) {
-                listener.routeUnsubscribed(this);
+            for (E listener : listeners) {
+                listener.routeUnsubscribed(this.getThis());
             }
             return updated;
         }
 
         if (reason.equals("Created")) {
             logger.info("Model " + this.getPathName() + " created");
-            for (Listener listener : listeners) {
-                listener.created(this);
+            for (E listener : listeners) {
+                listener.created(this.getThis());
             }
             return updated;
         }
 
         if (reason.equals("Deleted")) {
             logger.info("Model " + this.getPathName() + " deleted");
-            for (Listener listener : listeners) {
+            for (E listener : listeners) {
                 this.setConnected(false);
-                listener.deleted(this);
+                listener.deleted(this.getThis());
             }
             return updated;
         }
 
         if (reason.equals("Error") && value != null) {
             logger.warn("Model " + this.getPathName() + " received error: " + value.get("reason").getAsString());
-            for (Listener listener : listeners) {
+            for (E listener : listeners) {
                 listener.error(value.get("reason").getAsString());
             }
             return updated;
@@ -319,7 +319,6 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
      * {@inheritDoc}
      */
     @Override
-    @SuppressWarnings("unchecked")
     protected boolean notifyUpdate(String reason, JsonObject json) {
         if (!this.isPathUnknown()) {
             this.setConnected(true);
@@ -362,4 +361,11 @@ public abstract class Model<E extends Listener<? extends Model>> extends Listena
      * @param services pathfinder services object.
      */
     protected abstract void route(JsonObject json, PathfinderServices services);
+
+    /**
+     * Returns the current object represented by this.
+     *
+     * @return this.
+     */
+    protected abstract T getThis();
 }

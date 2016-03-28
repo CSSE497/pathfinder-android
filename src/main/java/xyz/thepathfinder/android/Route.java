@@ -19,7 +19,7 @@ public class Route {
     /**
      * Logs actions performed by the class.
      */
-    private static final Logger logger = LoggerFactory.getLogger(Action.class);
+    private static final Logger logger = LoggerFactory.getLogger(Route.class);
 
     /**
      * Transport used for the route.
@@ -52,7 +52,7 @@ public class Route {
      */
     private static Transport getTransport(JsonObject json, PathfinderServices services) {
         logger.info("Route getting transport: " + json.toString());
-        return Transport.getInstance(json.getAsJsonObject("vehicle"), services);
+        return Transport.getInstance(json.getAsJsonObject("transport"), services);
     }
 
     /**

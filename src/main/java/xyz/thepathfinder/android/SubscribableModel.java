@@ -7,10 +7,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Access to subscribe operations on models.
  *
+ * @param <T> Model Type
  * @param <E> Listener type
  * @author David Robinson
  */
-public abstract class SubscribableModel<E extends Listener<? extends Model>> extends Model<E> {
+public abstract class SubscribableModel<T extends SubscribableModel<T, E>, E extends ModelListener<T>> extends Model<T, E> {
 
     /**
      * Logs actions performed by the class.
@@ -60,10 +61,10 @@ public abstract class SubscribableModel<E extends Listener<? extends Model>> ext
 
         if (this.getModelType().equals(ModelType.CLUSTER)) {
             json.remove("id");
-            json.addProperty("model", "Vehicle");
+            json.addProperty("model", ModelType.TRANSPORT.toString());
             json.addProperty("clusterId", this.getPathName());
             this.sendMessage(json);
-            json.addProperty("model", "Commodity");
+            json.addProperty("model", ModelType.COMMODITY.toString());
             this.sendMessage(json);
         } else {
             this.sendMessage(json);

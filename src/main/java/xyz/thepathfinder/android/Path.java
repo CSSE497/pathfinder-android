@@ -18,7 +18,7 @@ class Path {
     /**
      * Logs actions performed by the class.
      */
-    private static final Logger logger = LoggerFactory.getLogger(Action.class);
+    private static final Logger logger = LoggerFactory.getLogger(Path.class);
 
     /**
      * Separator for path names.

@@ -1,7 +1,9 @@
 package xyz.thepathfinder.chimneyswap;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -165,7 +167,10 @@ public class PostChimneyActivity extends AppCompatActivity {
 
         Chimney myChimney = chimneyList.get(maxIndex);
 
-        SwapChimneysRequest chimneysRequest = new SwapChimneysRequest(getString(R.string.pathfinder_app_id), this.tradedChimney, myChimney);
+        SharedPreferences preferences = this.getSharedPreferences(MainActivity.PREFERENCES_FILE, Context.MODE_PRIVATE);
+        String idToken = preferences.getString(MainActivity.ID_TOKEN, "");
+
+        SwapChimneysRequest chimneysRequest = new SwapChimneysRequest(getString(R.string.pathfinder_app_id), idToken, this.tradedChimney, myChimney);
         chimneysRequest.swap();
 
         this.deleteChimney(this.tradedChimney.getId());

@@ -20,7 +20,7 @@ public class SelectionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_selection);
         RadioButton terreHauteButton = (RadioButton) this.findViewById(R.id.terre_haute);
         terreHauteButton.setChecked(true);
-        SelectionActivity.cluster = "/root/midwest/th";
+        SelectionActivity.cluster = "/root";
     }
 
     public void onClickEmployee(View view) {
@@ -40,12 +40,12 @@ public class SelectionActivity extends AppCompatActivity {
         switch(view.getId()) {
             case R.id.midwest:
                 if (checked) {
-                    SelectionActivity.cluster = "/root/midwest";
+                    SelectionActivity.cluster = "/root";
                 }
                 break;
             case R.id.terre_haute:
                 if (checked) {
-                    SelectionActivity.cluster = "/root/midwest/th";
+                    SelectionActivity.cluster = "/root";
                 }
                 break;
         }

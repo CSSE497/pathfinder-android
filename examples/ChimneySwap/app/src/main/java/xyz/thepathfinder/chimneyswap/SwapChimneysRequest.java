@@ -14,21 +14,18 @@ public class SwapChimneysRequest {
     private Chimney chimney1;
     private Chimney chimney2;
     private String appId;
+    private String idToken;
 
-    public SwapChimneysRequest(String appId, Chimney chimney1, Chimney chimney2) {
+    public SwapChimneysRequest(String appId, String idToken, Chimney chimney1, Chimney chimney2) {
         this.chimney1 = chimney1;
         this.chimney2 = chimney2;
         this.appId = appId;
+        this.idToken = idToken;
     }
 
     public void swap() {
-        Pathfinder pathfinder;
-        try {
-            pathfinder = Pathfinder.create(this.appId);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+        Pathfinder pathfinder = new Pathfinder(this.appId, this.idToken);
+        pathfinder.connect();
         Cluster defaultCluster = pathfinder.getCluster(SelectionActivity.cluster);
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("chimney", 1);

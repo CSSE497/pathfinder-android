@@ -1,7 +1,5 @@
 package xyz.thepathfinder.android;
 
-import com.google.gson.JsonObject;
-
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,9 +8,10 @@ import java.util.List;
  * Allows objects to listen for notifications.
  *
  * @param <E> the listener object type
+ * @param <T> the type of the object received by the listener in {@link Listenable#notifyUpdate(String, Object)}
  * @author David Robinson
  */
-public abstract class Listenable<E extends Listener<? extends Model>> {
+public abstract class Listenable<E extends Listener, T> {
 
     /**
      * The list of listeners
@@ -50,15 +49,15 @@ public abstract class Listenable<E extends Listener<? extends Model>> {
      * @return a list of listeners.
      */
     public List<E> getListeners() {
-        return Collections.<E>unmodifiableList(this.listeners);
+        return Collections.unmodifiableList(this.listeners);
     }
 
     /**
      * Method called when an update occurs.
      *
      * @param reason for notifying the model.
-     * @param json   object of the updated model.
+     * @param arg    object of the updated model.
      * @return <tt>true</tt> if the model was updated, <tt>false</tt> otherwise.
      */
-    protected abstract boolean notifyUpdate(String reason, JsonObject json);
+    protected abstract boolean notifyUpdate(String reason, T arg);
 }
