@@ -28,6 +28,9 @@ apply plugin: 'maven-publish'
 apply plugin: 'signing'
 apply plugin: 'idea'
 
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
 configure(allprojects) {
     ext.javadocLinks = [
             "http://docs.oracle.com/javase/7/docs/api/",
