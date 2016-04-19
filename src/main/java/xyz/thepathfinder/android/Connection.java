@@ -50,7 +50,7 @@ class Connection extends Endpoint {
      */
     protected Connection() {
         this.sentMessageCount = 0L;
-        this.messageQueue = new LinkedList<String>();
+        this.messageQueue = new LinkedList<>();
     }
 
     /**
@@ -140,6 +140,14 @@ class Connection extends Endpoint {
     public void onClose(Session session, CloseReason closeReason) {
         logger.info("Pathfinder connection closed: " + closeReason);
         this.session = session;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onError(Session session, Throwable throwable) {
+        logger.error("Pathfinder websocket connection broke: " + throwable.getMessage());
     }
 
     /**

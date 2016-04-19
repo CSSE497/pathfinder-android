@@ -57,12 +57,12 @@ public class Pathfinder {
     /**
      * The default authentication server URI.
      */
-    private static final String DEFAULT_AUTH_URI = "http://auth.thepathfinder.xyz/connection";
+    private static final String DEFAULT_AUTH_URI = "https://auth.thepathfinder.xyz/connection";
 
     /**
      * The default web socket URI.
      */
-    private static final String DEFAULT_WEBSOCKET_URI = "ws://api.thepathfinder.xyz/socket";
+    private static final String DEFAULT_WEBSOCKET_URI = "wss://api.thepathfinder.xyz/socket";
 
     /**
      * Application Identifier that identifies the application on the pathfinder server.
