@@ -72,8 +72,8 @@ public class EmployeeActivity extends AppCompatActivity implements GoogleApiClie
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        this.startLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        //Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        this.startLocation = new LatLng(44.32, -122.2131);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
