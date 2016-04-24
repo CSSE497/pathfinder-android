@@ -4,8 +4,19 @@
 [![Stories in Ready](https://badge.waffle.io/CSSE497/pathfinder-android.png?label=In%20Progress&title=In%20Progress)](http://waffle.io/CSSE497/pathfinder-android)
 [![Stories in Ready](https://badge.waffle.io/CSSE497/pathfinder-android.png?label=Under%20Review&title=Under%20Review)](http://waffle.io/CSSE497/pathfinder-android)
 
-# Pathfinder Android Client Library
+# Pathfinder Android/Java Client Library
 
-The Pathfinder Android Client Library allows developers to easily integrate Pathfinder routing service in their Android applications.
+The Pathfinder Android/Java Client Library allows developers to easily integrate Pathfinder routing service in their Android and Java applications.
 
-This is a placeholder file until we create a more comprehensive README.
+Pathfinder provides routing as a service, removing the need for developers to implement their own routing logistics. This SDK allows for Android and Java applications to act as commodities that need transportation or transportation providers. Additionally, there is support for viewing routes for sets of commodities and transportation providers.
+
+To register your application to use Pathfinder, visit our [website](https://thepathfinder.xyz).
+
+To get up to speed on integrating Pathfinder in your Android or Java application, checkout the [Javadocs](https://www.javadoc.io/doc/xyz.thepathfinder/pathfinder-android) or the [tutorials](https://pathfinder.readme.io).
+
+Pathfinder is distributed through Maven Central and JCenter. To use Pathfinder in your application, add the following line to your build.gradle file if you are using Gradle:
+
+    compile 'xyz.thepathfinder:pathfinder-android:0.0.16'
+    compile 'com.google.code.gson:gson:2.5'
+
+Note, if you are using Oracle's JDK/JRE you must add Let's Encrypt's X1 and X3 certificates to your keystore to properly connect to the Pathfinder service.
