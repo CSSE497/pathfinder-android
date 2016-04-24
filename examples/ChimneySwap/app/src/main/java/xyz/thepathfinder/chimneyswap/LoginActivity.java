@@ -15,8 +15,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import xyz.thepathfinder.chimneyswap.R;
-
 public class LoginActivity extends AppCompatActivity {
 
     private static String TAG = "LoginActivity";
@@ -66,6 +64,7 @@ public class LoginActivity extends AppCompatActivity {
                 onClickSignIn(v);
             }
         });
+
     }
 
     public void onClickSignIn(View view) {
