@@ -16,7 +16,7 @@ To get up to speed on integrating Pathfinder in your Android or Java application
 
 Pathfinder is distributed through Maven Central and JCenter. To use Pathfinder in your application, add the following line to your build.gradle file if you are using Gradle:
 
-    compile 'xyz.thepathfinder:pathfinder-android:0.0.16'
+    compile 'xyz.thepathfinder:pathfinder-android:1.0.0'
     compile 'com.google.code.gson:gson:2.5'
 
 Note, if you are using Oracle's JDK/JRE you must add Let's Encrypt's X1 and X3 certificates to your keystore to properly connect to the Pathfinder service.

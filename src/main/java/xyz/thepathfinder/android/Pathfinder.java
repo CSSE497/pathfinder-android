@@ -105,6 +105,7 @@ public class Pathfinder {
      *
      * @param applicationIdentifier application Identifier provided by a Pathfinder service provider
      * @param userCredentials       JWT of the user's credentials
+     * @param authenticationServerURL URL to use when authenticating users
      */
     public Pathfinder(String applicationIdentifier, String userCredentials, String authenticationServerURL) {
         try {
@@ -132,7 +133,9 @@ public class Pathfinder {
     /**
      * Sets the {@link PathfinderServices} object.
      *
+     * @param applicationIdentifier application Identifier provided by a Pathfinder service provider
      * @param userCredentials the user's identity JWT.
+     * @param authenticationServerURL URL to use when authenticating users
      */
     private void constructPathfinderServices(String applicationIdentifier, String userCredentials, String authenticationServerURL) {
         Connection connection = new Connection();
@@ -153,6 +156,20 @@ public class Pathfinder {
      * @throws RuntimeException if could not connect to the Pathfinder server.
      */
     public void connect() {
+        connect(true);
+    }
+
+    /**
+     * Establishes a connection to the Pathfinder server, if the connection is not already open.
+     * This method blocks until the connection is established if <tt>isAsync</tt> is <tt>false</tt>.
+     * Setting <tt>isAsync</tt> to <tt>false</tt> helps test for SSL problems, as when <tt>isAsync</tt>
+     * is <tt>true</tt> no exception is thrown when SSL fails.
+     *
+     * @param isAsync if <tt>true</tt> it will asynchronously connect to the Pathfinder server, if
+     *                <tt>false</tt> it will synchronously connect to the Pathfinder server
+     * @throws RuntimeException if could not connect to the Pathfinder server.
+     */
+    public void connect(boolean isAsync) {
         if (!this.isConnected()) {
 
             ClientManager clientManager = new ClientManager();
@@ -167,11 +184,16 @@ public class Pathfinder {
             ClientEndpointConfig configuration = ClientEndpointConfig.Builder.create().configurator(configurator).build();
 
             try {
-                clientManager.asyncConnectToServer(this.services.getConnection(), configuration, this.webSocketUrl);
+                if(isAsync) {
+                    clientManager.asyncConnectToServer(this.services.getConnection(), configuration, this.webSocketUrl);
+                } else {
+                    clientManager.connectToServer(this.services.getConnection(), configuration, this.webSocketUrl);
+                }
             } catch (DeploymentException e) {
-                // Invalid annotated connection object and connection problems
                 logger.error("Deployment Exception: " + e.getMessage());
                 throw new RuntimeException(e);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
@@ -184,6 +206,15 @@ public class Pathfinder {
      */
     public void addAuthenticationListener(AuthenticationListener listener) {
         this.authenticator.addListener(listener);
+    }
+
+    /**
+     * Removes an {@link AuthenticationListener}.
+     *
+     * @param listener to remove.
+     */
+    public void removeAuthenticationListener(AuthenticationListener listener) {
+        this.authenticator.removeListener(listener);
     }
 
     /**

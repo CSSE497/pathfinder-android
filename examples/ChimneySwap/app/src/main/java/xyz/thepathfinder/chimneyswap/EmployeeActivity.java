@@ -72,8 +72,8 @@ public class EmployeeActivity extends AppCompatActivity implements GoogleApiClie
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
-        Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
-        this.startLocation = new LatLng(location.getLatitude(), location.getLongitude());
+        //Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+        this.startLocation = new LatLng(44.32, -122.2131);
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -96,7 +96,7 @@ public class EmployeeActivity extends AppCompatActivity implements GoogleApiClie
         String idToken = preferences.getString(MainActivity.ID_TOKEN, "");
 
         Pathfinder pathfinder = new Pathfinder(getString(R.string.pathfinder_app_id), idToken);
-        pathfinder.connect();
+        pathfinder.connect(false);
         Transport transport;
         if(employeeId.equals("")) { // didn't find the employee's id
             Cluster cluster = pathfinder.getCluster(SelectionActivity.cluster);
