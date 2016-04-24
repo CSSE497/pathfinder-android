@@ -20,3 +20,9 @@ Pathfinder is distributed through Maven Central and JCenter. To use Pathfinder i
     compile 'com.google.code.gson:gson:2.5'
 
 Note, if you are using Oracle's JDK/JRE you must add Let's Encrypt's X1 and X3 certificates to your keystore to properly connect to the Pathfinder service.
+
+If you want to see the logging messages add the following dependencies:
+
+    compile 'org.slf4j:slf4j-log4j12:1.7.21'
+    compile 'ch.qos.logback:logback-classic:1.1.3'
+    compile 'ch.qos.logback:logback-core:1.1.3'
