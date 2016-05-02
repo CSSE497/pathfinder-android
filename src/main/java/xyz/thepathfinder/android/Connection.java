@@ -96,7 +96,7 @@ class Connection extends Endpoint {
      * @param message to be sent.
      */
     public void sendMessage(String message) {
-        if (this.isConnected()) {
+        if (this.isConnected() && !(this.messageHandler instanceof AuthenticationMessageHandler)) {
             this.send(message);
         } else {
             logger.warn("Attempting to send message while websocket is not open. Storing message until connection opens: " + message);

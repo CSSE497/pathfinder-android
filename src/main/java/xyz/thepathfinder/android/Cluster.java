@@ -120,24 +120,13 @@ public class Cluster extends SubscribableCrudModel<Cluster, ClusterListener> {
      * Returns an instance of cluster object based on the path in <tt>clusterJson</tt>. If there is
      * a cluster with that path already created, it will return that cluster object with updated fields.
      * If there isn't a cluster with that path already created, it will create a new
-     * cluster object and update the fields. If the path is associated with a different model type or
-     * the json will not parse to a cluster object's required fields it will throw a
-     * <tt>IllegalArgumentException</tt>.
+     * cluster object and update the fields.
      *
      * @param clusterJson A json object that parses to a cluster.
      * @param services    The pathfinder services object.
      * @return A cluster with the specified path.
-     * @throws IllegalArgumentException occurs if the json object doesn't parse to
-     *                                  a cluster object.
      */
     protected static Cluster getInstance(JsonObject clusterJson, PathfinderServices services) {
-        boolean canParseToCluster = Cluster.checkClusterFields(clusterJson);
-
-        if (!canParseToCluster) {
-            logger.error("Illegal Argument Exception: JSON could not be parsed to a cluster: " + clusterJson);
-            throw new IllegalArgumentException("JSON could not be parsed to a cluster");
-        }
-
         String path = Cluster.getPath(clusterJson);
         Cluster cluster = Cluster.getInstance(path, services);
 
@@ -146,22 +135,6 @@ public class Cluster extends SubscribableCrudModel<Cluster, ClusterListener> {
         cluster.notifyUpdate(null, clusterJson);
 
         return cluster;
-    }
-
-    /**
-     * Checks the json object for all the required fields of a cluster object.
-     *
-     * @param clusterJson JsonObject to check if it will parse to a cluster.
-     * @return Whether the json can be parsed to a cluster.
-     */
-    private static boolean checkClusterFields(JsonObject clusterJson) {
-        return clusterJson.has("id") &&
-                clusterJson.has("transports") &&
-                clusterJson.get("transports").isJsonArray() &&
-                clusterJson.has("commodities") &&
-                clusterJson.get("commodities").isJsonArray() &&
-                clusterJson.has("subclusters") &&
-                clusterJson.get("subclusters").isJsonArray();
     }
 
     /**
